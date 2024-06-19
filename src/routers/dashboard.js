@@ -10,6 +10,7 @@ const {
 } = require('../models/registration');
 const Orders = require("../models/order");
 const SpareParts = require("../models/sparePart");
+const ProductModel = require("../models/product");
 const Complaints = require("../models/complaint");
 
 router.get("/dashboardDetails", async (req, res) => {
@@ -65,6 +66,39 @@ router.get("/dashboardDetails", async (req, res) => {
       }
     });
   } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+
+router.get('/getUserAndProduct', async (req, res) => {
+  try {
+    const [
+      customers, 
+      services, 
+      technicians, 
+      dealers,  
+      brands,
+      product
+    ] = await Promise.all([
+      UserModel.find({}),
+      ServiceModel.find({}),
+      TechnicianModal.find({}),
+      DealerModel.find({}),
+      BrandRegistrationModel.find({}),
+      ProductModel.find({})
+    ]);
+
+    res.json({
+      customers: customers,
+      services: services,
+      technicians: technicians,
+      dealers: dealers,
+      brands: brands,
+      product: product,
+    });
+  } catch (err) {
+    console.error('Error fetching dashboard details:', err);
     res.status(500).send(err);
   }
 });

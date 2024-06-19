@@ -291,7 +291,7 @@ const userRegistrationSchema = new mongoose.Schema({
     email: { type: String, required: true },
     contact: { type: Number, required: true },
     password: { type: String, required: true },
-    address: { type: String, required: true },
+    address: { type: String  },
     role: { type: String, default: "USER" },
     verification: { type: String, default: "NOT_VERIFY" }
     , otp: { type: Number }
