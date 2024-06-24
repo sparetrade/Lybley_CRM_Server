@@ -3,8 +3,10 @@ const ComplaintModal =require("../models/complaint")
 const addComplaint  =  async(req, res) => {
         try{
             let body=req.body;
-            // let obj={...body,issueImages:req.file.location};
-            let data=new ComplaintModal(body);
+      
+            let obj={...body,issueImages:req.file.location};
+             
+            let data=new ComplaintModal(obj);
             await data.save();
             res.json({status:true,msg:"Complaint   Added"});
         }catch(err){
