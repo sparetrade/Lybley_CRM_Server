@@ -103,4 +103,203 @@ router.get('/getUserAndProduct', async (req, res) => {
   }
 });
 
+router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = {assignServiceCenterId:id};
+    const [
+      allComplaintCount,
+      complaintNewCount,
+      complaintAssignCount,
+      complaintPendingCount,
+      complaintCompleteCount,
+      complaintCancelCount,
+      complaintPartPendingCount
+    ] = await Promise.all([
+      Complaints.countDocuments(query),
+      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+      Complaints.countDocuments({ ...query, status: 'PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+    ]);
+
+    res.json({
+      complaints: {
+        allComplaints: allComplaintCount,
+        new: complaintNewCount,
+        assign: complaintAssignCount,
+        pending: complaintPendingCount,
+        complete: complaintCompleteCount,
+        cancel: complaintCancelCount,
+        partPending: complaintPartPendingCount
+      }
+    });
+  } catch (err) {
+    console.error('Error in /dashboardDetailsById/:id:', err);
+    res.status(500).send(err);
+  }
+});
+
+router.get("/dashboardDetailsByTechnicianId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = {technicianId:id};
+    const [
+      allComplaintCount,
+      complaintNewCount,
+      complaintAssignCount,
+      complaintPendingCount,
+      complaintCompleteCount,
+      complaintCancelCount,
+      complaintPartPendingCount
+    ] = await Promise.all([
+      Complaints.countDocuments(query),
+      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+      Complaints.countDocuments({ ...query, status: 'PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+    ]);
+
+    res.json({
+      complaints: {
+        allComplaints: allComplaintCount,
+        new: complaintNewCount,
+        assign: complaintAssignCount,
+        pending: complaintPendingCount,
+        complete: complaintCompleteCount,
+        cancel: complaintCancelCount,
+        partPending: complaintPartPendingCount
+      }
+    });
+  } catch (err) {
+    console.error('Error in /dashboardDetailsById/:id:', err);
+    res.status(500).send(err);
+  }
+});
+
+router.get("/dashboardDetailsByDealerId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = {dealerId:id};
+    const [
+      allComplaintCount,
+      complaintNewCount,
+      complaintAssignCount,
+      complaintPendingCount,
+      complaintCompleteCount,
+      complaintCancelCount,
+      complaintPartPendingCount
+    ] = await Promise.all([
+      Complaints.countDocuments(query),
+      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+      Complaints.countDocuments({ ...query, status: 'PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+    ]);
+
+    res.json({
+      complaints: {
+        allComplaints: allComplaintCount,
+        new: complaintNewCount,
+        assign: complaintAssignCount,
+        pending: complaintPendingCount,
+        complete: complaintCompleteCount,
+        cancel: complaintCancelCount,
+        partPending: complaintPartPendingCount
+      }
+    });
+  } catch (err) {
+    console.error('Error in /dashboardDetailsById/:id:', err);
+    res.status(500).send(err);
+  }
+});
+
+
+router.get("/dashboardDetailsByUserId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = {userId:id};
+    const [
+      allComplaintCount,
+      complaintNewCount,
+      complaintAssignCount,
+      complaintPendingCount,
+      complaintCompleteCount,
+      complaintCancelCount,
+      complaintPartPendingCount
+    ] = await Promise.all([
+      Complaints.countDocuments(query),
+      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+      Complaints.countDocuments({ ...query, status: 'PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+    ]);
+
+    res.json({
+      complaints: {
+        allComplaints: allComplaintCount,
+        new: complaintNewCount,
+        assign: complaintAssignCount,
+        pending: complaintPendingCount,
+        complete: complaintCompleteCount,
+        cancel: complaintCancelCount,
+        partPending: complaintPartPendingCount
+      }
+    });
+  } catch (err) {
+    console.error('Error in /dashboardDetailsById/:id:', err);
+    res.status(500).send(err);
+  }
+});
+
+router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = {brandId:id};
+    const [
+      allComplaintCount,
+      complaintNewCount,
+      complaintAssignCount,
+      complaintPendingCount,
+      complaintCompleteCount,
+      complaintCancelCount,
+      complaintPartPendingCount
+    ] = await Promise.all([
+      Complaints.countDocuments(query),
+      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+      Complaints.countDocuments({ ...query, status: 'PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+    ]);
+
+    res.json({
+      complaints: {
+        allComplaints: allComplaintCount,
+        new: complaintNewCount,
+        assign: complaintAssignCount,
+        pending: complaintPendingCount,
+        complete: complaintCompleteCount,
+        cancel: complaintCancelCount,
+        partPending: complaintPartPendingCount
+      }
+    });
+  } catch (err) {
+    console.error('Error in /dashboardDetailsById/:id:', err);
+    res.status(500).send(err);
+  }
+});
+
+
+
+
 module.exports = router;

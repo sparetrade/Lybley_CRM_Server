@@ -2,6 +2,7 @@ const mongoose=require("mongoose");
 
 const bankDetailSchema= new mongoose.Schema({
     userId:{type:String,required:true},
+    userName:{type:String,required:true},
     bankName:{type:String,required:true},
     accountHolderName:{type:String,required:true},
     accountNumber:{type:String,required:true},

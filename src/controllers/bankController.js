@@ -25,8 +25,8 @@ const updateBankDetails=async(req,res)=>{
 
 const bankDetailByBrand=async(req,res)=>{
       try{
-        let brandId=req.params.id;
-        let bank=await BankDetail.findOne({brandId:brandId});
+        let userId=req.params.id;
+        let bank=await BankDetail.findOne({userId:userId});
         res.send(bank);
       }catch(err){
         res.status(400).send(err);

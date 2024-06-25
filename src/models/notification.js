@@ -2,9 +2,9 @@ const mongoose=require("mongoose")
 
 const notificationSchema=mongoose.Schema({
     userId: { type: String  },
-    brandId: { type: String  },
-    brandName: { type: String  },
+    userName: { type: String  },
     message: { type: String },
+    title: { type: String },
     
     // recipient: { type: String, required: true },
   },{timestamps:true})
