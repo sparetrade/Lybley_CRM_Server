@@ -11,7 +11,15 @@ const addBankDetails=async(req,res)=>{
         console.log(err);
        }
 };
-
+const getAllBankDetails=async(req,res)=>{
+  try{
+    let userId=req.params.id;
+    let bank=await BankDetail.find({}).sort({ _id: -1 });
+    res.send(bank);
+  }catch(err){
+    res.status(400).send(err);
+  }
+};
 const updateBankDetails=async(req,res)=>{
        try{
         let _id=req.params.id;
@@ -33,4 +41,4 @@ const bankDetailByBrand=async(req,res)=>{
       }
 };
 
-module.exports = { addBankDetails,updateBankDetails,bankDetailByBrand };
+module.exports = { addBankDetails,updateBankDetails,getAllBankDetails,bankDetailByBrand };

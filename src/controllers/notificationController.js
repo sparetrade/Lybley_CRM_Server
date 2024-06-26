@@ -21,6 +21,15 @@ const getAllNotification = async (req, res) => {
         res.status(400).send(err);
     }
 }
+const getNotificationByUserId = async (req, res) => {
+    try {
+        let userId = req.params.id;  
+        let data = await NotificationModel.find({ userId: userId });
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
 const getNotificationById = async (req, res) => {
     try {
         let _id = req.params.id;
@@ -51,4 +60,4 @@ const deleteNotification = async (req, res) => {
     }
 }
 
-module.exports = { addNotification, getAllNotification, getNotificationById, editNotification, deleteNotification };
+module.exports = { addNotification,getNotificationByUserId, getAllNotification, getNotificationById, editNotification, deleteNotification };

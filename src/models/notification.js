@@ -5,8 +5,7 @@ const notificationSchema=mongoose.Schema({
     userName: { type: String  },
     message: { type: String },
     title: { type: String },
-    
-    // recipient: { type: String, required: true },
+    status:{ type:String,default:"UNREAD"}
   },{timestamps:true})
   
   const NotificationModal=new mongoose.model("Notification",notificationSchema);
