@@ -1,5 +1,6 @@
 const {TechnicianModal} = require("../models/registration")
  
+const NotificationModel = require("../models/notification")
 
 const addTechnician = async (req, res) => {
 
@@ -7,6 +8,17 @@ const addTechnician = async (req, res) => {
         let body = req.body;
         let data=new TechnicianModal(body);
         await data.save();
+        const notification = new NotificationModel({
+            userId: data.userId,
+            technicianId: data?._id,
+            serviceCenterId: data.serviceId,
+            brandId: data.brandId,
+            dealerId: data.dealerId,
+            userName: data.name,
+            title: ` Technician  Added `,
+            message: ` Service Center add  Technician    ${data.name} !`,
+         });
+         await notification.save();
         res.json({ status: true, msg: "Technician   Added" });
     } catch (err) {
         res.status(400).send(err);
@@ -37,6 +49,20 @@ const editTechnician = async (req, res) => {
         let _id = req.params.id;
         let body = req.body;
         let data = await TechnicianModal.findByIdAndUpdate(_id, body);
+        if(body.status){
+            const notification = new NotificationModel({
+                userId: data.userId,
+                technicianId: data?._id,
+                serviceCenterId: data.serviceId,
+                brandId: data.brandId,
+                dealerId: data.dealerId,
+                userName: data.name,
+                title: ` Technician   Verified `,
+                message: `Technician  Verified  ${data.name} !`,
+             });
+             await notification.save();
+        }
+        
         res.json({ status: true, msg: "Technician Updated" });
     } catch (err) {
         res.status(500).send(err);

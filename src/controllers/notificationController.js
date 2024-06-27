@@ -21,15 +21,59 @@ const getAllNotification = async (req, res) => {
         res.status(400).send(err);
     }
 }
-const getNotificationByUserId = async (req, res) => {
+
+
+const getNotificationByBrandId = async (req, res) => {
     try {
-        let userId = req.params.id;  
-        let data = await NotificationModel.find({ userId: userId });
+        let brandId = req.params.id;  
+        let data = await NotificationModel.find({ brandId: brandId }).sort({ _id: -1 });
         res.send(data);
     } catch (err) {
         res.status(400).send(err);
     }
 }
+
+const getNotificationByUserId = async (req, res) => {
+    try {
+        let userId = req.params.id;  
+        let data = await NotificationModel.find({ userId: userId }).sort({ _id: -1 });
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
+
+const getNotificationByTechnicianId = async (req, res) => {
+    try {
+        let technicianId = req.params.id;  
+        let data = await NotificationModel.find({ technicianId: technicianId }).sort({ _id: -1 });
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
+const getNotificationByServiceCenterId = async (req, res) => {
+    try {
+        let serviceCenterId = req.params.id;  
+        let data = await NotificationModel.find({ serviceCenterId: serviceCenterId }).sort({ _id: -1 });
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
+const getNotificationByDealerId = async (req, res) => {
+    try {
+        let dealerId = req.params.id;  
+        let data = await NotificationModel.find({ dealerId: dealerId }).sort({ _id: -1 });
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
+ 
+ 
+
+
 const getNotificationById = async (req, res) => {
     try {
         let _id = req.params.id;
@@ -60,4 +104,4 @@ const deleteNotification = async (req, res) => {
     }
 }
 
-module.exports = { addNotification,getNotificationByUserId, getAllNotification, getNotificationById, editNotification, deleteNotification };
+module.exports = { addNotification,getNotificationByUserId,getNotificationByBrandId,getNotificationByServiceCenterId,getNotificationByTechnicianId,getNotificationByDealerId, getAllNotification, getNotificationById, editNotification, deleteNotification };

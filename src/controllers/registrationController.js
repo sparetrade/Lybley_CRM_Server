@@ -2,7 +2,7 @@
 const otpGenerator = require("otp-generator")
 const { smsSend, sendMail } = require("../services/service")
 const { AdminModel, BrandRegistrationModel, ServiceModel,TechnicianModal, EmployeeModel, DealerModel, UserModel } = require('../models/registration');
- 
+const NotificationModel = require("../models/notification")
 
 
 const adminLoginController = async (req, res) => {
@@ -80,6 +80,13 @@ const brandRegistration = async (req, res) => {
         // Email does not exist, proceed with registration
         const newData = new BrandRegistrationModel(req.body);
         await newData.save();
+        const notification = new NotificationModel({
+            brandId: newData.brandID,
+            userName: newData.brandName,
+            title: `   Brand    `,
+            message: ` New Brand  Added     ${newData.brandName} !`,
+         });
+         await notification.save();
         return res.json({ status: true, msg: "Registration successful" });
     } catch (err) {
         console.error(err);
@@ -99,6 +106,13 @@ const serviceRegistration = async (req, res) => {
         // Email does not exist, proceed with registration
         const newData = new ServiceModel(req.body);
         await newData.save();
+        const notification = new NotificationModel({
+            serviceCenterId: newData._id,
+            userName: newData.serviceCenterName,
+            title: `  Service Center  Added `,
+            message: ` New Service Center  Added     ${newData.serviceCenterName} !`,
+         });
+         await notification.save();
         return res.json({ status: true, msg: "Registration successful" });
     } catch (err) {
         console.error(err);
@@ -137,6 +151,13 @@ const dealerRegistration = async (req, res) => {
         // Email does not exist, proceed with registration
         const newData = new DealerModel(req.body);
         await newData.save();
+        const notification = new NotificationModel({
+            dealerId: newData._id,
+            userName: newData.name,
+            title: `  Dealer  Added `,
+            message: ` New Dealer  Added     ${newData.name} !`,
+         });
+         await notification.save();
         return res.json({ status: true, msg: "Registration successful" });
     } catch (err) {
         console.error(err);
@@ -164,6 +185,13 @@ const userRegistration = async (req, res) => {
 
         const newData = new UserModel(req.body);
         await newData.save();
+        const notification = new NotificationModel({
+            userId: newData._id,
+            userName: newData.name,
+            title: `  User  Added `,
+            message: ` New User  Added     ${newData.name} !`,
+         });
+         await notification.save();
         return res.json({ status: true, msg: "Registration successful" });
     } catch (err) {
         console.error(err);
@@ -185,6 +213,15 @@ const editBrand = async (req, res) => {
         let _id = req.params.id;
         let body = req.body;
         let data = await BrandRegistrationModel.findByIdAndUpdate(_id, body);
+        if(body.status){
+            const notification = new NotificationModel({
+                brandId: newData.brandID,
+                userName: newData.brandName,
+                title: `   Verification    `,
+                message: `   Brand  Verified     ${newData.brandName} !`,
+             });
+             await notification.save();
+        }
         res.json({ status: true, msg: "Brand Updated" });
     } catch (err) {
         res.status(500).send(err);
@@ -222,6 +259,15 @@ const editServiceCenter = async (req, res) => {
         let _id = req.params.id;
         let body = req.body;
         let data = await ServiceModel.findByIdAndUpdate(_id, body);
+        if(body.status){
+            const notification = new NotificationModel({
+                serviceCenterId: newData._id,
+                userName: newData.serviceCenterName,
+                title: `  Service Center  Verification `,
+                message: `   Service Center  Verified     ${newData.serviceCenterName} !`,
+             });
+             await notification.save();
+        }
         res.json({ status: true, msg: "ServiceCenter Updated" });
     } catch (err) {
         res.status(500).send(err);
@@ -297,6 +343,14 @@ const editUser = async (req, res) => {
         let _id = req.params.id;
         let body = req.body;
         let data = await UserModel.findByIdAndUpdate(_id, body);
+        if(body.status){
+            const notification = new NotificationModel({
+                userId: newData._id,
+                userName: newData.name,
+                title: `  User  Verification `,
+                message: `   User  Verified     ${newData.name} !`,
+             });
+        }
         res.json({ status: true, msg: "User Updated" });
     } catch (err) {
         res.status(500).send(err);
@@ -334,6 +388,15 @@ const editDealer = async (req, res) => {
         let _id = req.params.id;
         let body = req.body;
         let data = await DealerModel.findByIdAndUpdate(_id, body);
+        if(body.status){
+            const notification = new NotificationModel({
+                userId: newData._id,
+                userName: newData.name,
+                title: `  Dealer  Verification `,
+                message: `   Dealer  Verified     ${newData.name} !`,
+             });
+             await notification.save();
+        }
         res.json({ status: true, msg: "Dealer Updated" });
     } catch (err) {
         res.status(500).send(err);

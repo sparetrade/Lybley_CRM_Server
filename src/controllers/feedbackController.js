@@ -8,8 +8,13 @@ const addFeedback = async (req, res) => {
         let data = new FeedbackModel(body);
         await data.save();
         const notification = new NotificationModel({
-
-            userId: req.body.ticketNumber, // or any user identifier
+            complaintId: req.body.complaintId,  
+            userId: req.body.userId,  
+            technicianId: req.body.technicianId,  
+            serviceCenterId: req.body.serviceCenterId,  
+            brandId: req.body.brandId,  
+            userName: req.body.customerName,  
+            title:`User Feedback`,
             message: `Thank you for your feedback, ${req.body.customerName}!`,
           });
           await notification.save();
@@ -43,6 +48,20 @@ const editFeedback = async (req, res) => {
         let _id = req.params.id;
         let body = req.body;
         let data = await FeedbackModel.findByIdAndUpdate(_id, body);
+        if(body.replyMessage){
+            const notification = new NotificationModel({
+                complaintId: data.complaintId,  
+                userId: data.userId,  
+                technicianId: data.technicianId,  
+                serviceCenterId: data.serviceCenterId,  
+                brandId: data.brandId, 
+                userName: data.customerName,   
+                title:`Brand Feedback Reply`,
+                message: `Thank you for your  Reply on Feedback !`,
+              });
+              await notification.save();
+        }
+       
         res.json({ status: true, msg: "Feedback Updated" });
     } catch (err) {
         res.status(500).send(err);
