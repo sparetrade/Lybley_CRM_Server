@@ -6,13 +6,49 @@ const addChatTicket = async (req, res) => {
         let body = req.body;
         let data = new ChatTicketModel(body);
         await data.save();
-        res.json({ status: true, msg: "ChatTicket   Added" });
+        res.json({ status: true, msg: "Chat Ticket   Added" });
     } catch (err) {
         res.status(400).send(err);
     }
 
 };
 
+const sendMessageAdmin= async (req, res) => {
+    try {
+        const { userId, message } = req.body;
+        if (!userId || !message) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const chatTicket = await ChatTicketModel.findOneAndUpdate(
+            { userId },
+            { $push: { adminMessage: message } },
+            { new: true, upsert: true }
+        );
+
+        res.json({ status: true, msg: 'Admin message added', chatTicket });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+const sendMessageUser= async (req, res) => {
+    try {
+        const { userId, userName, message } = req.body;
+        if (!userId || !userName || !message) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const chatTicket = await ChatTicketModel.findOneAndUpdate(
+            { userId },
+            { $push: { userMessage: message } },
+            { new: true, upsert: true }
+        );
+
+        res.json({ status: true, msg: 'User message added', chatTicket });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 const getAllChatTicket = async (req, res) => {
     try {
         let data = await ChatTicketModel.find({}).sort({ _id: -1 });
@@ -30,7 +66,20 @@ const getChatTicketById = async (req, res) => {
         res.status(400).send(err);
     }
 }
+const getChatTicketByUserId = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const data = await ChatTicketModel.findOne({ userId: userId });
+        
+        if (!data) {
+            return res.status(404).json({ message: 'Chat ticket not found' });
+        }
 
+        res.json(data);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
 const editChatTicket = async (req, res) => {
     try {
         let _id = req.params.id;
@@ -51,4 +100,4 @@ const deleteChatTicket = async (req, res) => {
     }
 }
 
-module.exports = { addChatTicket, getAllChatTicket, getChatTicketById, editChatTicket, deleteChatTicket };
+module.exports = { addChatTicket,getChatTicketByUserId,sendMessageAdmin,sendMessageUser, getAllChatTicket, getChatTicketById, editChatTicket, deleteChatTicket };
