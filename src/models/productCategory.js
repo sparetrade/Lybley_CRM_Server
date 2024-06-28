@@ -5,7 +5,7 @@ const productCategorySchema=new mongoose.Schema({
       userId:{type:String },
       userName:{type:String },
       adminId:{type:String },
-      adminId:{type:String },
+      brandId:{type:String },
       brandName:{type:String },
       status:{type:String ,default:"ACTIVE"}
 
