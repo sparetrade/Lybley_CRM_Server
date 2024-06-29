@@ -476,14 +476,14 @@ const otpVerificationSending = async (req, res) => {
         let user = await UserModel.findOneAndUpdate(filter, { otp: otp });
         // console.log(user);
         if (user) {
-            // if (body.contact) {
-            //     smsSend(otp, user.contact);
-            // } else if (body.email) {
+            if (body.contact) {
+                smsSend(otp, user.contact);
+            } else if (body.email) {
 
-            //     sendMail( body.email, otp,);
-            // }
+                sendMail( body.email, otp,);
+            }
             // console.log(user);
-            smsSend(otp, user.contact);
+            // smsSend(otp, user.contact);
             return res.json({ status: true, msg: "OTP sent" });
         } else {
             return res.json({ status: false, msg: "User not found" });

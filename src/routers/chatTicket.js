@@ -4,7 +4,7 @@ const router=express.Router();
  const { addChatTicket,sendMessageAdmin,getChatTicketByUserId,sendMessageUser,getAllChatTicket,getChatTicketById,editChatTicket,deleteChatTicket}=require("../controllers/chatTicketController")
 
 router.post("/addChatTicket",addChatTicket );
-router.post("/sendMessage/user",sendMessageUser );
+router.post("/sendMessage",sendMessageUser );
 router.post("/sendMessage/admin",sendMessageAdmin );
 router.get("/getAllChatTicket",getAllChatTicket );
 router.get("/getChatTicketByUserId/:userId",getChatTicketByUserId );

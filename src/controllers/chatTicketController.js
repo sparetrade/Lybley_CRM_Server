@@ -19,10 +19,10 @@ const sendMessageAdmin= async (req, res) => {
         if (!userId || !message) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-
+        const timestamp = new Date();
         const chatTicket = await ChatTicketModel.findOneAndUpdate(
             { userId },
-            { $push: { adminMessage: message } },
+            { $push: { adminMessage: message } , $set: { updatedAt: timestamp }},
             { new: true, upsert: true }
         );
 
@@ -33,18 +33,18 @@ const sendMessageAdmin= async (req, res) => {
 }
 const sendMessageUser= async (req, res) => {
     try {
-        const { userId, userName, message } = req.body;
-        if (!userId || !userName || !message) {
+        const { userId, sender, message } = req.body;
+        if (!userId  || !message) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-
+        const newMessage = { sender, message, timestamp: new Date() };
         const chatTicket = await ChatTicketModel.findOneAndUpdate(
             { userId },
-            { $push: { userMessage: message } },
-            { new: true, upsert: true }
+            { $push: { messages: newMessage }, $set: { updatedAt: new Date() } },
+            { new: true }
         );
 
-        res.json({ status: true, msg: 'User message added', chatTicket });
+        res.json({ status: true, msg: ' message added', chatTicket });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

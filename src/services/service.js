@@ -15,7 +15,7 @@ async function smsSend(otp, mobile) {
       numbers: [mobile]
     }
     let sms = await fast2sms.sendMessage(options);
-    console.log(sms)
+    // console.log(sms)
   } catch (err) {
     console.log(err);
   }
@@ -56,35 +56,65 @@ async function smsSend(otp, mobile) {
 
 
 
-async function sendMail(email, otp) {
+// async function sendMail(email, otp) {
+//   let transporter = nodemailer.createTransport({
+//     host: "smtp.zoho.in",
+//     port: 587,
+//     secure: false,
+//     requireTLS: true,
+//     auth: {
+//       user: "hi@sparetrade.in",
+//       pass: "ST@lybley9"
+//     }
+//   });
+
+//   try {
+//     let info = await transporter.sendMail({
+//       from: '"Lybley" <hi@sparetrade.in>',
+//       to: email,
+//       subject: "Your Email Verification OTP",
+//       html: `<h4>Email Verification</h4>
+//                    <p>Thank you for registering with Lybley. Please use the following OTP to verify your email address:</p>
+//                    <h2>${otp}</h2>
+//                    <p>If you did not request this, please ignore this email.</p>`
+//     });
+
+//     console.log('Email sent: ' + info.response);
+//   } catch (err) {
+//     console.log('Error: ', err);
+//   }
+// }
+async function sendMail(email, pass, isForget) {
   let transporter = nodemailer.createTransport({
     host: "smtp.zoho.in",
     port: 587,
     secure: false,
     requireTLS: true,
     auth: {
+      // user:"jesus.mueller87@ethereal.email",
       user: "hi@sparetrade.in",
       pass: "ST@lybley9"
+      //pass:"zT95Aax114tCZtwD1B"
     }
-  });
+  })
 
   try {
+    let sub = isForget ? "SpareTrade Password changed" : "Lybley Verification";
     let info = await transporter.sendMail({
-      from: '"Lybley" <hi@sparetrade.in>',
+      from: '"SpareTrade  " <hi@sparetrade.in>',
       to: email,
-      subject: "Your Email Verification OTP",
-      html: `<h4>Email Verification</h4>
-                   <p>Thank you for registering with Lybley. Please use the following OTP to verify your email address:</p>
-                   <h2>${otp}</h2>
-                   <p>If you did not request this, please ignore this email.</p>`
+      subject: sub,
+      html: `<h4>${isForget ? "Your Password has been changed." : "Thank you for your Verifictaion."}<h4>
+            ${isForget ? "You have successfully changed your password." : "You have successfully registered on LY3LEY."}
+           <P></P>
+          ${isForget ? "" : `Username:<a href="#">${email}</a> <br/>`}
+          ${isForget ? "New Password" : "Password"}:<a href="#">${pass}</a>`
     });
 
-    console.log('Email sent: ' + info.response);
   } catch (err) {
-    console.log('Error: ', err);
+    console.log("err", err);
   }
 }
-
 
 // async function sendMail(email,pass,isForget){
 //      let transporter = nodemailer.createTransport({
@@ -118,25 +148,25 @@ async function sendMail(email, otp) {
 // }
 // }
 
-const s3=new aws.S3({
-  region:process.env.AWS_BUCKET_REGION,
-  accessKeyId:process.env.AWS_ACCESS_KEY,
-  secretAccessKey:process.env.AWS_SECRET_KEY
+const s3 = new aws.S3({
+  region: process.env.AWS_BUCKET_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY
 })
-  
-const upload=()=>multer({
-  storage:multers3({
+
+const upload = () => multer({
+  storage: multers3({
     s3,
-    bucket:"sparetrade-bucket",
-    metadata:function(req,file,cb){
-       cb(null,{fieldName:file.fieldname});
+    bucket: "sparetrade-bucket",
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
     },
-    key:async function(req,file,cb){
+    key: async function (req, file, cb) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null,file.originalname + '-' + uniqueSuffix);
+      cb(null, file.originalname + '-' + uniqueSuffix);
     }
   })
-}) 
+})
 
 
 
