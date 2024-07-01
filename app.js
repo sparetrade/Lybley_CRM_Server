@@ -38,6 +38,10 @@ app.use(function (req, res, next) {
 });
 const PORT = process.env.PORT || 5000;
 
+app.get("/",(req,res)=>{
+    res.json( "Server is running")
+})
+
 app.use(registration);
 app.use(technician);
 app.use(product);
