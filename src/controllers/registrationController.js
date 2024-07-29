@@ -69,30 +69,40 @@ const adminRegistration = async (req, res) => {
 };
 const brandRegistration = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, brandName, brandID } = req.body;
 
+        // Validate required fields
+        if (!email || !brandName || !brandID) {
+            return res.status(400).json({ status: false, msg: "All required fields must be provided" });
+        }
+
+        // Check if the email is already registered
         const existingUser = await BrandRegistrationModel.findOne({ email });
 
         if (existingUser) {
             return res.status(400).json({ status: false, msg: "Email already registered" });
         }
 
-        // Email does not exist, proceed with registration
+        // Proceed with registration if the email is unique
         const newData = new BrandRegistrationModel(req.body);
         await newData.save();
+
+        // Create and save a notification
         const notification = new NotificationModel({
             brandId: newData.brandID,
             userName: newData.brandName,
-            title: `   Brand    `,
-            message: ` New Brand  Added     ${newData.brandName} !`,
-         });
-         await notification.save();
+            title: 'Brand Registration',
+            message: `A new brand has been added: ${newData.brandName}!`,
+        });
+        await notification.save();
+
         return res.json({ status: true, msg: "Registration successful" });
     } catch (err) {
-        console.error(err);
-        return res.status(500).send(err);
+        console.error('Error during registration:', err);
+        return res.status(500).json({ status: false, msg: 'Internal Server Error' });
     }
 };
+
 const serviceRegistration = async (req, res) => {
     try {
         const { email } = req.body;

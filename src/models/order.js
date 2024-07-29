@@ -6,7 +6,9 @@ const OrderSchema = mongoose.Schema({
         // unique: true,
         // sparse: true  
     },
- 
+    sparepartId: {
+        type: String
+    },
     partName: {
         type: String
     },
@@ -29,6 +31,9 @@ const OrderSchema = mongoose.Schema({
         },
         address: {
             type: String
+        },
+        pinCode: {
+            type: String
         }
     },
     orderDate: {
@@ -43,6 +48,18 @@ const OrderSchema = mongoose.Schema({
         enum: ['Standard', 'Express']
     },
     comments: {
+        type: String
+    },
+    brand: {
+        type: String
+    },
+    brandId: {
+        type: String
+    },
+    serviceCenter: {
+        type: String
+    },
+    serviceCenterId: {
         type: String
     },
     // attachments: {

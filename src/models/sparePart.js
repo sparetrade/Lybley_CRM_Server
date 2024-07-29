@@ -2,14 +2,15 @@ const mongoose =require("mongoose")
 
 const sparePartSchema=new mongoose.Schema({
  
-  userId:{type:String    },
+  brandId:{type:String},
+  brandName:{type:String},
   productId:{type:String    },
   skuNo:{type:String    },
   length:{type:Number    },
   breadth:{type:Number    },
   height:{type:Number    },
   weight:{type:Number    },
-  brandName:{type:String},
+  
   seller:{type:String},
   MRP:{type:Number    },
   bestPrice:{type:Number    },
@@ -22,7 +23,7 @@ const sparePartSchema=new mongoose.Schema({
   technician:{type:Number},
   images:{type:Array    },
         adminId:{type:String },
-        brandId:{type:String },
+       
      
         status:{type:String,default:"ACTIVE"}
   

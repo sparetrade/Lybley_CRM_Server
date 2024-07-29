@@ -36,13 +36,24 @@ const complaintSchema = new mongoose.Schema({
   serialNo: { type: String },
   purchaseDate: { type: Date },
   warrantyStatus: { type: String },
+  warrantyYears: { type: String },
   priorityLevel: { type: String },
   userName: { type: String },
   userId: { type: String },
   dealerName: { type: String },
   dealerId: { type: String },
+  updateHistory: [
+    {
+      updatedAt: { type: Date, default: Date.now },
+      changes: { type: Map, of: String },
+    },
+  ],
   assignServiceCenter: { type: String },
   assignServiceCenterId: { type: String },
+  assignServiceCenterTime: { type: Date },
+  srerviceCenterResponseTime: { type: Date },
+  assignTechnicianTime: { type: Date },
+  technicianResposeTime: { type: Date },
   assignTechnician: { type: String },
   technicianId: { type: String },
   technicianContact: { type: String },
@@ -50,7 +61,8 @@ const complaintSchema = new mongoose.Schema({
   // images: { type: String }, 
   issueType: { type: String },
   detailedDescription: { type: String },
-  issueImages: { type: String },  
+  issueImages: { type: String },
+  warrantyImage: { type: String },
   errorMessages: { type: String },
   preferredServiceDate: { type: Date },
   preferredServiceTime: { type: String },
@@ -61,6 +73,7 @@ const complaintSchema = new mongoose.Schema({
   alternateContactInfo: { type: String },
   serviceAddress: { type: String },
   status: { type: String, default: "PENDING" },
+  payment: { type: Number, default: 0 },
   statusComment: { type: String }
 }, { timestamps: true });
 
