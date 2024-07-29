@@ -15,6 +15,10 @@ const bradRegistrationSchema = new mongoose.Schema({
         type: String,
         required: true
       },
+      username: {
+        type: String,
+        // required: true
+      },
       brandID: {
         type: String,
         required: true
@@ -29,8 +33,8 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       contactPersonEmail: {
         type: String,
-        required: true,
-        unique: true
+        // required: true,
+        // unique: true
       },
       contactPersonPhoneNumber: {
         type: String,
@@ -56,10 +60,10 @@ const bradRegistrationSchema = new mongoose.Schema({
         type: String,
         required: true
       },
-      username: {
+      email: {
         type: String,
-        required: true,
-        unique: true
+        // required: true,
+        // unique: true
       },
       password: {
         type: String,
@@ -78,14 +82,14 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       termsAndConditions: {
         type: Boolean,
-        required: true
+        // required: true
       },
       privacyPolicy: {
         type: Boolean,
-        required: true
+        // required: true
       },
       role: { type: String, default: "BRAND" },
-      verification: { type: String, default: "NOT_VERIFY" }
+      verification: { type: String, default: "VERIFIED" }
       , otp: { type: Number },
   
       status: { type: String, default: "ACTIVE" },
@@ -95,6 +99,7 @@ const bradRegistrationSchema = new mongoose.Schema({
  
         name:{type:String,required:true},
         contact:{type:String,required:true},
+        serviceName:{type:String },
         email:{type:String,required:true},
         password:{type:String },
         image:{type:String },
@@ -102,12 +107,17 @@ const bradRegistrationSchema = new mongoose.Schema({
         address:{type:String },
         certificate:{type:String },
         skill:{type:String },
-        status:{type:String,default:"AVAILABLE"},
+        liveStatus:{type:String,default:"AVAILABLE"},
         role: { type: String, default: "TECHNICIAN" },
-        verification: { type: String, default: "NOT_VERIFY" }
+        verification: { type: String, default: "VERIFIED" }
         , otp: { type: Number },
         status: { type: String, default: "ACTIVE" },
-  
+        totalAmount: { type: Number, default: 0 },
+        walletAmount: { type: Number, default: 0 },
+        acceptedTerms: {
+          type: Boolean,
+          
+        },
   },{timestamps:true}
 );
 
@@ -200,7 +210,7 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     },
     username: {
         type: String,
-        required: true
+        // required: true
     },
     password: {
         type: String,
@@ -226,10 +236,12 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
 
 
     role: { type: String, default: "SERVICE" },
-    verification: { type: String, default: "NOT_VERIFY" }
+    verification: { type: String, default: "VERIFIED" }
     , otp: { type: Number },
 
     status: { type: String, default: "ACTIVE" },
+    totalAmount: { type: Number, default: 0 },
+    walletAmount: { type: Number, default: 0 }
 }, { timestamps: true });
 
 const employeeRegistrationSchema = new mongoose.Schema({
@@ -280,21 +292,28 @@ const dealerRegistrationSchema = new mongoose.Schema({
       type: Boolean,
       required: true,
     },
-    verification: { type: String, default: "NOT_VERIFY" }
+    verification: { type: String, default: "VERIFIED" }
     , otp: { type: Number },
-    role: { type: String, default: "DEALER" }
+    role: { type: String, default: "DEALER" },
+    totalAmount: { type: Number, default: 0 },
+    walletAmount: { type: Number, default: 0 }
 },
     { timestamps: true });
 
 const userRegistrationSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true },
-    contact: { type: Number, required: true },
+    contact: { type: String, required: true },
     password: { type: String, required: true },
     address: { type: String  },
     role: { type: String, default: "USER" },
-    verification: { type: String, default: "NOT_VERIFY" }
-    , otp: { type: Number }
+    verification: { type: String, default: "VERIFIED" }
+    ,
+    acceptedTerms: {
+      type: Boolean,
+      required: true,
+    },
+    otp: { type: Number }
 },
     { timestamps: true });
 

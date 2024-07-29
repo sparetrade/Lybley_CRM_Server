@@ -21,7 +21,7 @@ const feedbackSchema=mongoose.Schema({
     recommendationLikelihood: { type: Number, required: true },
     futureServiceInterest: { type: String   },
     serviceDate: { type: String   },
-    status:{ type:String,default:"NEW"}
+    status:{ type:String,default:"PENDING"}
   },{timestamps:true})
   
   const FeedbackModal=new mongoose.model("Feedback",feedbackSchema);

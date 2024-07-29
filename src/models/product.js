@@ -31,6 +31,7 @@ const productSchema = new mongoose.Schema({
       adminId: { type: String },
       brandId: { type: String },
       productBrand: { type: String },
+      warrantyYears: { type: String },
       warrantyStatus: { type: Boolean },
       status: { type: String, default: "ACTIVE" }
 

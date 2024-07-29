@@ -43,7 +43,15 @@ const getTechnicianById = async (req, res) => {
         res.status(400).send(err);
     }
 }
-
+const getComplaintByCenterId = async (req, res) => {
+    try {
+      const serviceId = req.params.userId;
+      const data = await TechnicianModal.find({ serviceId }).populate('serviceId');
+      res.send(data);
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  };
 const editTechnician = async (req, res) => {
     try {
         let _id = req.params.id;
@@ -78,4 +86,4 @@ const deleteTechnician = async (req, res) => {
     }
 }
 
-module.exports = { addTechnician, getAllTechnician, getTechnicianById, editTechnician, deleteTechnician };
+module.exports = { addTechnician,getComplaintByCenterId, getAllTechnician, getTechnicianById, editTechnician, deleteTechnician };
