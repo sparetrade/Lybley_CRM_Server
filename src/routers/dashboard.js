@@ -41,7 +41,7 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ }),
       Complaints.countDocuments({ status: 'NEW' }),
       Complaints.countDocuments({ status: 'ASSIGN' }),
-      Complaints.countDocuments({ status: 'PENDIND' }),
+      Complaints.countDocuments({ status: 'PENDING' }),
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
       Complaints.countDocuments({ status: 'PART PENDIND' })
