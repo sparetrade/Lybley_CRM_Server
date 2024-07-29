@@ -317,7 +317,7 @@ const userRegistrationSchema = new mongoose.Schema({
 },
     { timestamps: true });
 
-const BrandRegistrationModel = mongoose.model("BrandRegistration", bradRegistrationSchema);
+const BrandRegistrationModel = mongoose.model("BrandRegistrationsss", bradRegistrationSchema);
 const AdminModel = mongoose.model("AdminRegistration", adminRegistrationSchema);
 const DealerModel = mongoose.model("DealerRegistration", dealerRegistrationSchema);
 const ServiceModel = mongoose.model("ServiceRegistration", serviceCenterRegistrationSchema);

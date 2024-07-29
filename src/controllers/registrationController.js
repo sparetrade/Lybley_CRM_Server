@@ -69,32 +69,22 @@ const adminRegistration = async (req, res) => {
 };
 const brandRegistration = async (req, res) => {
     try {
-        const { email, brandName, brandID } = req.body;
+        const { email, ...otherData } = req.body;
 
-        // Validate required fields
-        if (!email || !brandName || !brandID) {
-            return res.status(400).json({ status: false, msg: "All required fields must be provided" });
+        // Validate input data
+        if (!email || !otherData) {
+            return res.status(400).json({ status: false, msg: "Bad Request: Missing required fields" });
         }
 
-        // Check if the email is already registered
-        const existingUser = await BrandRegistrationModel.findOne({ email });
-
-        if (existingUser) {
+        // Check for existing email
+        const existingBrand = await BrandRegistrationModel.findOne({ email });
+        if (existingBrand) {
             return res.status(400).json({ status: false, msg: "Email already registered" });
         }
 
         // Proceed with registration if the email is unique
-        const newData = new BrandRegistrationModel(req.body);
+        const newData = new BrandRegistrationModel({ email, ...otherData });
         await newData.save();
-
-        // Create and save a notification
-        const notification = new NotificationModel({
-            brandId: newData.brandID,
-            userName: newData.brandName,
-            title: 'Brand Registration',
-            message: `A new brand has been added: ${newData.brandName}!`,
-        });
-        await notification.save();
 
         return res.json({ status: true, msg: "Registration successful" });
     } catch (err) {
