@@ -129,7 +129,7 @@ router.post("/walletPayment",async(req,res)=>{
 router.post("/serviceCenterDuePayment", async (req, res) => {
   try {
     let body = req.body;
-    console.log(body);
+    // console.log(body);
 
     let response = await axios.post(
       "https://api.razorpay.com/v1/payouts",
@@ -144,21 +144,21 @@ router.post("/serviceCenterDuePayment", async (req, res) => {
     let { data } = response;
     // console.log(data);
 
-    if (data.entity === "payout") {
-      const notification = new NotificationModel({
-        serviceCenterId: body.fund_account.contact.reference_id,  
-        title: `Service Center Payment`,
-        message: `Payment Successful, ${body.amount} INR!`,
-      });
-      await notification.save();
+    // if (data.entity === "payout") {
+    //   const notification = new NotificationModel({
+    //     serviceCenterId: body.fund_account.contact.reference_id,  
+    //     title: `Service Center Payment`,
+    //     message: `Payment Successful, ${body.amount} INR!`,
+    //   });
+    //   await notification.save();
 
-      const transaction = new BankTransactionModel({
-        serviceCenterId: body.fund_account.contact.reference_id,
-        serviceCenterName: body.fund_account.contact.name,
-        paidAmount: body.amount,
-      });
-      await transaction.save();
-    }
+    //   const transaction = new BankTransactionModel({
+    //     serviceCenterId: body.fund_account.contact.reference_id,
+    //     serviceCenterName: body.fund_account.contact.name,
+    //     paidAmount: body.amount,
+    //   });
+    //   await transaction.save();
+    // }
 
     res.send(data);
   } catch (err) {

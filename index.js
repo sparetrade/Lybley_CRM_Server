@@ -23,7 +23,7 @@ const walletTransaction = require("./src/routers/bank");
 const chatTicket = require("./src/routers/chatTicket");
 const wallet = require("./src/routers/wallet");
 const payment = require("./src/routers/payments");
-
+const shipyariOrder=require("./src/routers/shipyariOrder")
 
 app.use(express.json());
 app.use(cors());
@@ -65,6 +65,7 @@ app.use(bank);
 app.use(walletTransaction);
 app.use(wallet);
 app.use(payment);
+app.use(shipyariOrder);
 
 app.listen(5000, () => {
     console.log("Server is running on PORT", PORT);
