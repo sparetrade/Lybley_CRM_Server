@@ -62,10 +62,11 @@ const OrderSchema = mongoose.Schema({
     serviceCenterId: {
         type: String
     },
+    shipyariOrder:{type:Object},
     // attachments: {
     //     type: [String]
     // },
-
+ 
     status: { type: String, default: "ORDER" }
 
 }, { timestamps: true });

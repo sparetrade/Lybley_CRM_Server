@@ -129,7 +129,7 @@ router.post("/walletPayment",async(req,res)=>{
 router.post("/serviceCenterDuePayment", async (req, res) => {
   try {
     let body = req.body;
-    console.log(body);
+    // console.log(body);
 
     let response = await axios.post(
       "https://api.razorpay.com/v1/payouts",
@@ -142,7 +142,7 @@ router.post("/serviceCenterDuePayment", async (req, res) => {
       }
     );
     let { data } = response;
-    // console.log(data);
+    console.log(data);
 
     if (data.entity === "payout") {
       const notification = new NotificationModel({
