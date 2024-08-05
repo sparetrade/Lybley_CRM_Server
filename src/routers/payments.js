@@ -142,23 +142,23 @@ router.post("/serviceCenterDuePayment", async (req, res) => {
       }
     );
     let { data } = response;
-    // console.log(data);
+    console.log(data);
 
-    // if (data.entity === "payout") {
-    //   const notification = new NotificationModel({
-    //     serviceCenterId: body.fund_account.contact.reference_id,  
-    //     title: `Service Center Payment`,
-    //     message: `Payment Successful, ${body.amount} INR!`,
-    //   });
-    //   await notification.save();
+    if (data.entity === "payout") {
+      const notification = new NotificationModel({
+        serviceCenterId: body.fund_account.contact.reference_id,  
+        title: `Service Center Payment`,
+        message: `Payment Successful, ${body.amount} INR!`,
+      });
+      await notification.save();
 
-    //   const transaction = new BankTransactionModel({
-    //     serviceCenterId: body.fund_account.contact.reference_id,
-    //     serviceCenterName: body.fund_account.contact.name,
-    //     paidAmount: body.amount,
-    //   });
-    //   await transaction.save();
-    // }
+      const transaction = new BankTransactionModel({
+        serviceCenterId: body.fund_account.contact.reference_id,
+        serviceCenterName: body.fund_account.contact.name,
+        paidAmount: body.amount,
+      });
+      await transaction.save();
+    }
 
     res.send(data);
   } catch (err) {

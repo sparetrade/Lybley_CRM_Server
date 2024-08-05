@@ -66,7 +66,7 @@ const OrderSchema = mongoose.Schema({
     // attachments: {
     //     type: [String]
     // },
-
+ 
     status: { type: String, default: "ORDER" }
 
 }, { timestamps: true });

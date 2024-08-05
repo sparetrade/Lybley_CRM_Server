@@ -111,22 +111,16 @@ const addOrder = async (req, res) => {
       let body = req.body;
       let { quantity, sparepartId, serviceCenterId,serviceCenter } = body;
   
-      // Retrieve the spare part to check the stock quantity
+      
       const sparePart = await BrandStockModel.findOne({ sparepartId: sparepartId });
   
       if (!sparePart) {
         return res.status(404).json({ status: false, msg: "Spare part not found" });
       }
-  
-      // Check if there is enough stock to fulfill the order
-    //   if (parseInt(sparePart.defectiveStock) < quantity) {
-    //     return res.json({ status: false, msg: "Insufficient stock" });
-    //   }
-  
-      // Deduct the order quantity from the stock
+   
       sparePart.defectiveStock = parseInt(sparePart.defectiveStock) + quantity;
   
-      // Save the updated product stock
+    
       await sparePart.save();
   
       // Update the service center stock if serviceCenterId is provided
