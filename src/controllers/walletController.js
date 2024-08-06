@@ -1,5 +1,6 @@
 const WalletModel = require("../models/wallet")
 const BankDetail = require("../models/bankDetails");
+const BankTransactionModel = require("../models/bankTransaction");
 const { default: axios } = require("axios");
 
 // const addWallet = async (req, res) => {
@@ -172,7 +173,42 @@ const getWalletByCenterId = async (req, res) => {
     res.status(400).send(err);
   }
 }
-
+const getTransactionByCenterId = async (req, res) => {
+  try {
+    let serviceCenterId = req.params.id;
+    let data = await BankTransactionModel.find({ serviceCenterId: serviceCenterId }).sort({ _id: -1 });
+    if (!data) {
+      return res.status(404).send({ message: "Transaction not found" });
+    }
+    res.send(data);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+}
+const getTransactionByBrandId = async (req, res) => {
+  try {
+    let userId = req.params.id;
+    let data = await BankTransactionModel.find({ userId: userId }).sort({ _id: -1 });
+    if (!data) {
+      return res.status(404).send({ message: "Transaction not found" });
+    }
+    res.send(data);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+}
+const getAllTransaction = async (req, res) => {
+  try {
+     
+    let data = await BankTransactionModel.find({ }).sort({ _id: -1 });
+    if (!data) {
+      return res.status(404).send({ message: "Transaction not found" });
+    }
+    res.send(data);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+}
 const editWallet = async (req, res) => {
   try {
     let _id = req.params.id;
@@ -193,4 +229,4 @@ const deleteWallet = async (req, res) => {
   }
 }
 
-module.exports = { addWallet, getAllWallet, getWalletById, getWalletByCenterId, editWallet, deleteWallet };
+module.exports = { addWallet,getTransactionByBrandId,getAllTransaction,getTransactionByCenterId, getAllWallet, getWalletById, getWalletByCenterId, editWallet, deleteWallet };
