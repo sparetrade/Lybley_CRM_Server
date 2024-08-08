@@ -27,11 +27,9 @@ const addComplaint = async (req, res) => {
 const addAPPComplaint = async (req, res) => {
    try {
       let body = req.body;
- 
-
-      let obj = { ...body, issueImages:   req.file };
-      console.log(obj);
-      let data = new ComplaintModal(obj);
+      // let obj = { ...body, issueImages: req.file };
+      // console.log(obj);
+      let data = new ComplaintModal(body);
       await data.save();
       const notification = new NotificationModel({
          complaintId: data?._id,
@@ -45,6 +43,7 @@ const addAPPComplaint = async (req, res) => {
       await notification.save();
       res.json({ status: true, msg: "Complaint   Added" });
    } catch (err) {
+      console.error('Error in createShipment:', err);
       res.status(400).send(err);
    }
 
