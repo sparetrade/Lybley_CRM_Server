@@ -65,8 +65,26 @@ const { default: axios } = require("axios");
 //   }
 // };
 
-
 const addWallet = async (req, res) => {
+  try {
+    const { serviceCenterName, accountHolderName, email, contact, bankDetailId, accountNumber, ifsc } = req.body;
+
+    // Check if the service center name already exists
+    const existingServiceCenter = await WalletModel.findOne({ serviceCenterName });
+    if (existingServiceCenter) {
+      return res.json({ status: false, msg: "Service Center already exists in Wallets" });
+    }
+
+    // Create new wallet data
+    const walletData = new WalletModel(req.body);
+    await walletData.save();
+    res.json({ status: true, msg: "Wallet Added" });
+  } catch (err) {
+    console.error('Error:', err.response ? err.response.data : err.message); // Log detailed error
+    res.status(400).send(err.response ? err.response.data : err.message);
+  }
+};
+const addWallet1 = async (req, res) => {
   try {
     const { serviceCenterName, accountHolderName, email, contact, bankDetailId, accountNumber, ifsc } = req.body;
 
