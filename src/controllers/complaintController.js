@@ -4,9 +4,33 @@ const NotificationModel = require("../models/notification")
 const addComplaint = async (req, res) => {
    try {
       let body = req.body;
+      let obj = { ...body, issueImages: req.file.location   };
+      
+      let data = new ComplaintModal(obj);
+      await data.save();
+      const notification = new NotificationModel({
+         complaintId: data?._id,
+         userId: data.userId,
+         brandId: data.brandId,
+         dealerId: data.dealerId,
+         userName: data.fullName,
+         title: `User Complaint`,
+         message: `Registred Your Complaint, ${req.body.fullName}!`,
+      });
+      await notification.save();
+      res.json({ status: true, msg: "Complaint   Added" });
+   } catch (err) {
+      res.status(400).send(err);
+   }
 
-      let obj = { ...body, issueImages: req.file.location  };
+};
+const addAPPComplaint = async (req, res) => {
+   try {
+      let body = req.body;
+ 
 
+      let obj = { ...body, issueImages:   req.file };
+      console.log(obj);
       let data = new ComplaintModal(obj);
       await data.save();
       const notification = new NotificationModel({
@@ -225,4 +249,4 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint,addDealerComplaint, getAllComplaint,getComplaintByUserId,getComplaintByTechId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint,addDealerComplaint,addAPPComplaint, getAllComplaint,getComplaintByUserId,getComplaintByTechId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
