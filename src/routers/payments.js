@@ -127,7 +127,7 @@ router.get("/getWalletTransaction/:id", async (req, res) => {
 
 
 
-router.post("/serviceCenterDuePayment", async (req, res) => {
+router.post("/serviceCenterDuePayment11111", async (req, res) => {
   try {
     let body = req.body;
     // console.log(body);

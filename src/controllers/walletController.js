@@ -2,6 +2,7 @@ const WalletModel = require("../models/wallet")
 const BankDetail = require("../models/bankDetails");
 const BankTransactionModel = require("../models/bankTransaction");
 const { default: axios } = require("axios");
+const NotificationModel = require("../models/notification")
 
 // const addWallet = async (req, res) => {
 //   try {
@@ -15,7 +16,7 @@ const { default: axios } = require("axios");
 
 //     // If not, proceed to add the new spare part
 //     const walletData = new WalletModel(req.body);
-    
+
 // console.log(walletData);
 //     const contactData = {
 //       name: req.body.accountHolderName,
@@ -40,7 +41,7 @@ const { default: axios } = require("axios");
 //         account_type: "bank_account",
 //         // contact_id: data.id,
 //         contact_id:  "cont_OY1HeeDKMAT7YO",
-        
+
 //       }
 //     }
 //       let response1 = await axios.post("https://api.razorpay.com/v1/fund_accounts", fundData, { headers: { Authorization: "Basic " + new Buffer.from(process.env.RAZORPAYX_KEY_ID + ":" + process.env.RAZORPAYX_KEY_SECRET).toString("base64") } });
@@ -56,7 +57,7 @@ const { default: axios } = require("axios");
 //       walletDetails.fund_account_id =  data.fund_account_id;
 //       await walletDetails.save();
 //       res.send(data);
-    
+
 //     res.send(data);
 //     await walletData.save();
 //     res.json({ status: true, msg: "Wallet Added" });
@@ -84,6 +85,116 @@ const addWallet = async (req, res) => {
     res.status(400).send(err.response ? err.response.data : err.message);
   }
 };
+
+
+// router.post("/serviceCenterDuePayment",
+const createTransaction = async (req, res) => {
+  try {
+    let body = req.body;
+// console.log(body);
+  
+    // Create and save the transaction record
+    const transaction = new BankTransactionModel({
+      // name:body.fund_account.bank_account.name,
+      name:body.fund_account.bank_account.name,
+      bankName:body.fund_account.bank_account.bankName,
+      accountNo:body.fund_account.bank_account.account_number,
+      ifscCode:body.fund_account.bank_account.ifsc,
+      dealerId: body.fund_account.contact.reference_id,
+      technicianId: body.fund_account.contact.reference_id,
+      brandId: body.fund_account.contact.reference_id,
+      serviceCenterId: body.fund_account.contact.reference_id,
+      serviceCenterName: body.fund_account.contact.name,
+      paidAmount: parseInt(body.amount, 10),  // Ensure amount is an integer
+    });
+    await transaction.save();
+
+    // Send response after transaction is successfully saved
+   
+
+    // After sending the response, continue with additional operations
+    const notification = new NotificationModel({
+      serviceCenterId: body.fund_account.contact.reference_id,
+      dealerId: body.fund_account.contact.reference_id,
+      technicianId: body.fund_account.contact.reference_id,
+      userId: body.fund_account.contact.reference_id,
+      title: ' Payment',
+      message: `Payment Processing, ${body.amount} INR!`,
+    });
+    await notification.save();
+
+    // Update the wallet
+    const serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: body.fund_account.contact.reference_id }).exec();
+
+    if (!serviceCenterWallet) {
+      // Handle case where wallet is not found
+      console.error('Wallet not found for service center:', body.fund_account.contact.reference_id);
+      return;
+    }
+
+    serviceCenterWallet.totalCommission = (parseInt(serviceCenterWallet.totalCommission || 0) + parseInt(body.amount));
+    serviceCenterWallet.dueAmount = (parseInt(serviceCenterWallet.dueAmount || 0) - parseInt(body.amount));
+    await serviceCenterWallet.save();
+    res.json({ status: true, msg: "Transaction created" });
+  } catch (err) {
+    console.error(err);
+    res.status(400).send({ error: err.message });
+  }
+};
+
+const updateTransactionStatus = async (req, res) => {
+  try {
+    const _id = req.params.id; // Extract ID from request parameters
+    const body = req.body; // Extract request body
+    // console.log(body);
+
+    // Update wallet information by ID
+    const updatedWallet = await BankTransactionModel.findByIdAndUpdate(_id, body, { new: true });
+
+    if (updatedWallet) {
+      // Create a notification
+      const notification = new NotificationModel({
+        // You might want to include dynamic IDs or user details in the notification
+        title: 'Payment',
+        message: 'Payment Successfuly   ',
+        // Add the relevant user IDs if needed:
+        // serviceCenterId: body.serviceCenterId,
+        // dealerId: body.dealerId,
+        // technicianId: body.technicianId,
+        // userId: body.userId,
+      });
+
+      // Save the notification to the database
+      await notification.save();
+
+      // Send a success response
+      return res.json({ status: true, msg: "Payment status updated successfully" });
+    } else {
+      // Send a failure response if no document was updated
+      return res.json({ status: false, msg: "Payment status not updated" });
+    }
+  } catch (err) {
+    // Log error and send an error response
+    console.error('Error updating transaction status:', err);
+    return res.status(500).json({ status: false, msg: 'Error updating payment status', error: err.message });
+  }
+};
+
+
+
+const updateTransaction = async (req, res) => {
+  try {
+     let _id = req.params.id;
+     let obj = await BankTransactionModel.findById(_id);
+     obj.images = req.file.location;
+
+     let obj1 = await BankTransactionModel.findByIdAndUpdate(_id, { payScreenshot: obj.images,status:"SUCCESS" }, { new: true });
+     res.json({ status: true, msg: "Update Transaction status", data: obj1 });
+  } catch (err) {
+     res.status(500).send(err);
+  }
+};
+
 const addWallet1 = async (req, res) => {
   try {
     const { serviceCenterName, accountHolderName, email, contact, bankDetailId, accountNumber, ifsc } = req.body;
@@ -111,10 +222,10 @@ const addWallet1 = async (req, res) => {
     };
 
     // Send request to create contact
-    let response = await axios.post("https://api.razorpay.com/v1/contacts", contactData, { 
-      headers: { 
-        Authorization: "Basic " + Buffer.from(process.env.RAZORPAYX_KEY_ID + ":" + process.env.RAZORPAYX_KEY_SECRET).toString("base64") 
-      } 
+    let response = await axios.post("https://api.razorpay.com/v1/contacts", contactData, {
+      headers: {
+        Authorization: "Basic " + Buffer.from(process.env.RAZORPAYX_KEY_ID + ":" + process.env.RAZORPAYX_KEY_SECRET).toString("base64")
+      }
     });
 
     const { data: contactDataResponse } = response;
@@ -134,10 +245,10 @@ const addWallet1 = async (req, res) => {
       };
 
       // Send request to create fund account
-      let response1 = await axios.post("https://api.razorpay.com/v1/fund_accounts", fundData, { 
-        headers: { 
-          Authorization: "Basic " + Buffer.from(process.env.RAZORPAYX_KEY_ID + ":" + process.env.RAZORPAYX_KEY_SECRET).toString("base64") 
-        } 
+      let response1 = await axios.post("https://api.razorpay.com/v1/fund_accounts", fundData, {
+        headers: {
+          Authorization: "Basic " + Buffer.from(process.env.RAZORPAYX_KEY_ID + ":" + process.env.RAZORPAYX_KEY_SECRET).toString("base64")
+        }
       });
 
       const { data: fundAccountData } = response1;
@@ -217,8 +328,8 @@ const getTransactionByBrandId = async (req, res) => {
 }
 const getAllTransaction = async (req, res) => {
   try {
-     
-    let data = await BankTransactionModel.find({ }).sort({ _id: -1 });
+
+    let data = await BankTransactionModel.find({}).sort({ _id: -1 });
     if (!data) {
       return res.status(404).send({ message: "Transaction not found" });
     }
@@ -247,4 +358,4 @@ const deleteWallet = async (req, res) => {
   }
 }
 
-module.exports = { addWallet,getTransactionByBrandId,getAllTransaction,getTransactionByCenterId, getAllWallet, getWalletById, getWalletByCenterId, editWallet, deleteWallet };
+module.exports = { addWallet, createTransaction,updateTransaction,updateTransactionStatus, getTransactionByBrandId, getAllTransaction, getTransactionByCenterId, getAllWallet, getWalletById, getWalletByCenterId, editWallet, deleteWallet };
