@@ -7,7 +7,13 @@ const bankTransactionSchema=new mongoose.Schema({
     userName:{type:String},
     totalPay:{type:Number},
     // commission:{type:Number},
-    paidAmount:{type:Number},
+    paidAmount:{type:String},
+    bankName:{type:String},
+    accountNo:{type:String},
+    ifscCode:{type:String},
+    name:{type:String},
+    
+    status: { type: String, default: "PROCESSING" },
     // totalDue:{type:Number},
 },{timestamps:true})
 
