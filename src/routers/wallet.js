@@ -7,8 +7,8 @@ const router=express.Router()
 
 router.post("/addWallet",addWallet)
 router.post("/serviceCenterDuePayment",createTransaction)
-// router.patch("/updateTransaction/:id", upload().single("payScreenshot"),updateTransaction );
-router.patch("/updateTransaction/:id",updateTransactionStatus );
+router.patch("/updateTransaction/:id", upload().single("payScreenshot"),updateTransaction );
+// router.patch("/updateTransaction/:id",updateTransactionStatus );
 router.get("/getAllWallet",getAllWallet)
 router.get("/getWalletById/:id",getWalletById)
 router.get("/getWalletByCenterId/:id",getWalletByCenterId)
