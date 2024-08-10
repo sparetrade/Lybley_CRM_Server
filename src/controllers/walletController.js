@@ -189,7 +189,32 @@ const updateTransaction = async (req, res) => {
      obj.images = req.file.location;
 
      let obj1 = await BankTransactionModel.findByIdAndUpdate(_id, { payScreenshot: obj.images,status:"SUCCESS" }, { new: true });
-     res.json({ status: true, msg: "Update Transaction status", data: obj1 });
+    //  const updatedWallet = await BankTransactionModel.findByIdAndUpdate(_id, body, { new: true });
+
+     if (obj1) {
+       // Create a notification
+       const notification = new NotificationModel({
+         // You might want to include dynamic IDs or user details in the notification
+         title: 'Payment',
+         message: 'Payment Successfuly   ',
+         // Add the relevant user IDs if needed:
+         // serviceCenterId: body.serviceCenterId,
+         // dealerId: body.dealerId,
+         // technicianId: body.technicianId,
+         // userId: body.userId,
+       });
+ 
+       // Save the notification to the database
+       await notification.save();
+ 
+       // Send a success response
+        // res.json({ status: true, msg: "Update Transaction status", data: obj1 });
+       return res.json({ status: true, msg: "Payment status updated successfully", data: obj1 });
+     } else {
+       // Send a failure response if no document was updated
+       return res.json({ status: false, msg: "Payment status not updated" });
+     }
+    
   } catch (err) {
      res.status(500).send(err);
   }
