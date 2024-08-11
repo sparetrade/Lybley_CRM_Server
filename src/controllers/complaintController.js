@@ -33,9 +33,9 @@ const addComplaint = async (req, res) => {
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
-         serviceCenter = await ServiceModel.findOne({ postalCode:pincode });
+         serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
       } else if (city) {
-         serviceCenter = await ServiceModel.findOne({ city:city });
+         serviceCenter = await ServiceModel.findOne({ city: city });
       }
       // console.log(serviceCenter);
 
@@ -98,22 +98,70 @@ const addComplaint = async (req, res) => {
 
 const addAPPComplaint = async (req, res) => {
    try {
+      // let body = req.body;
+      // let obj = { ...body, issueImages: req.file.location };
+      // console.log(obj);
       let body = req.body;
-      let obj = { ...body, issueImages: req.file.location };
-      console.log(obj);
+
+
+      let { city, pincode } = body; // Extract city and pincode from request body
+
+      // Find a service center based on city or pincode
+      let serviceCenter;
+      if (pincode) {
+         serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
+      } else if (city) {
+         serviceCenter = await ServiceModel.findOne({ city: city });
+      }
+      if (!serviceCenter) {
+         let obj = {
+            ...body,
+
+            assignServiceCenterId: serviceCenter?._id,
+            assignServiceCenter: serviceCenter?.serviceCenterName,
+            assignServiceCenterTime: new Date()
+         };
+         let data = new ComplaintModal(obj);
+         await data.save();
+         const notification = new NotificationModel({
+            complaintId: data?._id,
+            userId: data.userId,
+            brandId: data.brandId,
+            serviceCenterId: serviceCenter?._id,
+            dealerId: data.dealerId,
+            userName: data.fullName,
+            title: `User Complaint`,
+            message: `Registred Your Complaint, ${req.body.fullName}!`,
+         });
+         await notification.save();
+
+         return res.json({ status: true, msg: "Complaint Added" });
+      }
+      let obj = {
+         ...body,
+         // issueImages: req.file ? req.file.location : "", 
+         // warrantyImage: req.file ? req.file.location : "", 
+         assignServiceCenterId: serviceCenter?._id,
+         assignServiceCenter: serviceCenter?.serviceCenterName,
+         assignServiceCenterTime: new Date()
+      };
       let data = new ComplaintModal(obj);
       await data.save();
+
+
       const notification = new NotificationModel({
-         complaintId: data?._id,
+         complaintId: data._id,
          userId: data.userId,
          brandId: data.brandId,
+         serviceCenterId: serviceCenter?._id,
          dealerId: data.dealerId,
          userName: data.fullName,
-         title: `User Complaint`,
-         message: `Registred Your Complaint, ${req.body.fullName}!`,
+         title: `  Complaint`,
+         message: `Registered Your Complaint, ${req.body.fullName}!`,
       });
       await notification.save();
-      res.json({ status: true, msg: "Complaint   Added" });
+      res.json({ status: true, msg: "Complaint Added" });
+
    } catch (err) {
       console.error('Error in createShipment:', err);
       res.status(400).send(err);
@@ -149,24 +197,24 @@ const addAPPComplaint = async (req, res) => {
 const addDealerComplaint = async (req, res) => {
    try {
       let body = req.body;
-     
-            
+
+
       let { city, pincode } = body; // Extract city and pincode from request body
 
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
-         serviceCenter = await ServiceModel.findOne({ postalCode:pincode });
+         serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
       } else if (city) {
-         serviceCenter = await ServiceModel.findOne({ city:city });
+         serviceCenter = await ServiceModel.findOne({ city: city });
       }
       // console.log(serviceCenter);
 
       if (!serviceCenter) {
          let obj = {
             ...body,
-            issueImages: req.file ? req.file.location : "", 
-             warrantyImage: req.file ? req.file.location : "",        
+            issueImages: req.file ? req.file.location : "",
+            warrantyImage: req.file ? req.file.location : "",
             assignServiceCenterId: serviceCenter?._id,
             assignServiceCenter: serviceCenter?.serviceCenterName,
             assignServiceCenterTime: new Date()
@@ -192,8 +240,8 @@ const addDealerComplaint = async (req, res) => {
 
       let obj = {
          ...body,
-         issueImages: req.file ? req.file.location : "", 
-         warrantyImage: req.file ? req.file.location : "", 
+         issueImages: req.file ? req.file.location : "",
+         warrantyImage: req.file ? req.file.location : "",
          assignServiceCenterId: serviceCenter?._id,
          assignServiceCenter: serviceCenter?.serviceCenterName,
          assignServiceCenterTime: new Date()

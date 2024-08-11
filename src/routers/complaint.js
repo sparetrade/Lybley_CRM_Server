@@ -7,8 +7,8 @@ const {upload}  = require("../services/service");
 const router=express.Router()
 
 router.post("/createComplaint",upload().single("issueImages")  , addComplaint);
-router.post("/createAppComplaint",upload().single("issueImages")  , addAPPComplaint);
-// router.post("/createAppComplaint" , addAPPComplaint);
+// router.post("/createAppComplaint",upload().single("issueImages")  , addAPPComplaint);
+router.post("/createAppComplaint" , addAPPComplaint);
 router.post("/createDealerComplaint",upload().single("warrantyImage")  , addDealerComplaint);
  
 // router.post("/createComplaint",  addComplaint);
