@@ -1,8 +1,10 @@
 const mongoose=require("mongoose");
 
-const productCategorySchema=new mongoose.Schema({
+const subCategorySchema=new mongoose.Schema({
       categoryName:{type:String,required:true},
-      // categoryId:{type:String },
+      categoryId:{type:String },
+      subCategoryName:{type:String,required:true},
+    //   subCategoryId:{type:String },
       userId:{type:String },
       userName:{type:String },
       adminId:{type:String },
@@ -12,5 +14,5 @@ const productCategorySchema=new mongoose.Schema({
 
 },{timestamps:true});
 
-const ProductCategoryModel=new mongoose.model("ProductCategory",productCategorySchema);
-module.exports=ProductCategoryModel;
+const SubCategoryModel=new mongoose.model("SubCategory",subCategorySchema);
+module.exports=SubCategoryModel;
