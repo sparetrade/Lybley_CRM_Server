@@ -21,6 +21,15 @@ const getAllSubCategory=async(req,res)=>{
         res.status(400).send(err);
      }
 }
+const getSubCategoryByCateId=async(req,res)=>{
+   try{
+      let _id=req.params.id;
+       let data=await SubCategoryModal.find({categoryId:_id}).sort({ _id: -1 });
+       res.send(data);
+    }catch(err){
+       res.status(400).send(err);
+    }
+}
 const getSubCategoryById=async(req,res)=>{
     try{
         let _id=req.params.id;
@@ -51,4 +60,4 @@ const editSubCategory=async (req,res)=>{
      }
  }
 
-module.exports = { addSubCategory,getAllSubCategory,getSubCategoryById,editSubCategory,deleteSubCategory };
+module.exports = { addSubCategory,getAllSubCategory,getSubCategoryByCateId,getSubCategoryById,editSubCategory,deleteSubCategory };
