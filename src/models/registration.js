@@ -311,7 +311,7 @@ const userRegistrationSchema = new mongoose.Schema({
     ,
     acceptedTerms: {
       type: Boolean,
-      required: true,
+      
     },
     otp: { type: Number }
 },

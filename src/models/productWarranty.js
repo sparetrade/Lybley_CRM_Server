@@ -30,13 +30,15 @@ const productWarrantySchema=new mongoose.Schema({
       categoryId: { type: String },
        productId: { type: String },
        
-      uniqueId:{type: String,
-        default: () => generateAlphanumericId(6),
-        unique: true},
+      uniqueId:{type: String},
       year: {type:Date},
       batchNo: { type: String },
       warrantyInDays: Number,
       qrCodes: [{ qrCodeUrl: { type: String }, index: Number }],
+      userId: String,  
+      complaintId: String,  
+      isActivated: { type: Boolean, default: false },  
+      activationDate: Date,
     }],
  
 },{timestamps:true})

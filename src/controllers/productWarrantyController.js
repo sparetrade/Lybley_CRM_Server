@@ -1,13 +1,33 @@
 const ProductWarrantyModal =require("../models/productWarranty")
+const {UserModel } = require('../models/registration');
 const QRCode = require('qrcode');
 const mongoose = require('mongoose');
- 
+
+
+const generateUniqueId = async () => {
+  let isUnique = false;
+  let uniqueId;
+
+  while (!isUnique) {
+    uniqueId = Math.floor(100000 + Math.random() * 900000).toString(); // Generates a 6-digit number
+
+    // Check if this uniqueId already exists in the database
+    const existingRecord = await ProductWarrantyModal.findOne({ productId: uniqueId });
+
+    if (!existingRecord) {
+      isUnique = true;
+    }
+  }
+
+  return uniqueId;
+};
+
    
 const addProductWarranty = async (req, res) => {
     try {
       const { 
         productName, productId, categoryId,  categoryName, 
-          year, numberOfGenerate, batchNo, warrantyInDays, brandName, brandId 
+          year, numberOfGenerate, batchNo, warrantyInDays, brandName, brandId , 
       } = req.body;
 //   console.log(req.body);
   
@@ -21,13 +41,13 @@ const addProductWarranty = async (req, res) => {
       // Generate multiple records with unique QR codes
       const records = [];
       for (let i = 0; i < numberOfRecords; i++) {
-        const uniqueId = `${productId}-${i + 1}`;  
+        const uniqueId = await generateUniqueId();  
         const qrCodeData = uniqueId;
   
         try {
            
         //   const qrCodeUrl1 = `https://crm.servsy.in/warranty?productId=${productId}&uniqueId=${uniqueId}`;
-          const qrCodeUrl1 = `https://crm.servsy.in`;
+          const qrCodeUrl1 = `https://crm.servsy.in/warrantyActivation?uniqueId=${uniqueId}`;
 
           // Generate QR code with the URL
         //   const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl);
@@ -41,7 +61,7 @@ const addProductWarranty = async (req, res) => {
             categoryId,
            
             brandId,brandName,categoryName,
-            
+            uniqueId,
             year,
             batchNo,
             warrantyInDays,
@@ -97,6 +117,68 @@ const addProductWarranty = async (req, res) => {
       res.status(500).json({ status: false, msg: error.message });
     }
   };
+  const activateWarranty = async (req, res) => {
+    try {
+      const { name, contact, email, address, password, uniqueId } = req.body;
+  
+      if (!name || !contact || !email || !address || !password || !uniqueId) {
+        return res.status(400).json({ status: false, msg: 'Missing required fields' });
+      }
+  
+      // Check if the user already exists
+      let user = await UserModel.findOne({ email });
+      if (!user) {
+        // Hash the password and create a new user
+        
+        user = new UserModel({
+          name,
+          contact,
+          email,
+          address,
+          password ,
+        });
+        await user.save();
+      }
+  
+      // Find the warranty record based on the unique ID
+      const warranty = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
+      if (!warranty) {
+        return res.status(404).json({ status: false, msg: 'Warranty not found' });
+      }
+  
+      // Find the specific record with the matching uniqueId
+      const record = warranty.records.find(record => record.uniqueId === uniqueId);
+      if (!record) {
+        return res.status(404).json({ status: false, msg: 'Warranty record not found' });
+      }
+  
+      // Check if the warranty has already been activated
+      if (record.isActivated) {
+        return res.status(400).json({ status: false, msg: 'This warranty has already been activated' });
+      }
+  
+      // Activate the warranty
+      record.isActivated = true;
+      record.userId = user._id; // Link the warranty to the user
+      record.activationDate = new Date();
+  
+      // Save the updated warranty
+      await warranty.save();
+  
+      res.status(200).json({
+        status: true,
+        msg: 'Warranty activated successfully',
+        data: record, // Return only the activated record
+      });
+    } catch (error) {
+      res.status(500).json({ status: false, msg: error.message });
+    }
+   
+  
+   
+  };
+  
+   
   
 
 const getAllProductWarranty=async(req,res)=>{
@@ -137,4 +219,4 @@ const editProductWarranty=async (req,res)=>{
      }
  }
 
-module.exports = { addProductWarranty,getAllProductWarranty,getProductWarrantyById,editProductWarranty,deleteProductWarranty };
+module.exports = { addProductWarranty,activateWarranty,getAllProductWarranty,getProductWarrantyById,editProductWarranty,deleteProductWarranty };
