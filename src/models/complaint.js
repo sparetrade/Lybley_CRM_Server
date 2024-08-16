@@ -28,6 +28,7 @@ const complaintSchema = new mongoose.Schema({
   // },{timestamps:true})
   productName: { type: String },
   categoryName: { type: String },
+  subCategoryName:{ type: String },
   productBrand: { type: String },
   productId: { type: String },
   categoryId: { type: String },
