@@ -111,10 +111,18 @@ const shipyariOrder = require("./src/routers/shipyariOrder");
 app.use(express.json());
 
 app.use(cors({
-    origin: '*', // Allow all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'] // Specify allowed headers
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle OPTIONS requests globally
+app.options('*', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.sendStatus(204); // No content, but successfully handled
+});
 
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
