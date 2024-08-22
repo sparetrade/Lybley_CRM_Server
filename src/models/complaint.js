@@ -36,6 +36,8 @@ const complaintSchema = new mongoose.Schema({
   modelNo: { type: String },
   serialNo: { type: String },
   purchaseDate: { type: Date },
+  lat: { type: String  },
+  long: { type: String  },
   warrantyStatus: { type: String },
   warrantyYears: { type: String },
   priorityLevel: { type: String },
