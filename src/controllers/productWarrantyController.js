@@ -198,6 +198,27 @@ const getProductWarrantyById=async(req,res)=>{
         res.status(400).send(err);
      }
 }
+const getProductWarrantyByUniqueId = async (req, res) => {
+  try {
+    const uniqueId = req.params.id;   
+    // console.log("Searching for uniqueId:", uniqueId);
+    
+    // Search for a document where the `uniqueId` exists in the `records` array
+    const data = await ProductWarrantyModal.findOne({ 
+      'records.uniqueId': uniqueId 
+    });  
+    
+    if (!data) {
+      return res.status(404).send({ message: "Product warranty not found" });
+    }
+
+    res.send(data);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(400).send({ error: err.message });
+  }
+};
+
 
 const editProductWarranty=async (req,res)=>{
     try{
@@ -219,4 +240,4 @@ const editProductWarranty=async (req,res)=>{
      }
  }
 
-module.exports = { addProductWarranty,activateWarranty,getAllProductWarranty,getProductWarrantyById,editProductWarranty,deleteProductWarranty };
+module.exports = { addProductWarranty,activateWarranty,getAllProductWarranty,getProductWarrantyByUniqueId,getProductWarrantyById,editProductWarranty,deleteProductWarranty };
