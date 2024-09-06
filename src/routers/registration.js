@@ -1,11 +1,15 @@
 const express=require("express");
 const router = express.Router();
+const { upload} = require("../services/service");
+
 const {getProfileById,adminLoginController,brandRegistration,serviceRegistration,empolyeeRegistration,dealerRegistration, adminRegistration,userRegistration,
   getAllBrand,getBrandById,editBrand,deleteBrand,getAllServiceCenter,getServiceCenterById,editServiceCenter,deleteServiceCenter,
 getAllEmployee,getEmployeeById,editEmployee,deleteEmployee ,getAllDealer,getDealerById,editDealer,deleteDealer,getAllUser,
 getUserById,editUser,deleteUser,otpVerification,otpVerificationSending,forgetPassword,mobileEmailVerification,
 otpSending}=require("../controllers/registrationController")
 const RegistrationModel=require("../models/registration");
+const {BrandRegistrationModel}=require("../models/registration");
+
 
  
 router.post("/registration", adminRegistration
@@ -76,7 +80,18 @@ router.patch("/editBrandBy/:id",async(req,res)=>{
     res.status(500).send(err);
   }
 });
-
+router.patch("/uploadBrandLogo/:id", upload().single("brandLogo"), async (req, res) => {
+  try {
+      let _id = req.params.id;
+      let obj = await BrandRegistrationModel.findById(_id);
+      obj.images = req.file.location;
+      
+      let obj1 = await BrandRegistrationModel.findByIdAndUpdate(_id, { brandLogo: obj.images }, { new: true });
+      res.json({ status: true, msg: "Logo Uploaded Successfully", data: obj1 });
+  } catch (err) {
+      res.status(500).send(err);
+  }
+});
  
 router.delete("/deleteBrandBy/:id",async(req,res)=>{
   try{
