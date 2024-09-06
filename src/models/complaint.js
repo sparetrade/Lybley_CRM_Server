@@ -26,6 +26,7 @@ const complaintSchema = new mongoose.Schema({
   //     complaintType:{type:String },
   //     status:{type:String,default:"PENDIND"}
   // },{timestamps:true})
+  complaintId: { type: String },
   productName: { type: String },
   categoryName: { type: String },
   subCategoryName:{ type: String },
@@ -35,6 +36,7 @@ const complaintSchema = new mongoose.Schema({
   brandId: { type: String },
   modelNo: { type: String },
   serialNo: { type: String },
+  uniqueId: { type: String },
   purchaseDate: { type: Date },
   lat: { type: String  },
   long: { type: String  },
@@ -82,6 +84,36 @@ const complaintSchema = new mongoose.Schema({
   payment: { type: Number, default: 0 },
   statusComment: { type: String }
 }, { timestamps: true });
+
+
+complaintSchema.pre('save', function (next) {
+  const complaint = this;
+
+  // Add debug logging to check if the middleware is triggered
+  // console.log("Running pre-save middleware for complaintId generation");
+
+  // Ensure both productBrand and productName are defined before generating complaintId
+  if (!complaint.complaintId) {
+    const brandPart = complaint.productBrand ? complaint.productBrand.slice(0, 2).toUpperCase() : "XX"; // Default to 'XX' if undefined
+    const date = new Date();
+    const dayPart = date.getDate().toString().padStart(2, '0'); // Day in 2 digits
+    const monthPart = (date.getMonth() + 1).toString().padStart(2, '0'); // Month in 2 digits
+    const productPart = complaint.productName ? complaint.productName.slice(0, 2).toUpperCase() : "YY"; // Default to 'YY' if undefined
+
+    // Generate complaintId (Example: BR0409PR or XX0409YY if productBrand or productName is missing)
+    complaint.complaintId = `${brandPart}${dayPart}${monthPart}${productPart}`;
+
+    // Log the generated complaintId
+    // console.log("Generated complaintId:", complaint.complaintId);
+  } else {
+    console.log("complaintId already exists:", complaint.complaintId);
+  }
+
+  next();
+});
+
+
+
 
 const ComplaintModal = new mongoose.model("Complaints", complaintSchema)
 

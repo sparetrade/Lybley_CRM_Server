@@ -88,6 +88,9 @@ const bradRegistrationSchema = new mongoose.Schema({
         type: Boolean,
         // required: true
       },
+      brandLogo: {
+        type: String
+      },
       role: { type: String, default: "BRAND" },
       verification: { type: String, default: "VERIFIED" }
       , otp: { type: Number },

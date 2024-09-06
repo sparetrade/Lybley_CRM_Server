@@ -119,7 +119,7 @@ const addProductWarranty = async (req, res) => {
   };
   const activateWarranty = async (req, res) => {
     try {
-      const { name, contact, email, address, password, uniqueId } = req.body;
+      const { name, contact, email, address,lat,long,pincode , password, uniqueId } = req.body;
   
       if (!name || !contact || !email || !address || !password || !uniqueId) {
         return res.status(400).json({ status: false, msg: 'Missing required fields' });
@@ -136,6 +136,7 @@ const addProductWarranty = async (req, res) => {
           email,
           address,
           password ,
+          lat,long,pincode 
         });
         await user.save();
       }
@@ -156,10 +157,16 @@ const addProductWarranty = async (req, res) => {
       if (record.isActivated) {
         return res.status(400).json({ status: false, msg: 'This warranty has already been activated' });
       }
-  
+      lat,long,pincode ,
       // Activate the warranty
       record.isActivated = true;
-      record.userId = user._id; // Link the warranty to the user
+      record.userName =name;  
+      record.email = email;  
+      record.contact = contact;  
+      record.address = address;  
+      record.lat = lat;  
+      record.long = long;  
+      record.pincode = pincode;  
       record.activationDate = new Date();
   
       // Save the updated warranty
