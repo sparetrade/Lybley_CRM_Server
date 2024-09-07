@@ -43,6 +43,8 @@ const productWarrantySchema=new mongoose.Schema({
       lat: String,  
       long: String,  
       pincode: String,  
+      district: String,  
+      state: String,  
       complaintId: String,  
       isActivated: { type: Boolean, default: false },  
       activationDate: Date,

@@ -119,7 +119,7 @@ const addProductWarranty = async (req, res) => {
   };
   const activateWarranty = async (req, res) => {
     try {
-      const { name, contact, email, address,lat,long,pincode , password, uniqueId } = req.body;
+      const { name, contact, email, address,lat,long,pincode ,district,state, password, uniqueId } = req.body;
   
       if (!name || !contact || !email || !address || !password || !uniqueId) {
         return res.status(400).json({ status: false, msg: 'Missing required fields' });
@@ -166,6 +166,8 @@ const addProductWarranty = async (req, res) => {
       record.address = address;  
       record.lat = lat;  
       record.long = long;  
+      record.district = district;  
+      record.state = state;  
       record.pincode = pincode;  
       record.activationDate = new Date();
   
