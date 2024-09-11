@@ -10,6 +10,7 @@ const subCategorySchema=new mongoose.Schema({
       adminId:{type:String },
       brandId:{type:String },
       brandName:{type:String },
+      payout:{type:String },
       status:{type:String ,default:"ACTIVE"}
 
 },{timestamps:true});
