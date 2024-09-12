@@ -9,6 +9,7 @@ getUserById,editUser,deleteUser,otpVerification,otpVerificationSending,forgetPas
 otpSending}=require("../controllers/registrationController")
 const RegistrationModel=require("../models/registration");
 const {BrandRegistrationModel}=require("../models/registration");
+const {ServiceModel}=require("../models/registration");
 
 
  
@@ -92,7 +93,42 @@ router.patch("/uploadBrandLogo/:id", upload().single("brandLogo"), async (req, r
       res.status(500).send(err);
   }
 });
- 
+router.patch("/uploadCenterGstCertificate/:id", upload().single("gstCertificate"), async (req, res) => {
+  try {
+      let _id = req.params.id;
+      let obj = await ServiceModel.findById(_id);
+      obj.images = req.file.location;
+      
+      let obj1 = await ServiceModel.findByIdAndUpdate(_id, { gstCertificate: obj.images }, { new: true });
+      res.json({ status: true, msg: "Gst Certificate Uploaded Successfully", data: obj1 });
+  } catch (err) {
+      res.status(500).send(err);
+  }
+});
+router.patch("/uploadCenterIdentityProof/:id", upload().single("identityProof"), async (req, res) => {
+  try {
+      let _id = req.params.id;
+      let obj = await ServiceModel.findById(_id);
+      obj.images = req.file.location;
+      
+      let obj1 = await ServiceModel.findByIdAndUpdate(_id, { identityProof: obj.images }, { new: true });
+      res.json({ status: true, msg: "Identity Proof Uploaded Successfully", data: obj1 });
+  } catch (err) {
+      res.status(500).send(err);
+  }
+});
+router.patch("/uploadCenterCertificationDocuments/:id", upload().single("certificationDocuments"), async (req, res) => {
+  try {
+      let _id = req.params.id;
+      let obj = await ServiceModel.findById(_id);
+      obj.images = req.file.location;
+      
+      let obj1 = await ServiceModel.findByIdAndUpdate(_id, { certificationDocuments: obj.images }, { new: true });
+      res.json({ status: true, msg: "Certification Documents Uploaded Successfully", data: obj1 });
+  } catch (err) {
+      res.status(500).send(err);
+  }
+});
 router.delete("/deleteBrandBy/:id",async(req,res)=>{
   try{
     let _id=req.params.id; 
