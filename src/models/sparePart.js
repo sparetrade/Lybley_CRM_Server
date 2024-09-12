@@ -18,6 +18,12 @@ const sparePartSchema=new mongoose.Schema({
   partName:{type:String    },
   category:{type:String    },
   productModel:{type:String    },
+  products: [
+    {
+      productName:{type:String },
+      productId:{type:String },
+    },
+  ],
   partNo:{type:String    },
   faultType:{type:Array},
   technician:{type:Number},

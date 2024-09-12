@@ -221,15 +221,15 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // businessLicense: {
-    //     type: String  
-    // },
-    // taxDocument: {
-    //     type: String  
-    // },
-    // certificationDocuments: {
-    //     type: String  
-    // },
+    gstCertificate: {
+        type: String  
+    },
+    identityProof: {
+        type: String  
+    },
+    certificationDocuments: {
+        type: String  
+    },
     agreement: {
         type: Boolean,
         required: true
