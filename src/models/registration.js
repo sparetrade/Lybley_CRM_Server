@@ -27,6 +27,8 @@ const bradRegistrationSchema = new mongoose.Schema({
         type: String,
         required: true
       },
+
+      serviceCategories:{type:Array},
       contactPersonName: {
         type: String,
         required: true
@@ -78,7 +80,7 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       companySize: {
         type: String,
-        required: true
+        // required: true
       },
       termsAndConditions: {
         type: Boolean,
@@ -181,17 +183,14 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    serviceCategories: {
-        type: [String],
-        required: true
-    },
+    serviceCategories:{type:Array},
     brandsSupported: {
         type: [String],
-        required: true
+        // required: true
     },
     technicianCertifications: {
         type: String,
-        required: true
+        // required: true
     },
     operatingHours: {
         type: String,
