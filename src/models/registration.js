@@ -184,9 +184,9 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
         required: true
     },
     serviceCategories:{type:Array},
-    brandsSupported: {
+    pincodeSupported: {
         type: [String],
-        // required: true
+        
     },
     technicianCertifications: {
         type: String,
