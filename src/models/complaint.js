@@ -64,7 +64,12 @@ const complaintSchema = new mongoose.Schema({
   technicianContact: { type: String },
   comments: { type: String },
   // images: { type: String }, 
-  issueType: { type: String },
+  // issueType: { type: String }, 
+  issueType: {
+    type: Array
+   
+},
+  
   detailedDescription: { type: String },
   issueImages: { type: String },
   warrantyImage: { type: String },
