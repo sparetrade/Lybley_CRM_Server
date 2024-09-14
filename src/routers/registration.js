@@ -129,6 +129,37 @@ router.patch("/uploadCenterCertificationDocuments/:id", upload().single("certifi
       res.status(500).send(err);
   }
 });
+
+router.patch('/updateServiceCenterpincode/:id', async (req, res) => {
+  try {
+    const { pincodes } = req.body;
+    const { id } = req.params;
+
+    if (!pincodes) {
+      return res.json({ status:true,msg: 'Pincode is required' });
+    }
+
+    // Find service center by ID and update
+    const updatedServiceCenter = await ServiceModel.findByIdAndUpdate(
+      id,
+      { $push: { pincodeSupported: pincodes } },  // Push pincode to the array
+      { new: true, useFindAndModify: false }
+    );
+
+    if (!updatedServiceCenter) {
+      return res.json({ status:true,msg: 'Service Center not found' });
+    }
+
+    res.json({status:true,msg: 'Pincode added successfully', data: updatedServiceCenter });
+  } catch (error) {
+    res.status(500).json({status:false,msg: 'Server error', error });
+  }
+});
+
+
+
+
+
 router.delete("/deleteBrandBy/:id",async(req,res)=>{
   try{
     let _id=req.params.id; 
