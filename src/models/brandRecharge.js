@@ -4,6 +4,7 @@ const brandRechargeSchema=new mongoose.Schema({
     brandId:{type:String},
     brandName:{type:String},
      amount:{type:String},
+     description:{type:String},
 },{timestamps:true})
 
 const BrandRechargeModel=new mongoose.model("brandRecharge",brandRechargeSchema);
