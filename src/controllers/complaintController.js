@@ -1,7 +1,8 @@
 const ComplaintModal = require("../models/complaint")
 const NotificationModel = require("../models/notification")
 const { ServiceModel } = require("../models/registration")
-
+const SubCategoryModal = require("../models/subCategory")
+const BrandRechargeModel = require("../models/brandRecharge")
 // const addComplaint = async (req, res) => {
 //    try {
 //       let body = req.body;
@@ -414,7 +415,21 @@ const editComplaint = async (req, res) => {
          });
          await notification.save();
       }
+      if (body.status === "COMPLETED") {
+         // let subCatData = await SubCategoryModal.findById({categoryId:data.categoryId});
+         let subCatData = await SubCategoryModal.findOne({ categoryId: data.categoryId });
+         
+         if (subCatData) {
 
+            const brandTrans = new BrandRechargeModel({
+               brandId: data.brandId,
+               brandName: data.productBrand,
+               amount: -subCatData.payout,
+               description: "Complaint Close  Payout"
+            });
+            await brandTrans.save();
+         }
+      }
       res.json({ status: true, msg: "Complaint Updated" });
    } catch (err) {
       res.status(500).send(err);
