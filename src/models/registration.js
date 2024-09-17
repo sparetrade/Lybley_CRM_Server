@@ -105,6 +105,8 @@ const bradRegistrationSchema = new mongoose.Schema({
         name:{type:String,required:true},
         contact:{type:String,required:true},
         serviceName:{type:String },
+        serviceCenterName:{type:String },
+        serviceCenterId:{type:String },
         email:{type:String,required:true},
         password:{type:String },
         image:{type:String },
