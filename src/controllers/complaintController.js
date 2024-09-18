@@ -3,6 +3,7 @@ const NotificationModel = require("../models/notification")
 const { ServiceModel } = require("../models/registration")
 const SubCategoryModal = require("../models/subCategory")
 const BrandRechargeModel = require("../models/brandRecharge")
+const WalletModel = require("../models/wallet")
 // const addComplaint = async (req, res) => {
 //    try {
 //       let body = req.body;
@@ -418,7 +419,7 @@ const editComplaint = async (req, res) => {
       if (body.status === "COMPLETED") {
          // let subCatData = await SubCategoryModal.findById({categoryId:data.categoryId});
          let subCatData = await SubCategoryModal.findOne({ categoryId: data.categoryId });
-         
+
          if (subCatData) {
 
             const brandTrans = new BrandRechargeModel({
@@ -428,7 +429,40 @@ const editComplaint = async (req, res) => {
                description: "Complaint Close  Payout"
             });
             await brandTrans.save();
+            const serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: data.assignServiceCenterId }).exec();
+
+            if (!serviceCenterWallet) {
+               // Handle case where wallet is not found
+               console.error('Wallet not found for service center:', );
+               // return;
+               return res.json({ status: true, msg: "Complaint Updated" });
+            }
+   
+            serviceCenterWallet.totalCommission = (parseInt(serviceCenterWallet.totalCommission || 0) + parseInt(subCatData.payout));
+            serviceCenterWallet.dueAmount = (parseInt(serviceCenterWallet.dueAmount || 0) + parseInt(subCatData.payout));
+            await serviceCenterWallet.save();
+
+
+            const dealerWallet = await WalletModel.findOne({ serviceCenterId: data.dealerId }).exec();
+
+            if (!dealerWallet) {
+               // Handle case where wallet is not found
+               console.error('Wallet not found for dealer:',  );
+               return res.json({ status: true, msg: "Complaint Updated" });
+            }
+   
+            const payout = parseInt(subCatData.payout);
+
+            // If dealerId is present, add 20% of payout, else add full payout
+            const commissionToAdd = data.dealerId ? payout * 0.2 : payout;
+            
+            // Update service center's total commission and due amount
+            dealerWallet.totalCommission = (parseInt(dealerWallet.totalCommission || 0) + commissionToAdd);
+            dealerWallet.dueAmount = (parseInt(dealerWallet.dueAmount || 0) + commissionToAdd);
+            
+            await dealerWallet.save();
          }
+        
       }
       res.json({ status: true, msg: "Complaint Updated" });
    } catch (err) {
