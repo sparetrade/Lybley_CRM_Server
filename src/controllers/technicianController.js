@@ -6,6 +6,13 @@ const addTechnician = async (req, res) => {
 
     try {
         let body = req.body;
+        const { email } = req.body;
+        const existingTech = await TechnicianModal.findOne({ email });
+
+        if (existingTech) {
+            return res.status(400).json({ status: false, msg: "Email already registered" });
+        }
+
         let data=new TechnicianModal(body);
         await data.save();
         const notification = new NotificationModel({
