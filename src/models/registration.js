@@ -116,6 +116,7 @@ const bradRegistrationSchema = new mongoose.Schema({
         lat: { type: String  },
         long: { type: String  },
         skill:{type:String },
+        type:{type:String },
         liveStatus:{type:String,default:"AVAILABLE"},
         role: { type: String, default: "TECHNICIAN" },
         verification: { type: String, default: "VERIFIED" }
