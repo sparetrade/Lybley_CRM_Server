@@ -5,9 +5,10 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
 const NotificationModel = require("../models/notification")
-const { UserModel } = require("../models/registration")
+const { UserModel,BrandRegistrationModel } = require("../models/registration")
 const ComplaintModal = require("../models/complaint")
 const BankTransactionModel = require("../models/bankTransaction");
+const  BrandRechargeModel = require("../models/brandRecharge")
 const WalletModel = require("../models/wallet")
 
 const fs = require("fs");
@@ -77,7 +78,42 @@ router.post("/paymentVerificationForUser", async (req, res) => {
     res.status(401).send("Not Authorized");
   }
 });
+router.post("/paymentVerificationForBrand", async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body.response;
+  // console.log(req.body.response,"req.body");
+  
 
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest("hex");
+
+  const isAuthentic = expectedSignature === razorpay_signature;
+
+// console.log(isAuthentic);
+
+  if (isAuthentic) {
+    try {
+      let brand = await BrandRegistrationModel.findById(req.body.userD);
+// console.log(brand);
+
+      const notification = new NotificationModel({
+        brandId: brand._id,
+        userName: brand.brandName,
+        title: `Brand Payment`,
+        message: `Payment Successfully  , ${req.body.amount} INR!`,
+      });
+      await notification.save();
+    
+      let recharge = new BrandRechargeModel({ brandId: brand?._id, brandName: brand?.brandName, amount: req.body.amount ,description:"Recharge Added"});
+      await recharge.save();
+       
+      res.json({ status: true, msg: "Payment Successfull" });
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  } else {
+    res.status(401).send("Not Authorized");
+  }
+});
 
 router.get("/getAllWalletTransaction", async (req, res) => {
   try {
