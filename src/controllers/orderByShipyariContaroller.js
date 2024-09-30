@@ -56,7 +56,7 @@ const UserStockModel = require("../models/userStock")
 //   "message": "Seller Signed In Successfully."
 // }
 const SHIPYARI_API_BASE_URL = 'https://api-seller.shipyaari.com/api/v1'; // Replace with the actual base URL
-const SHIPYARI_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imx5YmxleUBnbWFpbC5jb20iLCJzZWxsZXJJZCI6MTMyMTI1LCJjb21wYW55SWQiOiIwMGE4ZGQ2Zi05YTcwLTQ5N2UtYjdiZC0yYzE0OTUyMWZkYWQiLCJwcml2YXRlQ29tcGFueUlkIjoxMzA3NzYsImlhdCI6MTcyMjY2NTk5MCwiZXhwIjoxNzIzMjcwNzkwfQ.xkZp9QlQO_vYF0JYNYvCVkN2rhw2hDvZ9JEpGTQlCTA'; // Replace with your Shipyari API key
+const SHIPYARI_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imx5YmxleUBnbWFpbC5jb20iLCJzZWxsZXJJZCI6MTMyMTI1LCJjb21wYW55SWQiOiIwMGE4ZGQ2Zi05YTcwLTQ5N2UtYjdiZC0yYzE0OTUyMWZkYWQiLCJwcml2YXRlQ29tcGFueUlkIjoxMzA3NzYsImlhdCI6MTcyNzY4NDgwOCwiZXhwIjoxNzI4Mjg5NjA4fQ.QGTuhsif08FmDwYLrkP0Z0gFecFbVzFuGzOPJkyeo60'; // Replace with your Shipyari API key
 
 const shipyariInstance = axios.create({
   baseURL: SHIPYARI_API_BASE_URL,
