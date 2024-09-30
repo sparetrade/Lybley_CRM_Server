@@ -38,16 +38,58 @@ const getStockById=async(req,res)=>{
      }
 }
 
-const editStock=async (req,res)=>{
-    try{
-        let _id=req.params.id;
-        let body=req.body;
-        let data=await BrandStockModel.findByIdAndUpdate(_id,body);
-        res.json({status:true,msg:"Stock Updated"});
-     }catch(err){
-        res.status(500).send(err);
+// const editStock=async (req,res)=>{
+//     try{
+//         let _id=req.params.id;
+//         let body=req.body;
+//         let data=await BrandStockModel.findByIdAndUpdate(_id,body);
+//         res.json({status:true,msg:"Stock Updated"});
+//      }catch(err){
+//         res.status(500).send(err);
+//      }
+// }
+const editStock = async (req, res) => {
+   try {
+     let _id = req.params.id;
+     let { fresh, title } = req.body;
+ 
+     // Find the BrandStock by ID
+     let brandStock = await BrandStockModel.findById(_id);
+     
+     if (!brandStock) {
+       return res.status(404).json({ status: false, msg: "Brand Stock not found" });
      }
-}
+ 
+     // Create the new stock entry
+     const newStockEntry = {
+       fresh,
+       title,
+       createdAt: Date.now(),
+       updatedAt: Date.now(),
+     };
+ 
+     // Add new stock to the stock array
+     brandStock.stock.push(newStockEntry);
+ 
+     // Parse current freshStock (if it exists) and add the new fresh stock value
+     let currentFreshStock = parseInt(brandStock.freshStock || '0', 10);
+     let newFreshValue = parseInt(fresh || '0', 10);
+     let updatedFreshStock = currentFreshStock + newFreshValue;
+ 
+     // Update the freshStock field with the cumulative total
+     brandStock.freshStock = updatedFreshStock.toString();
+ 
+     // Save the updated document
+     await brandStock.save();
+ 
+     res.json({ status: true, msg: "Stock Updated", data: brandStock });
+   } catch (err) {
+     res.status(500).send(err);
+   }
+ };
+ 
+ 
+ 
  const deleteStock=async(req,res)=>{
     try{
         let _id=req.params.id;
