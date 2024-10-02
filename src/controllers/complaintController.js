@@ -35,8 +35,15 @@ const addComplaint = async (req, res) => {
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
-         serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
-      } else if (city) {
+         // serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
+         serviceCenter = await ServiceModel.findOne({
+            $or: [
+               { postalCode: pincode },
+               { pincodeSupported: { $in: [pincode] } }
+            ]
+         });
+      }
+       else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
       // console.log(serviceCenter);
@@ -111,7 +118,13 @@ const addAPPComplaint = async (req, res) => {
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
-         serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
+         serviceCenter = await ServiceModel.findOne({
+            $or: [
+               { postalCode: pincode },
+               { pincodeSupported: { $in: [pincode] } }
+            ]
+         });
+      
       } else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
@@ -206,7 +219,14 @@ const addDealerComplaint = async (req, res) => {
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
-         serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
+         // serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
+         serviceCenter = await ServiceModel.findOne({
+            $or: [
+               { postalCode: pincode },
+               { pincodeSupported: { $in: [pincode] } }
+            ]
+         });
+      
       } else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
