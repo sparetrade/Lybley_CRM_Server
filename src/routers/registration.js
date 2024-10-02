@@ -130,29 +130,62 @@ router.patch("/uploadCenterCertificationDocuments/:id", upload().single("certifi
   }
 });
 
+// router.patch('/updateServiceCenterpincode/:id', async (req, res) => {
+//   try {
+//     const { pincodes } = req.body;
+//     const { id } = req.params;
+
+//     if (!pincodes) {
+//       return res.json({ status:true,msg: 'Pincode is required' });
+//     }
+
+//     // Find service center by ID and update
+//     const updatedServiceCenter = await ServiceModel.findByIdAndUpdate(
+//       id,
+//       { $push: { pincodeSupported: pincodes } },  // Push pincode to the array
+//       { new: true, useFindAndModify: false }
+//     );
+
+//     if (!updatedServiceCenter) {
+//       return res.json({ status:true,msg: 'Service Center not found' });
+//     }
+
+//     res.json({status:true,msg: 'Pincode added successfully', data: updatedServiceCenter });
+//   } catch (error) {
+//     res.status(500).json({status:false,msg: 'Server error', error });
+//   }
+// });
+
 router.patch('/updateServiceCenterpincode/:id', async (req, res) => {
   try {
-    const { pincodes } = req.body;
+    let { pincodes } = req.body; // Expecting a comma-separated string of pincodes
     const { id } = req.params;
 
-    if (!pincodes) {
-      return res.json({ status:true,msg: 'Pincode is required' });
+    if (!pincodes || typeof pincodes !== 'string') {
+      return res.json({ status: false, msg: 'Pincode is required and should be a comma-separated string' });
     }
 
-    // Find service center by ID and update
+    // Convert the comma-separated string into an array of 6-digit pincodes
+    const pincodeArray = pincodes.split(',').map(pincode => pincode.trim()).filter(pincode => pincode.length === 6);
+
+    if (pincodeArray.length === 0) {
+      return res.json({ status: false, msg: 'No valid 6-digit pincodes found' });
+    }
+
+    // Add the array of pincodes to the pincodeSupported field in the Service Center
     const updatedServiceCenter = await ServiceModel.findByIdAndUpdate(
       id,
-      { $push: { pincodeSupported: pincodes } },  // Push pincode to the array
+      { $addToSet: { pincodeSupported: { $each: pincodeArray } } },  // $addToSet with $each to insert array at once
       { new: true, useFindAndModify: false }
     );
 
     if (!updatedServiceCenter) {
-      return res.json({ status:true,msg: 'Service Center not found' });
+      return res.json({ status: false, msg: 'Service Center not found' });
     }
 
-    res.json({status:true,msg: 'Pincode added successfully', data: updatedServiceCenter });
+    res.json({ status: true, msg: 'Pincodes added successfully', data: updatedServiceCenter });
   } catch (error) {
-    res.status(500).json({status:false,msg: 'Server error', error });
+    res.status(500).json({ status: false, msg: 'Server error', error });
   }
 });
 
