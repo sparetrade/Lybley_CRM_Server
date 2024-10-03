@@ -13,6 +13,7 @@ router.post('/shipping-rates', async (req, res) => {
 });
 
 router.post('/create-shipment', shipyariService.createShipment);
+router.post('/create-center-shipment', shipyariService.createServiceShipment);
 router.post('/create-defective-shipment', shipyariService.createDefectiveShipment);
 router.post("/fetchManifest",shipyariService.fetchManifest);
 router.post("/fetchLabels",shipyariService.fetchLabels);

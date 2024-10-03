@@ -68,6 +68,9 @@ const OrderSchema = mongoose.Schema({
     // },
  
     status: { type: String, default: "ORDER" },
+    comments: {
+        type: String
+    },
     brandApproval: { type: String, default: "APPROVED" }
 
 }, { timestamps: true });
