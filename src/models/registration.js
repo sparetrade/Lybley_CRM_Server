@@ -9,7 +9,7 @@ const adminRegistrationSchema = new mongoose.Schema({
     role: { type: String, default: "ADMIN" },
 },
     { timestamps: true });
-
+  
 const bradRegistrationSchema = new mongoose.Schema({
     brandName: {
         type: String,
@@ -19,10 +19,11 @@ const bradRegistrationSchema = new mongoose.Schema({
         type: String,
         // required: true
       },
-      brandID: {
+      brandId: {
         type: String,
         required: true
       },
+
       brandDescription: {
         type: String,
         required: true
@@ -93,6 +94,9 @@ const bradRegistrationSchema = new mongoose.Schema({
       brandLogo: {
         type: String
       },
+      brandSaas: {
+        type: String
+      },
       role: { type: String, default: "BRAND" },
       verification: { type: String, default: "VERIFIED" }
       , otp: { type: Number },
@@ -101,7 +105,8 @@ const bradRegistrationSchema = new mongoose.Schema({
     }, { timestamps: true });
  
     const technicianSchema=new mongoose.Schema({
- 
+      brandName: { type: String},
+      brandId: { type: String},
         name:{type:String,required:true},
         contact:{type:String,required:true},
         serviceName:{type:String },
@@ -133,29 +138,31 @@ const bradRegistrationSchema = new mongoose.Schema({
 
 
 const serviceCenterRegistrationSchema = new mongoose.Schema({
+  brandName: { type: String},
+  brandId: { type: String},
     serviceCenterName: {
         type: String,
-        required: true
+        // required: true
     },
     serviceCenterType: {
         type: String,
-        required: true
+        // required: true
     },
     registrationNumber: {
         type: String,
-        required: true
+        // required: true
     },
     tin: {
         type: String,
-        required: true
+        // required: true
     },
     contactPersonName: {
         type: String,
-        required: true
+        // required: true
     },
     contactPersonPosition: {
         type: String,
-        required: true
+        // required: true
     },
     email: {
         type: String,
@@ -164,27 +171,27 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     },
     contact: {
         type: String,
-        required: true
+        // required: true
     },
     streetAddress: {
         type: String,
-        required: true
+        // required: true
     },
     city: {
         type: String,
-        required: true
+        // required: true
     },
     state: {
         type: String,
-        required: true
+        // required: true
     },
     postalCode: {
         type: String,
-        required: true
+        // required: true
     },
     country: {
         type: String,
-        required: true
+        // required: true
     },
     serviceCategories:{type:Array},
     pincodeSupported: {
@@ -197,23 +204,23 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     },
     operatingHours: {
         type: String,
-        required: true
+        // required: true
     },
     yearsInOperation: {
         type: String,
-        required: true
+        // required: true
     },
     numberOfTechnicians: {
         type: String,
-        required: true
+        // required: true
     },
     averageTurnaroundTime: {
         type: String,
-        required: true
+        // required: true
     },
     insuranceCoverage: {
         type: Boolean,
-        default: false
+        // default: false
     },
     username: {
         type: String,
@@ -234,11 +241,11 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     },
     agreement: {
         type: Boolean,
-        required: true
+        // required: true
     },
     privacyPolicy: {
         type: Boolean,
-        required: true
+        // required: true
     },
 
 
@@ -263,7 +270,8 @@ const employeeRegistrationSchema = new mongoose.Schema({
 
 const dealerRegistrationSchema = new mongoose.Schema({
     name: { type: String, required: true },
-   
+    brandName: { type: String},
+    brandId: { type: String},
     businessAddress: {
       type: String,
       required: true,

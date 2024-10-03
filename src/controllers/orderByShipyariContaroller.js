@@ -297,12 +297,11 @@ const createShipment = async (req, res) => {
     res.status(500).json({ status: false, msg: error?.response?.data?.message || 'Internal Server Error' });
   }
 };
-
-const createDefectiveShipment = async (req, res) => {
+const createServiceShipment = async (req, res) => {
   const data = req.body;
 
-  const pickupPincode = Number(data?.brandPincode);
-  const deliveryPincode = Number(data?.supplierInformation?.pinCode);
+  const pickupPincode = Number(data?.supplierInformation?.pinCode)
+  const deliveryPincode = Number(data?.serviceCenterPincode);
   const weight = Number(data?.weight); // Ensure weight is a number
   const dimension = {
     length: Number(data?.length),  // Ensure dimensions are numbers
@@ -316,19 +315,19 @@ const createDefectiveShipment = async (req, res) => {
 
   const orderData = {
     pickupDetails: {
-      fullAddress: data?.brandAddress,
+      fullAddress: data?.supplierInformation?.address,
       pincode: pickupPincode,
       contact: {
         name: data?.brand,
-        mobileNo: Number(data?.brandContact)
+        mobileNo: Number(data?.supplierInformation?.contact)
       }
     },
     deliveryDetails: {
-      fullAddress: data?.supplierInformation?.address,
+      fullAddress: data?.serviceCenterAddress,
       pincode: deliveryPincode,
       contact: {
         name: data?.serviceCenter,
-        mobileNo: Number(data?.supplierInformation?.contact)
+        mobileNo: Number(data?.serviceContact)
       },
       gstNumber: ''
     },
@@ -422,7 +421,169 @@ const createDefectiveShipment = async (req, res) => {
    
 
       // Deduct the order quantity from the stock
-      sparePart.defectiveStock = parseInt(sparePart.freshStock) + defectiveStock;
+      sparePart.freshStock = parseInt(sparePart.freshStock) - quantity;
+      await sparePart.save();
+
+      // Update the service center stock if serviceCenterId is provided
+      if (serviceCenterId) {
+        const serviceCenterStock = await UserStockModel.findOne({ serviceCenterId: serviceCenterId, sparepartId: sparepartId }).exec();  // Ensure exec() for query execution
+
+        if (serviceCenterStock) {
+          serviceCenterStock.freshStock = parseInt(serviceCenterStock.freshStock) + quantity;
+          await serviceCenterStock.save();
+        } else {
+          await UserStockModel.create({
+            serviceCenterId: serviceCenterId,
+            serviceCenterName: serviceCenter,
+            sparepartId: sparepartId,
+            sparepartName: sparePart.name,
+            freshStock: quantity,
+          });
+        }
+      }
+      let backendOrder = { ...data, shipyariOrder: response?.data }
+      // Create a new order
+      let newOrder = new OrderModel(backendOrder);
+      await newOrder.save();
+
+      // Send response with the shipment and order status
+      res.status(response.status).json({
+        message: response.data.message,
+        orderStatus: { status: true, msg: "Order Added" }
+      });
+    } else {
+      return res.status(400).json({ message: 'Order placement failed' });
+    }
+  } catch (error) {
+    console.error('Error in createShipment:', error);
+    res.status(500).json({ status: false, msg: error?.response?.data?.message || 'Internal Server Error' });
+  }
+};
+const createDefectiveShipment = async (req, res) => {
+  const data = req.body;
+
+  const pickupPincode = Number(data?.serviceCenterPincode);
+  const deliveryPincode = Number(data?.supplierInformation?.pinCode);
+  const weight = Number(data?.weight); // Ensure weight is a number
+  const dimension = {
+    length: Number(data?.length),  // Ensure dimensions are numbers
+    width: Number(data?.breadth),
+    height: Number(data?.height)
+  };
+
+  const orderType = "B2C";
+  const paymentMode = "PREPAID";
+  const invoiceValue = 10;
+
+  const orderData = {
+    pickupDetails: {
+      fullAddress: data?.serviceCenterAddress,
+      pincode: pickupPincode,
+      contact: {
+        name: data?.serviceCenter,
+        mobileNo: Number(data?.serviceContact)
+      }
+    },
+    deliveryDetails: {
+      fullAddress: data?.supplierInformation?.address,
+      pincode: deliveryPincode,
+      contact: {
+        name: data?.serviceCenter,
+        mobileNo: Number(data?.supplierInformation?.contact)
+      },
+      gstNumber: ''
+    },
+    boxInfo: [
+      {
+        name: 'box_1',
+        weightUnit: 'Kg',
+        deadWeight: weight,
+        length: dimension.length,
+        breadth: dimension.width,
+        height: dimension.height,
+        measureUnit: 'cm',
+        products: [
+          {
+            name: data?.partName,
+            category: 'Electronic',
+            sku: 'abc',
+            qty: Number(data?.quantity),
+            unitPrice: Number(data?.bestPrice),
+            unitTax: 180,
+            weightUnit: 'kg',
+            deadWeight: weight,
+            length: dimension.length,
+            breadth: dimension.width,
+            height: dimension.height,
+            measureUnit: 'cm'
+          }
+        ],
+        codInfo: {
+          isCod: false,
+          collectableAmount: 0,
+          invoiceValue: 2000
+        },
+        podInfo: {
+          isPod: false
+        },
+        insurance: false
+      }
+    ],
+    orderType,
+    transit: 'FORWARD',
+    courierPartner: '',
+    source: '',
+    pickupDate: '1711606459000',  // Ensure this is in the correct format expected by the API
+    gstNumber: '',
+    orderId: '',
+    eWayBillNo: '',
+    brandName: 'Google',
+    brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/250px-Google_2015_logo.svg.png'
+  }
+
+  try {
+    // Validate required fields
+    if (!pickupPincode || !deliveryPincode || !invoiceValue || !paymentMode || !weight || !orderType || !dimension) {
+      return res.status(400).json({ status: false, msg: 'All fields are required for shipment' });
+    }
+
+    // Check serviceability
+    const responseAbility = await shipyariInstance.post('order/checkServiceabilityV2', {
+      pickupPincode,
+      deliveryPincode,
+      invoiceValue,
+      paymentMode,
+      weight,
+      orderType,
+      dimension
+    });
+
+    if (!responseAbility.data.success) {
+      return res.status(400).json({ status: false, msg: 'Serviceability check failed' });
+    }
+    let { quantity, sparepartId, serviceCenterId, serviceCenter } = data;
+
+    const sparePart = await BrandStockModel.findOne({ sparepartId: sparepartId }).exec();  // Ensure exec() for query execution
+
+    if (!sparePart) {
+      return res.status(404).json({ status: false, msg: "Spare part not found" });
+    }
+
+    // Check if there is enough stock to fulfill the order
+    // if (parseInt(sparePart.defec) < quantity) {
+    //   return res.json({ status: false, msg: "Insufficient stock" });
+    // }
+    // Place the order
+    const response = await shipyariInstance.post('/order/placeOrderApiV3', orderData);
+    // console.log(response);
+
+    // Check if the placement of the order was successful
+    if (response.data.success) {
+      // Retrieve the spare part to check the stock quantity
+   
+
+      // Deduct the order quantity from the stock
+      sparePart.defectiveStock = parseInt(sparePart.defectiveStock) + quantity;
       await sparePart.save();
 
       // Update the service center stock if serviceCenterId is provided
@@ -623,6 +784,7 @@ const searchAvailability = async (req, res) => {
 module.exports = {
   getShippingRates,
   createShipment,
+  createServiceShipment,
   createDefectiveShipment,
   fetchLabels,
   fetchManifest,
