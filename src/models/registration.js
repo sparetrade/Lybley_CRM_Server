@@ -21,7 +21,7 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       brandId: {
         type: String,
-        required: true
+        // required: true
       },
 
       brandDescription: {
