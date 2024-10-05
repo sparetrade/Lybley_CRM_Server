@@ -274,11 +274,11 @@ const dealerRegistrationSchema = new mongoose.Schema({
     brandId: { type: String},
     businessAddress: {
       type: String,
-      required: true,
+      // required: true,
     },
     contactPerson: {
       type: String,
-      required: true,
+      // required: true,
     },
     email: {
       type: String,
@@ -288,24 +288,24 @@ const dealerRegistrationSchema = new mongoose.Schema({
     },
     contact: {
       type: String,
-      required: true,
+      // required: true,
       // match: [/^\d{10}$/, 'is invalid'], // Assuming phone number is a 10-digit number
     },
     businessRegistrationNumber: {
       type: String,
-      required: true,
+      // required: true,
     },
     gstVatNumber: {
       type: String,
-      required: true,
+      // required: true,
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     acceptedTerms: {
       type: Boolean,
-      required: true,
+      // required: true,
     },
     verification: { type: String, default: "VERIFIED" }
     , otp: { type: Number },
