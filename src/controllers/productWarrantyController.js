@@ -121,7 +121,7 @@ const addProductWarranty = async (req, res) => {
     try {
       const { name, contact, email, address,lat,long,pincode ,district,state, password, uniqueId } = req.body;
   
-      if (!name || !contact || !email || !address || !password || !uniqueId) {
+      if (!name || !contact   || !address  || !uniqueId) {
         return res.status(400).json({ status: false, msg: 'Missing required fields' });
       }
   
