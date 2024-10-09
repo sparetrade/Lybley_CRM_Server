@@ -317,9 +317,9 @@ const dealerRegistrationSchema = new mongoose.Schema({
 
 const userRegistrationSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String  },
     contact: { type: String, required: true },
-    password: { type: String, required: true },
+    password: { type: String  },
     address: { type: String  },
     lat: { type: String  },
     long: { type: String  },
