@@ -50,7 +50,7 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'PENDING' }),
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
-      Complaints.countDocuments({ status: 'PART PENDIND' }),
+      Complaints.countDocuments({ status: 'PART PENDING' }),
       Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
