@@ -112,10 +112,7 @@ const addComplaint = async (req, res) => {
             return res.status(404).json({ status: false, msg: 'Warranty record not found' });
          }
 
-         // Check if the warranty has already been activated
-         if (record.isActivated) {
-            return res.status(400).json({ status: false, msg: 'This warranty has already been activated' });
-         }
+         
            
             // Activate the warranty
             record.isActivated = true;
