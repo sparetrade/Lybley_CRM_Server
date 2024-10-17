@@ -1,35 +1,11 @@
-const mongoose = require("mongoose")
-const { type } = require("os")
+const mongoose = require("mongoose");
 
+// Define the complaint schema
 const complaintSchema = new mongoose.Schema({
-  //     complaintName:{type:String },
-  //     productCategory:{type:String },
-  //     categoryId:{type:String },
-  //     brand:{type:String },
-  //     brandId:{type:String },
-  //     adminId:{type:String },
-  //     productName:{type:String }
-  //     ,customerName:{type:String },
-  //     customerMobile:{type:String },
-  //     customerEmail:{type:String },
-  //     zipCode:{type:String },
-  //     address1:{type:String },
-  //     address2:{type:String },
-  //     listOfArea:{type:String },
-  //     state:{type:String },
-  //     district:{type:String },
-  //     city:{type:String },
-  //     locality:{type:String },
-  //     lacdmark:{type:String },
-  //     complaintNature:{type:String },
-  //     complaintDetails:{type:String },
-  //     complaintType:{type:String },
-  //     status:{type:String,default:"PENDIND"}
-  // },{timestamps:true})
-  complaintId: { type: String },
+  complaintId: { type: String, unique: true }, // Ensure complaintId is unique
   productName: { type: String },
   categoryName: { type: String },
-  subCategoryName:{ type: String },
+  subCategoryName: { type: String },
   productBrand: { type: String },
   productId: { type: String },
   categoryId: { type: String },
@@ -38,8 +14,8 @@ const complaintSchema = new mongoose.Schema({
   serialNo: { type: String },
   uniqueId: { type: String },
   purchaseDate: { type: Date },
-  lat: { type: String  },
-  long: { type: String  },
+  lat: { type: String },
+  long: { type: String },
   warrantyStatus: { type: String },
   warrantyYears: { type: String },
   priorityLevel: { type: String },
@@ -63,13 +39,7 @@ const complaintSchema = new mongoose.Schema({
   technicianId: { type: String },
   technicianContact: { type: String },
   comments: { type: String },
-  // images: { type: String }, 
-  // issueType: { type: String }, 
-  issueType: {
-    type: Array
-   
-},
-  
+  issueType: { type: Array },
   detailedDescription: { type: String },
   issueImages: { type: String },
   warrantyImage: { type: String },
@@ -90,26 +60,28 @@ const complaintSchema = new mongoose.Schema({
   statusComment: { type: String }
 }, { timestamps: true });
 
-
-complaintSchema.pre('save', function (next) {
+// Pre-save middleware to generate a unique complaintId
+complaintSchema.pre('save', async function (next) {
   const complaint = this;
 
-  // Add debug logging to check if the middleware is triggered
-  // console.log("Running pre-save middleware for complaintId generation");
-
-  // Ensure both productBrand and productName are defined before generating complaintId
+  // Generate complaintId if it doesn't exist
   if (!complaint.complaintId) {
-    const brandPart = complaint.productBrand ? complaint.productBrand.slice(0, 2).toUpperCase() : "XX"; // Default to 'XX' if undefined
+    const brandPart = complaint.productBrand ? complaint.productBrand.slice(0, 2).toUpperCase() : "XX"; // Default to 'XX'
     const date = new Date();
     const dayPart = date.getDate().toString().padStart(2, '0'); // Day in 2 digits
     const monthPart = (date.getMonth() + 1).toString().padStart(2, '0'); // Month in 2 digits
-    const productPart = complaint.productName ? complaint.productName.slice(0, 2).toUpperCase() : "YY"; // Default to 'YY' if undefined
+    const productPart = complaint.productName ? complaint.productName.slice(0, 2).toUpperCase() : "YY"; // Default to 'YY'
+    const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0'); // Random 3 digit number
 
-    // Generate complaintId (Example: BR0409PR or XX0409YY if productBrand or productName is missing)
-    complaint.complaintId = `${brandPart}${dayPart}${monthPart}${productPart}`;
+    // Generate complaintId
+    complaint.complaintId = `${brandPart}${dayPart}${monthPart}${productPart}${randomPart}`;
 
-    // Log the generated complaintId
-    // console.log("Generated complaintId:", complaint.complaintId);
+    // Ensure uniqueness
+    const existingComplaint = await ComplaintModal.findOne({ complaintId: complaint.complaintId });
+    if (existingComplaint) {
+      // If the generated complaintId already exists, regenerate it
+      return next();
+    }
   } else {
     console.log("complaintId already exists:", complaint.complaintId);
   }
@@ -117,10 +89,7 @@ complaintSchema.pre('save', function (next) {
   next();
 });
 
+// Create the Complaint model
+const ComplaintModal = mongoose.model("Complaints", complaintSchema);
 
-
-
-const ComplaintModal = new mongoose.model("Complaints", complaintSchema)
-
-
-module.exports = ComplaintModal
+module.exports = ComplaintModal;
