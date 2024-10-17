@@ -1,109 +1,184 @@
 const ComplaintModal = require("../models/complaint")
 const NotificationModel = require("../models/notification")
 const { ServiceModel } = require("../models/registration")
+const { UserModel } = require("../models/registration")
 const SubCategoryModal = require("../models/subCategory")
 const BrandRechargeModel = require("../models/brandRecharge")
 const WalletModel = require("../models/wallet")
+const ProductWarrantyModal =require("../models/productWarranty")
+
 // const addComplaint = async (req, res) => {
 //    try {
 //       let body = req.body;
-//       let obj = { ...body, issueImages: req.file.location   };
+//       let { city, pincode } = body; // Extract city and pincode from request body
 
+//       // Find a service center based on city or pincode
+//       let serviceCenter;
+//       if (pincode) {
+//          // serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
+//          serviceCenter = await ServiceModel.findOne({
+//             $or: [
+//                { postalCode: pincode },
+//                { pincodeSupported: { $in: [pincode] } }
+//             ]
+//          });
+//       }
+//        else if (city) {
+//          serviceCenter = await ServiceModel.findOne({ city: city });
+//       }
+//       // console.log(serviceCenter);
+
+//       if (!serviceCenter) {
+//          let obj = {
+//             ...body,
+//             issueImages: req.file?.location,
+//             assignServiceCenterId: serviceCenter?._id,
+//             assignServiceCenter: serviceCenter?.serviceCenterName,
+//             assignServiceCenterTime: new Date()
+//          };
+//          let data = new ComplaintModal(obj);
+//          await data.save();
+
+
+//          const notification = new NotificationModel({
+//             complaintId: data._id,
+//             userId: data.userId,
+//             brandId: data.brandId,
+//             serviceCenterId: serviceCenter?._id,
+//             dealerId: data.dealerId,
+//             userName: data.fullName,
+//             title: `  Complaint`,
+//             message: `Registered Your Complaint, ${req.body.fullName}!`,
+//          });
+//          await notification.save();
+//          return res.json({ status: true, msg: "Complaint Added" });
+//          // return res.status(404).json({ status: false, msg: 'No service center found for the provided city or pincode.' });
+//       }
+
+//       let obj = {
+//          ...body,
+//          issueImages: req.file?.location,
+//          assignServiceCenterId: serviceCenter?._id,
+//          assignServiceCenter: serviceCenter?.serviceCenterName,
+//          assignServiceCenterTime: new Date()
+//       };
 //       let data = new ComplaintModal(obj);
 //       await data.save();
+
+
 //       const notification = new NotificationModel({
-//          complaintId: data?._id,
+//          complaintId: data._id,
 //          userId: data.userId,
 //          brandId: data.brandId,
+//          serviceCenterId: serviceCenter?._id,
 //          dealerId: data.dealerId,
 //          userName: data.fullName,
-//          title: `User Complaint`,
-//          message: `Registred Your Complaint, ${req.body.fullName}!`,
+//          title: `  Complaint`,
+//          message: `Registered Your Complaint, ${req.body.fullName}!`,
 //       });
 //       await notification.save();
-//       res.json({ status: true, msg: "Complaint   Added" });
+//       res.json({ status: true, msg: "Complaint Added" });
 //    } catch (err) {
+//       console.error(err);
 //       res.status(400).send(err);
 //    }
-
 // };
+
 const addComplaint = async (req, res) => {
    try {
       let body = req.body;
-      let { city, pincode } = body; // Extract city and pincode from request body
+      let { city, pincode, emailAddress, fullName, phoneNumber, serviceAddress } = body; // Extract email and fullName from request body
+      const email = emailAddress;
+      const uniqueId = body?.uniqueId;
+      // Check if user is already registered based on email
+      let user = await UserModel.findOne({ email });
+
+      // If user is not registered, register them
+      if (!user) {
+         user = new UserModel({ email: emailAddress, name: fullName, contact: phoneNumber, address: serviceAddress, password: "12345678" });
+         await user.save();
+      }
+      // console.log(uniqueId);
+      
+      if (uniqueId) {
+         const warranty = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
+         if (!warranty) {
+            return res.status(404).json({ status: false, msg: 'Warranty not found' });
+         }
+
+         // Find the specific record with the matching uniqueId
+         const record = warranty.records.find(record => record.uniqueId === uniqueId);
+         if (!record) {
+            return res.status(404).json({ status: false, msg: 'Warranty record not found' });
+         }
+
+         // Check if the warranty has already been activated
+         if (record.isActivated) {
+            return res.status(400).json({ status: false, msg: 'This warranty has already been activated' });
+         }
+           
+            // Activate the warranty
+            record.isActivated = true;
+         record.userName = fullName;
+         record.email = email;
+         record.contact = phoneNumber;
+         record.address = serviceAddress;
+         record.district = body?.district;
+         record.state = body?.state;
+         record.pincode = pincode;
+         record.activationDate = new Date();
+
+         // Save the updated warranty
+         await warranty.save();
+      }
 
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
-         // serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
          serviceCenter = await ServiceModel.findOne({
             $or: [
                { postalCode: pincode },
                { pincodeSupported: { $in: [pincode] } }
             ]
          });
-      }
-       else if (city) {
+      } else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
-      // console.log(serviceCenter);
 
-      if (!serviceCenter) {
-         let obj = {
-            ...body,
-            issueImages: req.file?.location,
-            assignServiceCenterId: serviceCenter?._id,
-            assignServiceCenter: serviceCenter?.serviceCenterName,
-            assignServiceCenterTime: new Date()
-         };
-         let data = new ComplaintModal(obj);
-         await data.save();
-
-
-         const notification = new NotificationModel({
-            complaintId: data._id,
-            userId: data.userId,
-            brandId: data.brandId,
-            serviceCenterId: serviceCenter?._id,
-            dealerId: data.dealerId,
-            userName: data.fullName,
-            title: `  Complaint`,
-            message: `Registered Your Complaint, ${req.body.fullName}!`,
-         });
-         await notification.save();
-         return res.json({ status: true, msg: "Complaint Added" });
-         // return res.status(404).json({ status: false, msg: 'No service center found for the provided city or pincode.' });
-      }
-
+      // Prepare the complaint object
       let obj = {
          ...body,
+         userId: user._id,
+         userName: user.name,
          issueImages: req.file?.location,
          assignServiceCenterId: serviceCenter?._id,
          assignServiceCenter: serviceCenter?.serviceCenterName,
          assignServiceCenterTime: new Date()
       };
+
+      // Save the complaint
       let data = new ComplaintModal(obj);
       await data.save();
 
-
+      // Create a notification for the user
       const notification = new NotificationModel({
          complaintId: data._id,
          userId: data.userId,
          brandId: data.brandId,
          serviceCenterId: serviceCenter?._id,
          dealerId: data.dealerId,
-         userName: data.fullName,
-         title: `  Complaint`,
-         message: `Registered Your Complaint, ${req.body.fullName}!`,
+         userName: fullName,
+         title: `Complaint`,
+         message: `Registered Your Complaint, ${fullName}!`,
       });
       await notification.save();
+
       res.json({ status: true, msg: "Complaint Added" });
    } catch (err) {
       console.error(err);
       res.status(400).send(err);
    }
 };
-
 
 const addAPPComplaint = async (req, res) => {
    try {
@@ -124,7 +199,7 @@ const addAPPComplaint = async (req, res) => {
                { pincodeSupported: { $in: [pincode] } }
             ]
          });
-      
+
       } else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
@@ -178,7 +253,7 @@ const addAPPComplaint = async (req, res) => {
       res.json({ status: true, msg: "Complaint Added" });
 
    } catch (err) {
-      console.error('Error in createShipment:', err);
+      console.error('Error in  :', err);
       res.status(400).send(err);
    }
 
@@ -226,7 +301,7 @@ const addDealerComplaint = async (req, res) => {
                { pincodeSupported: { $in: [pincode] } }
             ]
          });
-      
+
       } else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
@@ -453,11 +528,11 @@ const editComplaint = async (req, res) => {
 
             if (!serviceCenterWallet) {
                // Handle case where wallet is not found
-               console.error('Wallet not found for service center:', );
+               console.error('Wallet not found for service center:',);
                // return;
                return res.json({ status: true, msg: "Complaint Updated" });
             }
-   
+
             serviceCenterWallet.totalCommission = (parseInt(serviceCenterWallet.totalCommission || 0) + parseInt(subCatData.payout));
             serviceCenterWallet.dueAmount = (parseInt(serviceCenterWallet.dueAmount || 0) + parseInt(subCatData.payout));
             await serviceCenterWallet.save();
@@ -467,22 +542,22 @@ const editComplaint = async (req, res) => {
 
             if (!dealerWallet) {
                // Handle case where wallet is not found
-               console.error('Wallet not found for dealer:',  );
+               console.error('Wallet not found for dealer:',);
                return res.json({ status: true, msg: "Complaint Updated" });
             }
-   
+
             const payout = parseInt(subCatData.payout);
 
             // If dealerId is present, add 20% of payout, else add full payout
             const commissionToAdd = data.dealerId ? payout * 0.2 : payout;
-            
+
             // Update service center's total commission and due amount
             dealerWallet.totalCommission = (parseInt(dealerWallet.totalCommission || 0) + commissionToAdd);
             dealerWallet.dueAmount = (parseInt(dealerWallet.dueAmount || 0) + commissionToAdd);
-            
+
             await dealerWallet.save();
          }
-        
+
       }
       res.json({ status: true, msg: "Complaint Updated" });
    } catch (err) {
