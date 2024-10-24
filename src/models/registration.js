@@ -122,6 +122,7 @@ const bradRegistrationSchema = new mongoose.Schema({
         long: { type: String  },
         skill:{type:String },
         type:{type:String },
+        pincode:{type:String },
         liveStatus:{type:String,default:"AVAILABLE"},
         role: { type: String, default: "TECHNICIAN" },
         verification: { type: String, default: "VERIFIED" }
