@@ -636,5 +636,105 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
 
 
 
+router.get('/getStatewisePendingComplaints', async (req, res) => {
+  try {
+    // Aggregation pipeline to get count of pending complaints by state
+    const complaints = await Complaints.aggregate([
+      { $match: { status: 'PENDING' } },  // Filter to include only pending complaints
+      { $group: { _id: "$state", count: { $sum: 1 } } } , // Group by state and count
+      { $sort: { count: -1 } } 
+    ]);
+
+    res.status(200).json(complaints);  // Send response with aggregated data
+  } catch (error) {
+    console.error('Error fetching state-wide pending complaints:', error);
+    res.status(500).json({ error: 'Error fetching state-wide pending complaints' });
+  }
+});
+
+router.get('/getDistrictWisePendingComplaints', async (req, res) => {
+  try {
+    // Aggregation pipeline to get count of pending complaints by district
+    const complaints = await Complaints.aggregate([
+      { $match: { status: 'PENDING' } },  // Filter to include only pending complaints
+      { $group: { _id: "$district", count: { $sum: 1 } } },  // Group by district and count
+      { $sort: { count: -1 } } 
+    ]);
+
+    res.status(200).json(complaints);  // Send response with aggregated data
+  } catch (error) {
+    console.error('Error fetching district-wise pending complaints:', error);
+    res.status(500).json({ error: 'Error fetching district-wise pending complaints' });
+  }
+});
+
+router.get('/getServiceCenterWisePendingComplaints', async (req, res) => {
+  try {
+    // Aggregation pipeline to get count of pending complaints by service center, sorted by count in descending order
+    const complaints = await Complaints.aggregate([
+      { $match: { status: 'PENDING' } },                    // Filter to include only pending complaints
+      { $group: { _id: "$assignServiceCenter", count: { $sum: 1 } } },  // Group by service center and count
+      { $sort: { count: -1 } }                              // Sort by count in descending order
+    ]);
+
+    res.status(200).json(complaints);  // Send response with sorted data
+  } catch (error) {
+    console.error('Error fetching service-center-wise pending complaints:', error);
+    res.status(500).json({ error: 'Error fetching service-center-wise pending complaints' });
+  }
+});
+router.get('/getNoServiceableAreaComplaints', async (req, res) => {
+  try {
+    // Aggregation pipeline to get pending complaints with no associated service center, including userName and district
+    const complaints = await Complaints.aggregate([
+      { $match: { status: 'PENDING', serviceCenter: { $exists: false } } },  // Filter for pending complaints without service center
+      { $project: { userName: 1, district: 1 } }                             // Project only userName and district fields
+    ]);
+
+    res.status(200).json(complaints);  // Send response with list of complaints
+  } catch (error) {
+    console.error('Error fetching no serviceable area complaints:', error);
+    res.status(500).json({ error: 'Error fetching no serviceable area complaints' });
+  }
+});
+router.get('/getComplaintInsights', async (req, res) => {
+  try {
+    const [
+      complaintsByBrand,
+      complaintsByLocationAndProduct,
+      commonFaults
+    ] = await Promise.all([
+      Complaints.aggregate([
+        { $group: { _id: "$productBrand", count: { $sum: 1 } } }, // No $match to filter status
+        { $sort: { count: -1 } }
+      ]),
+      Complaints.aggregate([
+        { $group: { _id: {   product: "$productName" }, count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]),
+      Complaints.aggregate([
+        { $unwind: "$issueType" },  // Unwind the issueType array
+        { $group: { _id: "$issueType", count: { $sum: 1 } } },  // Group by individual issue types
+        { $sort: { count: -1 } }
+      ])
+    ]);
+
+    res.status(200).json({
+      complaintsByBrand,
+      complaintsByLocationAndProduct,
+      commonFaults
+    });
+  } catch (error) {
+    console.error('Error fetching complaint insights:', error);
+    res.status(500).json({ error: 'Error fetching complaint insights' });
+  }
+});
+
+
+
+
+
+
+
 
 module.exports = router;
