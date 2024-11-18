@@ -51,10 +51,14 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
       Complaints.countDocuments({ status: 'PART PENDING' }),
-      Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
-      Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
-    ]);
+      // Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
+      // Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      // Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
+    // ]);
+    Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+    Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+    Complaints.countDocuments({ status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
+  ]);
 
     res.json({
       customers: customerCount,
@@ -291,7 +295,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
     startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
     startOfLastWeek.setHours(0, 0, 0, 0);
     const endOfLastWeek = new Date(startOfWeek);
-    const {  now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
+    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
     // Query to filter complaints by assignServiceCenterId
     const query = { assignServiceCenterId: id };
 
@@ -305,6 +309,9 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       complaintCancelCount,
       complaintPartPendingCount,
       allMonthComplaintCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days,
       lastMonthNewCount,
       lastMonthAssignCount,
       lastMonthPendingCount,
@@ -312,9 +319,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       lastMonthCancelCount,
       lastMonthPartPendingCount,
       allWeekComplaintCount,
-      complaints0To1Days,
-      complaints2To5Days,
-      complaintsMoreThan5Days,
+      
       lastWeekNewCount,
       lastWeekAssignCount,
       lastWeekPendingCount,
@@ -337,9 +342,12 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
-      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } }),
+      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
+      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
       // Last Month counts
       Complaints.countDocuments({ ...query, createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS', createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
@@ -609,9 +617,9 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
-      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } })
+      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
     ]);
 
     res.json({
