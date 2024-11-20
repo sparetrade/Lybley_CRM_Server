@@ -766,16 +766,30 @@ router.get('/getComplaintInsights', async (req, res) => {
       commonFaults
     ] = await Promise.all([
       Complaints.aggregate([
-        { $group: { _id: "$productBrand", count: { $sum: 1 } } }, // No $match to filter status
+        // Group complaints by productBrand and count them
+        { $group: { _id: "$productBrand", count: { $sum: 1 } } },
         { $sort: { count: -1 } }
       ]),
       Complaints.aggregate([
-        { $group: { _id: {   product: "$productName" }, count: { $sum: 1 } } },
+        // Group complaints by both product and productBrand
+        { 
+          $group: { 
+            _id: { product: "$productName", productBrand: "$productBrand" }, 
+            count: { $sum: 1 } 
+          } 
+        },
         { $sort: { count: -1 } }
       ]),
       Complaints.aggregate([
-        { $unwind: "$issueType" },  // Unwind the issueType array
-        { $group: { _id: "$issueType", count: { $sum: 1 } } },  // Group by individual issue types
+        // Unwind the issueType array
+        { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },  // Use preserveNullAndEmptyArrays to avoid issues if issueType is not an array
+        { 
+          $group: { 
+            _id: "$issueType", 
+            productBrand: { $first: "$productBrand" },  // Get the first productBrand for each issueType
+            count: { $sum: 1 } 
+          } 
+        },
         { $sort: { count: -1 } }
       ])
     ]);
@@ -790,6 +804,7 @@ router.get('/getComplaintInsights', async (req, res) => {
     res.status(500).json({ error: 'Error fetching complaint insights' });
   }
 });
+
 
 
 
