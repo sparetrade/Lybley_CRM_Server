@@ -664,43 +664,92 @@ router.get('/getStatewisePendingComplaints', async (req, res) => {
   }
 });
 
+// router.get('/getDistrictWisePendingComplaints', async (req, res) => {
+//   try {
+//     // Aggregation pipeline to get count of pending complaints by district
+//     const complaints = await Complaints.aggregate([
+//       { $match: { status: 'PENDING' } },  // Filter to include only pending complaints
+//       { $group: { _id: "$district", count: { $sum: 1 } } },  // Group by district and count
+//       { $sort: { count: -1 } } 
+//     ]);
+
+//     res.status(200).json(complaints);  // Send response with aggregated data
+//   } catch (error) {
+//     console.error('Error fetching district-wise pending complaints:', error);
+//     res.status(500).json({ error: 'Error fetching district-wise pending complaints' });
+//   }
+// });
+
 router.get('/getDistrictWisePendingComplaints', async (req, res) => {
   try {
-    // Aggregation pipeline to get count of pending complaints by district
+    // Aggregation pipeline to get count of pending complaints by state and district
     const complaints = await Complaints.aggregate([
-      { $match: { status: 'PENDING' } },  // Filter to include only pending complaints
-      { $group: { _id: "$district", count: { $sum: 1 } } },  // Group by district and count
-      { $sort: { count: -1 } } 
+      { 
+        $match: { status: 'PENDING' }  // Filter to include only pending complaints
+      },
+      { 
+        $group: { 
+          _id: { state: "$state", district: "$district" },  // Group by state and district
+          count: { $sum: 1 }  // Count the number of complaints
+        } 
+      },
+      { 
+        $sort: { "count": -1 }  // Sort by count in descending order
+      }
     ]);
 
-    res.status(200).json(complaints);  // Send response with aggregated data
+    // Transform the output to a more readable format (optional)
+    const transformedComplaints = complaints.map(item => ({
+      state: item._id.state,
+      district: item._id.district,
+      count: item.count
+    }));
+
+    res.status(200).json(transformedComplaints);  // Send response with aggregated data
   } catch (error) {
     console.error('Error fetching district-wise pending complaints:', error);
     res.status(500).json({ error: 'Error fetching district-wise pending complaints' });
   }
 });
 
+// router.get('/getServiceCenterWisePendingComplaints', async (req, res) => {
+//   try {
+//     // Aggregation pipeline to get count of pending complaints by service center, sorted by count in descending order
+//     const complaints = await Complaints.aggregate([
+//       { $match: { status: 'PENDING' } },                    // Filter to include only pending complaints
+//       { $group: { _id: "$assignServiceCenter", count: { $sum: 1 } } },  // Group by service center and count
+//       { $sort: { count: -1 } }                              // Sort by count in descending order
+//     ]);
+
+//     res.status(200).json(complaints);  // Send response with sorted data
+//   } catch (error) {
+//     console.error('Error fetching service-center-wise pending complaints:', error);
+//     res.status(500).json({ error: 'Error fetching service-center-wise pending complaints' });
+//   }
+// });
+
 router.get('/getServiceCenterWisePendingComplaints', async (req, res) => {
   try {
-    // Aggregation pipeline to get count of pending complaints by service center, sorted by count in descending order
+    // Aggregation pipeline to get count of pending complaints by service center
     const complaints = await Complaints.aggregate([
-      { $match: { status: 'PENDING' } },                    // Filter to include only pending complaints
-      { $group: { _id: "$assignServiceCenter", count: { $sum: 1 } } },  // Group by service center and count
-      { $sort: { count: -1 } }                              // Sort by count in descending order
+      { $match: { status: 'PENDING', assignServiceCenter: { $ne: null } } }, // Filter to include only pending complaints with a valid service center
+      { $group: { _id: "$assignServiceCenter", count: { $sum: 1 } } },       // Group by service center and count
+      { $sort: { count: -1 } }                                              // Sort by count in descending order
     ]);
 
-    res.status(200).json(complaints);  // Send response with sorted data
+    res.status(200).json(complaints); // Send response with sorted data
   } catch (error) {
     console.error('Error fetching service-center-wise pending complaints:', error);
     res.status(500).json({ error: 'Error fetching service-center-wise pending complaints' });
   }
 });
+
 router.get('/getNoServiceableAreaComplaints', async (req, res) => {
   try {
     // Aggregation pipeline to get pending complaints with no associated service center, including userName and district
     const complaints = await Complaints.aggregate([
-      { $match: { status: 'PENDING', serviceCenter: { $exists: false } } },  // Filter for pending complaints without service center
-      { $project: { userName: 1, district: 1 } }                             // Project only userName and district fields
+      { $match: { status: 'PENDING', assignServiceCenter: { $exists: false } } },  // Filter for pending complaints without service center
+      { $project: { userName: 1, district: 1 , state: 1, phoneNumber: 1} }                             // Project only userName and district fields
     ]);
 
     res.status(200).json(complaints);  // Send response with list of complaints
