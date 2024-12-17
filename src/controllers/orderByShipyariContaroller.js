@@ -56,7 +56,7 @@ const UserStockModel = require("../models/userStock")
 //   "message": "Seller Signed In Successfully."
 // }
 const SHIPYARI_API_BASE_URL = 'https://api-seller.shipyaari.com/api/v1'; // Replace with the actual base URL
-const SHIPYARI_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imx5YmxleUBnbWFpbC5jb20iLCJzZWxsZXJJZCI6MTMyMTI1LCJjb21wYW55SWQiOiIwMGE4ZGQ2Zi05YTcwLTQ5N2UtYjdiZC0yYzE0OTUyMWZkYWQiLCJwcml2YXRlQ29tcGFueUlkIjoxMzA3NzYsImlhdCI6MTcyNzY4NDgwOCwiZXhwIjoxNzI4Mjg5NjA4fQ.QGTuhsif08FmDwYLrkP0Z0gFecFbVzFuGzOPJkyeo60'; // Replace with your Shipyari API key
+const SHIPYARI_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imx5YmxleUBnbWFpbC5jb20iLCJzZWxsZXJJZCI6MTMyMTI1LCJjb21wYW55SWQiOiIwMGE4ZGQ2Zi05YTcwLTQ5N2UtYjdiZC0yYzE0OTUyMWZkYWQiLCJwcml2YXRlQ29tcGFueUlkIjoxMzA3NzYsImlhdCI6MTczNDQyMTMxMSwiZXhwIjoxNzM1MDI2MTExfQ.AyC6rL4E-KJD9xw6tWDfjSMdLOyKGQvqI08CZGrPg1c'; // Replace with your Shipyari API key
 
 const shipyariInstance = axios.create({
   baseURL: SHIPYARI_API_BASE_URL,
@@ -643,25 +643,55 @@ const fetchManifest = async (req, res) => {
     });
   }
 };
+// const fetchLabels = async (req, res) => {
+//   const { awbs } = req.body;
+
+//   try {
+//     const response = await shipyariInstance.post(
+//       'labels/fetchLabels',
+//       { awbs }
+//     );
+
+//     // Forward the response from Shipyaari API to the client
+//     res.status(response.status).json(response.data);
+//   } catch (error) {
+//     console.error('Error fetching labels:', error);
+//     res.status(error.response ? error.response.status : 500).json({
+//       message: 'An error occurred while fetching the labels',
+//       error: error.response ? error.response.data : error.message
+//     });
+//   }
+// };
+
 const fetchLabels = async (req, res) => {
-  const { awbs } = req.body;
+  const { avnkey, shipyaari_id } = req.body; // Destructure request body
 
   try {
+    // Send POST request to Shipyaari API
     const response = await shipyariInstance.post(
-      'labels/fetchLabels',
-      { awbs }
+      "labels/getlabel_avn",
+      {
+        avnkey,          // AVN key from client
+        shipyaari_id,    // Array of Shipyaari IDs
+      }
     );
 
-    // Forward the response from Shipyaari API to the client
+    // Forward the response to the client
     res.status(response.status).json(response.data);
   } catch (error) {
-    console.error('Error fetching labels:', error);
+    console.error("Error fetching labels:", error);
+
+    // Handle errors
     res.status(error.response ? error.response.status : 500).json({
-      message: 'An error occurred while fetching the labels',
-      error: error.response ? error.response.data : error.message
+      message: "An error occurred while fetching the labels",
+      error: error.response ? error.response.data : error.message,
     });
   }
 };
+
+
+
+
 const fetchTaxInvoices = async (req, res) => {
   const { awbs } = req.body;
 
