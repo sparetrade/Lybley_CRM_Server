@@ -517,7 +517,7 @@ const editComplaint = async (req, res) => {
             const brandTrans = new BrandRechargeModel({
                brandId: data.brandId,
                brandName: data.productBrand,
-               amount: -subCatData.payout,
+               amount: -body?.paymentBrand,
                description: "Complaint Close  Payout"
             });
             await brandTrans.save();

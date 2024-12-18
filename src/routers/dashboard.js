@@ -33,6 +33,7 @@ router.get("/dashboardDetails", async (req, res) => {
       complaintCompleteCount,
       complaintCancelCount,
       complaintPartPendingCount,
+      complaintFinalVerificationCount,
       complaints0To1Days,
       complaints2To5Days,
       complaintsMoreThan5Days
@@ -51,6 +52,8 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
       Complaints.countDocuments({ status: 'PART PENDING' }),
+      Complaints.countDocuments({  status: 'Final Verification' }),
+
       // Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
@@ -76,6 +79,7 @@ router.get("/dashboardDetails", async (req, res) => {
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
         partPending: complaintPartPendingCount,
+        finalVerification: complaintFinalVerificationCount,
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
         moreThanFiveDays: complaintsMoreThan5Days

@@ -57,6 +57,10 @@ const complaintSchema = new mongoose.Schema({
   serviceAddress: { type: String },
   status: { type: String, default: "PENDING" },
   payment: { type: Number, default: 0 },
+  paymentBrand: { type: Number, default: 0 },
+  finalComments: { type: String },
+  kilometer: { type: String },
+
   statusComment: { type: String }
 }, { timestamps: true });
 
