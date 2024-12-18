@@ -52,7 +52,7 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
       Complaints.countDocuments({ status: 'PART PENDING' }),
-      Complaints.countDocuments({  status: 'Final Verification' }),
+      Complaints.countDocuments({  status: 'FINAL VERIFICATION' }),
 
       // Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
