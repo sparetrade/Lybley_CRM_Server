@@ -643,51 +643,51 @@ const fetchManifest = async (req, res) => {
     });
   }
 };
-// const fetchLabels = async (req, res) => {
-//   const { awbs } = req.body;
-
-//   try {
-//     const response = await shipyariInstance.post(
-//       'labels/fetchLabels',
-//       { awbs }
-//     );
-
-//     // Forward the response from Shipyaari API to the client
-//     res.status(response.status).json(response.data);
-//   } catch (error) {
-//     console.error('Error fetching labels:', error);
-//     res.status(error.response ? error.response.status : 500).json({
-//       message: 'An error occurred while fetching the labels',
-//       error: error.response ? error.response.data : error.message
-//     });
-//   }
-// };
-
 const fetchLabels = async (req, res) => {
-  const { avnkey, shipyaari_id } = req.body; // Destructure request body
+  const { awbs } = req.body;
 
   try {
-    // Send POST request to Shipyaari API
     const response = await shipyariInstance.post(
-      "labels/getlabel_avn",
-      {
-        avnkey,          // AVN key from client
-        shipyaari_id,    // Array of Shipyaari IDs
-      }
+      'labels/fetchLabels',
+      { awbs }
     );
 
-    // Forward the response to the client
+    // Forward the response from Shipyaari API to the client
     res.status(response.status).json(response.data);
   } catch (error) {
-    console.error("Error fetching labels:", error);
-
-    // Handle errors
+    console.error('Error fetching labels:', error);
     res.status(error.response ? error.response.status : 500).json({
-      message: "An error occurred while fetching the labels",
-      error: error.response ? error.response.data : error.message,
+      message: 'An error occurred while fetching the labels',
+      error: error.response ? error.response.data : error.message
     });
   }
 };
+
+// const fetchLabels = async (req, res) => {
+//   const { avnkey, shipyaari_id } = req.body; // Destructure request body
+
+//   try {
+//     // Send POST request to Shipyaari API
+//     const response = await shipyariInstance.post(
+//       "labels/getlabel_avn",
+//       {
+//         avnkey,          // AVN key from client
+//         shipyaari_id,    // Array of Shipyaari IDs
+//       }
+//     );
+
+//     // Forward the response to the client
+//     res.status(response.status).json(response.data);
+//   } catch (error) {
+//     console.error("Error fetching labels:", error);
+
+//     // Handle errors
+//     res.status(error.response ? error.response.status : 500).json({
+//       message: "An error occurred while fetching the labels",
+//       error: error.response ? error.response.data : error.message,
+//     });
+//   }
+// };
 
 
 
