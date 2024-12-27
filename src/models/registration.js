@@ -97,6 +97,9 @@ const bradRegistrationSchema = new mongoose.Schema({
       brandSaas: {
         type: String
       },
+      tollfree: {
+        type: String
+      },
       role: { type: String, default: "BRAND" },
       verification: { type: String, default: "VERIFIED" }
       , otp: { type: Number },
