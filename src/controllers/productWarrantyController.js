@@ -1,5 +1,5 @@
-const ProductWarrantyModal =require("../models/productWarranty")
-const {UserModel } = require('../models/registration');
+const ProductWarrantyModal = require("../models/productWarranty")
+const { UserModel } = require('../models/registration');
 const QRCode = require('qrcode');
 const mongoose = require('mongoose');
 
@@ -30,36 +30,36 @@ const mongoose = require('mongoose');
 //           year, numberOfGenerate, batchNo, warrantyInDays, brandName, brandId , 
 //       } = req.body;
 // //   console.log(req.body);
-  
+
 //       const numberOfRecords = +numberOfGenerate; // Number of records to create
-  
+
 //       // Validate input
 //     //   if (!productName || !productId || !categoryCode || ! || !brandId,brandName,categoryName || !brandName || !brandId) {
 //     //     return res.status(400).json({ status: false, msg: 'Missing required fields' });
 //     //   }
-  
+
 //       // Generate multiple records with unique QR codes
 //       const records = [];
 //       for (let i = 0; i < numberOfRecords; i++) {
 //         const uniqueId = await generateUniqueId();  
 //         const qrCodeData = uniqueId;
-  
+
 //         try {
-           
+
 //         //   const qrCodeUrl1 = `https://crm.servsy.in/warranty?productId=${productId}&uniqueId=${uniqueId}`;
 //           const qrCodeUrl1 = `https://crm.servsy.in/warrantyActivation?uniqueId=${uniqueId}`;
 
 //           // Generate QR code with the URL
 //         //   const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl);
 //           const qrCodeUrl = await QRCode.toDataURL(qrCodeUrl1);
-  
+
 //           // Create a new record with the QR code and additional fields
 //           records.push({
 //             productName,
 //             productId,
 //             productId  ,
 //             categoryId,
-           
+
 //             brandId,brandName,categoryName,
 //             uniqueId,
 //             year,
@@ -72,11 +72,11 @@ const mongoose = require('mongoose');
 //           // Handle QR code generation error
 //         }
 //       }
-  
+
 //       if (records.length === 0) {
 //         return res.status(500).json({ status: false, msg: 'No records were created due to QR code generation errors' });
 //       }
-  
+
 //       // Create metadata document with all records included
 //       const metadata = new ProductWarrantyModal({
 //         brandName,
@@ -88,10 +88,10 @@ const mongoose = require('mongoose');
 //         id: new mongoose.Types.ObjectId(), // Use a new unique ID for this metadata document
 //         records,
 //       });
-  
+
 //       // Save metadata
 //       const savedMetadata = await metadata.save();
-  
+
 //       // Construct response data
 //       const responseData = {
 //         brandName,
@@ -103,7 +103,7 @@ const mongoose = require('mongoose');
 //         id: savedMetadata.id,
 //         records: savedMetadata.records,
 //       };
-  
+
 //       res.status(201).json({
 //         status: true,
 //         msg: 'Warranty Created',
@@ -125,7 +125,7 @@ const mongoose = require('mongoose');
 //     } = req.body;
 
 //     const numberOfRecords = +numberOfGenerate; // Number of records to create
-  
+
 //     // Fetch all existing uniqueIds to ensure uniqueness in one go
 //     const existingUniqueIds = new Set(
 //       (await ProductWarrantyModal.find({}, 'records.uniqueId')).map(record => record.uniqueId)
@@ -182,9 +182,9 @@ const mongoose = require('mongoose');
 
 const addProductWarranty = async (req, res) => {
   try {
-    const { 
-      productName, productId, categoryId, categoryName, 
-      year, numberOfGenerate, batchNo, warrantyInDays, brandName, brandId 
+    const {
+      productName, productId, categoryId, categoryName,
+      year, numberOfGenerate, batchNo, warrantyInDays, brandName, brandId
     } = req.body;
 
     const numberOfRecords = +numberOfGenerate;
@@ -246,7 +246,7 @@ const generateUniqueRecord = async (index, data) => {
   for (let retry = 0; retry < 5; retry++) {
     try {
       uniqueId = await generateUniqueId();
-      
+
       // Check once more before using this uniqueId if it already exists in the database
       const existingRecord = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
       if (existingRecord) {
@@ -288,7 +288,7 @@ const generateUniqueId = async () => {
 
   while (!isUnique) {
     uniqueId = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit number
-    
+
     // Check if this uniqueId already exists in the database
     const existingRecord = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
     if (!existingRecord) {
@@ -300,110 +300,227 @@ const generateUniqueId = async () => {
 };
 
 
- 
 
 
 
-  const activateWarranty = async (req, res) => {
-    try {
-      const { name, contact, email, address,lat,long,pincode ,district,state, password, uniqueId } = req.body;
-  
-      if (!name || !contact   || !address  || !uniqueId) {
-        return res.status(400).json({ status: false, msg: 'Missing required fields' });
-      }
-  
-      // Check if the user already exists
-      let user = await UserModel.findOne({ email });
-      if (!user) {
-        // Hash the password and create a new user
-        
-        user = new UserModel({
-          name,
-          contact,
-          email,
-          address,
-          password ,
-          lat,long,pincode 
-        });
-        await user.save();
-      }
-  
-      // Find the warranty record based on the unique ID
-      const warranty = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
-      if (!warranty) {
-        return res.status(404).json({ status: false, msg: 'Warranty not found' });
-      }
-  
-      // Find the specific record with the matching uniqueId
-      const record = warranty.records.find(record => record.uniqueId === uniqueId);
-      if (!record) {
-        return res.status(404).json({ status: false, msg: 'Warranty record not found' });
-      }
-  
-      // Check if the warranty has already been activated
-      if (record.isActivated) {
-        return res.status(400).json({ status: false, msg: 'This warranty has already been activated' });
-      }
-      lat,long,pincode ,
+
+const activateWarranty = async (req, res) => {
+  try {
+    const { name, contact, email, address, lat, long, pincode, district, state, password, uniqueId } = req.body;
+
+    if (!name || !contact || !address || !uniqueId) {
+      return res.status(400).json({ status: false, msg: 'Missing required fields' });
+    }
+
+    // Check if the user already exists
+    let user = await UserModel.findOne({ email });
+    if (!user) {
+      // Hash the password and create a new user
+
+      user = new UserModel({
+        name,
+        contact,
+        email,
+        address,
+        password,
+        lat, long, pincode
+      });
+      await user.save();
+    }
+
+    // Find the warranty record based on the unique ID
+    const warranty = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
+    if (!warranty) {
+      return res.status(404).json({ status: false, msg: 'Warranty not found' });
+    }
+
+    // Find the specific record with the matching uniqueId
+    const record = warranty.records.find(record => record.uniqueId === uniqueId);
+    if (!record) {
+      return res.status(404).json({ status: false, msg: 'Warranty record not found' });
+    }
+
+    // Check if the warranty has already been activated
+    if (record.isActivated) {
+      return res.status(400).json({ status: false, msg: 'This warranty has already been activated' });
+    }
+    lat, long, pincode,
       // Activate the warranty
       record.isActivated = true;
-      record.userName =name;  
-      record.email = email;  
-      record.contact = contact;  
-      record.address = address;  
-      record.lat = lat;  
-      record.long = long;  
-      record.district = district;  
-      record.state = state;  
-      record.pincode = pincode;  
-      record.activationDate = new Date();
-  
-      // Save the updated warranty
-      await warranty.save();
-  
-      res.status(200).json({
-        status: true,
-        msg: 'Warranty activated successfully',
-        data: record, // Return only the activated record
-      });
-    } catch (error) {
-      res.status(500).json({ status: false, msg: error.message });
-    }
-   
-  
-   
-  };
-  
-   
-  
+    record.userName = name;
+    record.email = email;
+    record.contact = contact;
+    record.address = address;
+    record.lat = lat;
+    record.long = long;
+    record.district = district;
+    record.state = state;
+    record.pincode = pincode;
+    record.activationDate = new Date();
 
-const getAllProductWarranty=async(req,res)=>{
-    try{
-        let data=await ProductWarrantyModal.find({}).sort({ _id: -1 });
-        res.send(data);
-     }catch(err){
-        res.status(400).send(err);
-     }
+    // Save the updated warranty
+    await warranty.save();
+
+    res.status(200).json({
+      status: true,
+      msg: 'Warranty activated successfully',
+      data: record, // Return only the activated record
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, msg: error.message });
+  }
+
+
+
+};
+
+
+
+
+const getAllProductWarranty = async (req, res) => {
+  try {
+    let data = await ProductWarrantyModal.find({}).sort({ _id: -1 });
+    res.send(data);
+  } catch (err) {
+    res.status(400).send(err);
+  }
 }
-const getProductWarrantyById=async(req,res)=>{
-    try{
-        let _id=req.params.id;
-        let data=await ProductWarrantyModal.findById(_id);
+
+
+ 
+    
+    const getAllActivationWarranty = async (req, res) => {
+      try {
+        const data = await ProductWarrantyModal.aggregate([
+          { $unwind: "$records" }, // Deconstruct the records array
+          { $match: { "records.isActivated": true } }, // Filter only activated records
+          {
+            $project: {
+              _id: "$records._id",
+          brandName: "$records.brandName",
+          brandId: "$records.brandId",
+          productName: "$records.productName",
+          productId: "$records.productId",
+          categoryId: "$records.categoryId",
+          uniqueId: "$records.uniqueId",
+          year: "$records.year",
+          batchNo: "$records.batchNo",
+          warrantyInDays: "$records.warrantyInDays",
+          qrCodes: "$records.qrCodes",
+          userId: "$records.userId",
+          userName: "$records.userName",
+          email: "$records.email",
+          contact: "$records.contact",
+          address: "$records.address",
+          lat: "$records.lat",
+          long: "$records.long",
+          pincode: "$records.pincode",
+          district: "$records.district",
+          state: "$records.state",
+          complaintId: "$records.complaintId",
+          activationDate:"$records.activationDate",
+            },
+          },
+          { $sort: { _id: -1 } },
+        ]);
+    
         res.send(data);
-     }catch(err){
+      } catch (err) {
         res.status(400).send(err);
-     }
+      }
+    };
+    
+  
+    const getActivationWarrantyById = async (req, res) => {
+      try {
+        const { id } = req.params;
+    
+        // Validate the ID format
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+          return res.status(400).send({ message: 'Invalid ID format' });
+        }
+    
+        // console.log("Requested ID:", id); // Debug log
+    
+        // Use the `new` keyword to instantiate ObjectId
+        const objectId = new mongoose.Types.ObjectId(id);
+    
+        // Use aggregate to find the matching record
+        const data = await ProductWarrantyModal.aggregate([
+          { 
+            $unwind: "$records"  // Deconstruct the records array
+          },
+          { 
+            $match: { "records._id": objectId }  // Correct usage of ObjectId
+          },
+          {
+            $project: {
+              _id: "$records._id",
+              brandName: "$records.brandName",
+              brandId: "$records.brandId",
+              productName: "$records.productName",
+              productId: "$records.productId",
+              categoryId: "$records.categoryId",
+              uniqueId: "$records.uniqueId",
+              year: "$records.year",
+              batchNo: "$records.batchNo",
+              warrantyInDays: "$records.warrantyInDays",
+              qrCodes: "$records.qrCodes",
+              userId: "$records.userId",
+              userName: "$records.userName",
+              email: "$records.email",
+              contact: "$records.contact",
+              address: "$records.address",
+              lat: "$records.lat",
+              long: "$records.long",
+              pincode: "$records.pincode",
+              district: "$records.district",
+              state: "$records.state",
+              complaintId: "$records.complaintId",
+              activationDate:"$records.activationDate",
+            },
+          },
+        ]);
+    
+        // Check if no data is found
+        if (!data || data.length === 0) {
+          return res.status(404).send({ message: 'Record not found' });
+        }
+    
+        // Return the found record
+        res.status(200).json(data[0]);
+      } catch (error) {
+        // Handle any errors
+        console.error('Error fetching data:', error);
+        res.status(500).send({ message: "Error fetching data", error: error.message });
+      }
+    };
+    
+    
+    
+
+
+
+
+const getProductWarrantyById = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let data = await ProductWarrantyModal.findById(_id);
+    res.send(data);
+  } catch (err) {
+    res.status(400).send(err);
+  }
 }
 const getProductWarrantyByUniqueId = async (req, res) => {
   try {
-    const uniqueId = req.params.id;   
+    const uniqueId = req.params.id;
     // console.log("Searching for uniqueId:", uniqueId);
-    
+
     // Search for a document where the `uniqueId` exists in the `records` array
-    const data = await ProductWarrantyModal.findOne({ 
-      'records.uniqueId': uniqueId 
-    });  
-    
+    const data = await ProductWarrantyModal.findOne({
+      'records.uniqueId': uniqueId
+    });
+
     if (!data) {
       return res.status(404).send({ message: "Product warranty not found" });
     }
@@ -416,24 +533,24 @@ const getProductWarrantyByUniqueId = async (req, res) => {
 };
 
 
-const editProductWarranty=async (req,res)=>{
-    try{
-        let _id=req.params.id;
-        let body=req.body;
-        let data=await ProductWarrantyModal.findByIdAndUpdate(_id,body);
-        res.json({status:true,msg:"Product warranty Updated"});
-     }catch(err){
-        res.status(500).send(err);
-     }
+const editProductWarranty = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let body = req.body;
+    let data = await ProductWarrantyModal.findByIdAndUpdate(_id, body);
+    res.json({ status: true, msg: "Product warranty Updated" });
+  } catch (err) {
+    res.status(500).send(err);
+  }
 }
- const deleteProductWarranty=async(req,res)=>{
-    try{
-        let _id=req.params.id;
-        let data=await ProductWarrantyModal.findByIdAndDelete(_id);
-        res.json({status:true,msg:"Product warranty Deteled"});
-     }catch(err){
-        res.status(500).send(err);
-     }
- }
+const deleteProductWarranty = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let data = await ProductWarrantyModal.findByIdAndDelete(_id);
+    res.json({ status: true, msg: "Product warranty Deteled" });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+}
 
-module.exports = { addProductWarranty,activateWarranty,getAllProductWarranty,getProductWarrantyByUniqueId,getProductWarrantyById,editProductWarranty,deleteProductWarranty };
+module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty, getAllActivationWarranty,getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById, editProductWarranty, deleteProductWarranty };
