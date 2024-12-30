@@ -349,7 +349,7 @@ const activateWarranty = async (req, res) => {
       // Activate the warranty
       record.isActivated = true;
     record.userName = name;
-    record.userId = _id;
+      record.userId = user._id;
     record.email = email;
     record.contact = contact;
     record.address = address;
