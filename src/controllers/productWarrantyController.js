@@ -318,6 +318,7 @@ const activateWarranty = async (req, res) => {
       // Hash the password and create a new user
 
       user = new UserModel({
+        _id,
         name,
         contact,
         email,
@@ -348,6 +349,7 @@ const activateWarranty = async (req, res) => {
       // Activate the warranty
       record.isActivated = true;
     record.userName = name;
+    record.userId = _id;
     record.email = email;
     record.contact = contact;
     record.address = address;
