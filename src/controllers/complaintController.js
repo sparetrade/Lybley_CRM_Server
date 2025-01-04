@@ -5,7 +5,7 @@ const { UserModel } = require("../models/registration")
 const SubCategoryModal = require("../models/subCategory")
 const BrandRechargeModel = require("../models/brandRecharge")
 const WalletModel = require("../models/wallet")
-const ProductWarrantyModal =require("../models/productWarranty")
+const ProductWarrantyModal = require("../models/productWarranty")
 
 // const addComplaint = async (req, res) => {
 //    try {
@@ -99,7 +99,7 @@ const addComplaint = async (req, res) => {
          await user.save();
       }
       // console.log(uniqueId);
-      
+
       if (uniqueId) {
          const warranty = await ProductWarrantyModal.findOne({ 'records.uniqueId': uniqueId });
          if (!warranty) {
@@ -112,10 +112,10 @@ const addComplaint = async (req, res) => {
             return res.status(404).json({ status: false, msg: 'Warranty record not found' });
          }
 
-         
-           
-            // Activate the warranty
-            record.isActivated = true;
+
+
+         // Activate the warranty
+         record.isActivated = true;
          record.userName = fullName;
          record.email = email;
          record.contact = phoneNumber;
@@ -169,8 +169,7 @@ const addComplaint = async (req, res) => {
          message: `Registered Your Complaint, ${fullName}!`,
       });
       await notification.save();
-
-      res.json({ status: true, msg: "Complaint Added" });
+      res.json({ status: true, msg: "Complaint Added", user: user });
    } catch (err) {
       console.error(err);
       res.status(400).send(err);
