@@ -387,27 +387,25 @@ const getAllProductWarranty = async (req, res) => {
     res.status(400).send(err);
   }
 }
-
 const getAllProductWarrantyById = async (req, res) => {
- 
-    try {
-      const { id: brandId } = req.params;
-  
-      const warranties = await ProductWarrantyModal.aggregate([
-        { $match: { brandId } }, // Filter by brandId
-        { $sort: { _id: -1 } }, // Sort by _id in descending order
-        { $project: { warrantyField1: 1, warrantyField2: 1, _id: 1 } } // Only include necessary fields
-      ]);
-  
-      if (warranties.length === 0) {
-        return res.status(404).send({ error: "No warranties found for this brand" });
-      }
-  
-      res.status(200).send(warranties);
-    } catch (err) {
-      res.status(400).send({ error: "Error fetching product warranties", details: err.message });
+  try {
+    const { id: brandId } = req.params;
+
+    const warranties = await ProductWarrantyModal.aggregate([
+      { $match: { brandId } }, // Filter by brandId
+      { $sort: { _id: -1 } }, // Sort by _id in descending order
+    ]);
+
+    if (warranties.length === 0) {
+      return res.status(404).send({ error: "No warranties found for this brand" });
     }
-  };
+
+    res.status(200).send(warranties);
+  } catch (err) {
+    res.status(400).send({ error: "Error fetching product warranties", details: err.message });
+  }
+};
+
   
 
 const getAllProductWarrantyByBrandIdTotal = async (req, res) => {
