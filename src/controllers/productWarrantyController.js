@@ -349,7 +349,7 @@ const activateWarranty = async (req, res) => {
       // Activate the warranty
       record.isActivated = true;
     record.userName = name;
-      record.userId = user._id;
+    record.userId = user._id;
     record.email = email;
     record.contact = contact;
     record.address = address;
@@ -388,17 +388,57 @@ const getAllProductWarranty = async (req, res) => {
   }
 }
 
-
+const getAllProductWarrantyById = async (req, res) => {
  
-    
-    const getAllActivationWarranty = async (req, res) => {
-      try {
-        const data = await ProductWarrantyModal.aggregate([
-          { $unwind: "$records" }, // Deconstruct the records array
-          { $match: { "records.isActivated": true } }, // Filter only activated records
-          {
-            $project: {
-              _id: "$records._id",
+    try {
+      const { id: brandId } = req.params;
+  
+      const warranties = await ProductWarrantyModal.aggregate([
+        { $match: { brandId } }, // Filter by brandId
+        { $sort: { _id: -1 } }, // Sort by _id in descending order
+        { $project: { warrantyField1: 1, warrantyField2: 1, _id: 1 } } // Only include necessary fields
+      ]);
+  
+      if (warranties.length === 0) {
+        return res.status(404).send({ error: "No warranties found for this brand" });
+      }
+  
+      res.status(200).send(warranties);
+    } catch (err) {
+      res.status(400).send({ error: "Error fetching product warranties", details: err.message });
+    }
+  };
+  
+
+const getAllProductWarrantyByBrandIdTotal = async (req, res) => {
+  try {
+    const { id } = req.params; // Get brandId from the URL params
+    // console.log("brandId:", brandId);
+    const brandId = id;
+    // Find warranties matching the brandId
+    const result = await ProductWarrantyModal.aggregate([
+      { $match: { brandId } }, // Match documents with the specific brandId
+      { $group: { _id: null, totalNumberOfGenerate: { $sum: "$numberOfGenerate" } } } // Sum up the numberOfGenerate
+    ]);
+
+    // If no data is found, return 0
+    const totalNumberOfGenerate = result.length > 0 ? result[0].totalNumberOfGenerate : 0;
+
+    res.status(200).send({ totalNumberOfGenerate });
+  } catch (err) {
+    res.status(400).send({ error: "Error fetching total number of generate", details: err.message });
+  }
+}
+
+
+const getAllActivationWarranty = async (req, res) => {
+  try {
+    const data = await ProductWarrantyModal.aggregate([
+      { $unwind: "$records" }, // Deconstruct the records array
+      { $match: { "records.isActivated": true } }, // Filter only activated records
+      {
+        $project: {
+          _id: "$records._id",
           brandName: "$records.brandName",
           brandId: "$records.brandId",
           productName: "$records.productName",
@@ -420,86 +460,86 @@ const getAllProductWarranty = async (req, res) => {
           district: "$records.district",
           state: "$records.state",
           complaintId: "$records.complaintId",
-          activationDate:"$records.activationDate",
-            },
-          },
-          { $sort: { _id: -1 } },
-        ]);
-    
-        res.send(data);
-      } catch (err) {
-        res.status(400).send(err);
-      }
-    };
-    
-  
-    const getActivationWarrantyById = async (req, res) => {
-      try {
-        const { id } = req.params;
-    
-        // Validate the ID format
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-          return res.status(400).send({ message: 'Invalid ID format' });
-        }
-    
-        // console.log("Requested ID:", id); // Debug log
-    
-        // Use the `new` keyword to instantiate ObjectId
-        const objectId = new mongoose.Types.ObjectId(id);
-    
-        // Use aggregate to find the matching record
-        const data = await ProductWarrantyModal.aggregate([
-          { 
-            $unwind: "$records"  // Deconstruct the records array
-          },
-          { 
-            $match: { "records._id": objectId }  // Correct usage of ObjectId
-          },
-          {
-            $project: {
-              _id: "$records._id",
-              brandName: "$records.brandName",
-              brandId: "$records.brandId",
-              productName: "$records.productName",
-              productId: "$records.productId",
-              categoryId: "$records.categoryId",
-              uniqueId: "$records.uniqueId",
-              year: "$records.year",
-              batchNo: "$records.batchNo",
-              warrantyInDays: "$records.warrantyInDays",
-              qrCodes: "$records.qrCodes",
-              userId: "$records.userId",
-              userName: "$records.userName",
-              email: "$records.email",
-              contact: "$records.contact",
-              address: "$records.address",
-              lat: "$records.lat",
-              long: "$records.long",
-              pincode: "$records.pincode",
-              district: "$records.district",
-              state: "$records.state",
-              complaintId: "$records.complaintId",
-              activationDate:"$records.activationDate",
-            },
-          },
-        ]);
-    
-        // Check if no data is found
-        if (!data || data.length === 0) {
-          return res.status(404).send({ message: 'Record not found' });
-        }
-    
-        // Return the found record
-        res.status(200).json(data[0]);
-      } catch (error) {
-        // Handle any errors
-        console.error('Error fetching data:', error);
-        res.status(500).send({ message: "Error fetching data", error: error.message });
-      }
-    };
-    
-    
-    
+          activationDate: "$records.activationDate",
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+
+    res.send(data);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+
+const getActivationWarrantyById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ message: 'Invalid ID format' });
+    }
+
+    // console.log("Requested ID:", id); // Debug log
+
+    // Use the `new` keyword to instantiate ObjectId
+    const objectId = new mongoose.Types.ObjectId(id);
+
+    // Use aggregate to find the matching record
+    const data = await ProductWarrantyModal.aggregate([
+      {
+        $unwind: "$records"  // Deconstruct the records array
+      },
+      {
+        $match: { "records._id": objectId }  // Correct usage of ObjectId
+      },
+      {
+        $project: {
+          _id: "$records._id",
+          brandName: "$records.brandName",
+          brandId: "$records.brandId",
+          productName: "$records.productName",
+          productId: "$records.productId",
+          categoryId: "$records.categoryId",
+          uniqueId: "$records.uniqueId",
+          year: "$records.year",
+          batchNo: "$records.batchNo",
+          warrantyInDays: "$records.warrantyInDays",
+          qrCodes: "$records.qrCodes",
+          userId: "$records.userId",
+          userName: "$records.userName",
+          email: "$records.email",
+          contact: "$records.contact",
+          address: "$records.address",
+          lat: "$records.lat",
+          long: "$records.long",
+          pincode: "$records.pincode",
+          district: "$records.district",
+          state: "$records.state",
+          complaintId: "$records.complaintId",
+          activationDate: "$records.activationDate",
+        },
+      },
+    ]);
+
+    // Check if no data is found
+    if (!data || data.length === 0) {
+      return res.status(404).send({ message: 'Record not found' });
+    }
+
+    // Return the found record
+    res.status(200).json(data[0]);
+  } catch (error) {
+    // Handle any errors
+    console.error('Error fetching data:', error);
+    res.status(500).send({ message: "Error fetching data", error: error.message });
+  }
+};
+
+
+
 
 
 
@@ -555,4 +595,4 @@ const deleteProductWarranty = async (req, res) => {
   }
 }
 
-module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty, getAllActivationWarranty,getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById, editProductWarranty, deleteProductWarranty };
+module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById, editProductWarranty, deleteProductWarranty };
