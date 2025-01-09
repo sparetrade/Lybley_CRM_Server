@@ -122,6 +122,30 @@ router.get('/getUserAndProduct', async (req, res) => {
     res.status(500).send(err);
   }
 });
+router.get('/getCustomers/:id', async (req, res) => {
+  try {
+   const brandId= req.params.id; // Extract brandId from query parameters
+// console.log(brandId);
+
+    // Find complaints based on the brandId
+    const complaints = await Complaints.find(brandId ? { brandId } : {});
+
+    // Extract unique user IDs (or other fields, such as email) from complaints
+    const userIds = [...new Set(complaints.map(complaint => complaint.userId))];
+
+    // Find users who match the extracted user IDs
+    const customers = await UserModel.find({ _id: { $in: userIds } });
+
+    res.json({
+      customers,       // Users associated with complaints
+      complaints,  // The complaints data
+    });
+  } catch (err) {
+    console.error('Error fetching users and complaints by brandId:', err);
+    res.status(500).send(err);
+  }
+});
+
 
 // router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
 //   try {
