@@ -175,7 +175,7 @@ router.post('/filterUserData', async (req, res) => {
   //   }
   // });
   
-  router.post('/filterData', async (req, res) => {
+  router.post('/filterDataOld', async (req, res) => {
     try {
       const { reportType, startDate, endDate, filters, includeCharts } = req.body;
       // console.log(filters);
@@ -273,6 +273,131 @@ router.post('/filterUserData', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+
+ 
+  
+  router.post('/filterData', async (req, res) => {
+    try {
+      const { reportType, startDate, endDate, filters } = req.body;
+      const brandId = req?.body?.filters?.brandId || null;
+      const userRole = req?.body?.filters?.userRole || null;
+  
+      let query = {};
+      let dateQuery = {};
+  
+      // Apply date filter if startDate and endDate are provided
+      if (startDate && endDate) {
+        dateQuery.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+      }
+  
+      // Handle USER Report
+      if (reportType === 'USER') {
+        // Fetch complaints filtered by brandId if provided
+        const complaints = await ComplaintModal.find(brandId ? { brandId, ...dateQuery } : dateQuery);
+  
+        // Extract unique user IDs from complaints
+        const userIds = [...new Set(complaints.map((complaint) => complaint.userId))];
+  
+        // Find users who match the extracted user IDs
+        const customers = await UserModel.find({ _id: { $in: userIds } });
+  
+        // Create report data with labels and data for charts (if required)
+        const reportData = {
+          summary: `User Report from ${startDate} to ${endDate}`,
+          customers,
+          totalCustomers: customers.length,
+          labels: ['Customer Count'],
+          data: [customers.length] // Example: Count of customers for charting
+        };
+  
+        return res.json({ summary: 'User Report', data: reportData });
+      }
+  
+      // Handle COMPLAINT Report
+      if (reportType === 'COMPLAINT') {
+        // Add additional filters for complaints
+        if (filters.status) {
+          const statuses = Object.keys(filters.status).filter((key) => filters.status[key]);
+          if (statuses.length) {
+            query.status = { $in: statuses };
+          }
+        }
+  
+        if (filters.product && filters.product.length > 0) {
+          query.productId = { $in: filters.product };
+        }
+  
+        if (filters.serviceCenter && filters.serviceCenter.length > 0) {
+          query.assignServiceCenterId = { $in: filters.serviceCenter };
+        }
+  
+        if (filters.technician && filters.technician.length > 0) {
+          query.technicianId = { $in: filters.technician };
+        }
+  
+        if (filters.country) {
+          query.country = filters.country;
+        }
+  
+        if (filters.state) {
+          query.state = filters.state;
+        }
+  
+        if (filters.city) {
+          query.city = filters.city;
+        }
+  
+        // Apply brandId filter if provided
+        if (brandId) {
+          query.brandId = brandId;
+        }
+  
+        // Apply date filter
+        if (startDate && endDate) {
+          query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+        }
+  
+        // Fetch complaints based on the query
+        const complaints = await ComplaintModal.find(query);
+  
+        // Example: Group complaints by status for chart labels and data
+        const groupedByStatus = complaints.reduce((acc, complaint) => {
+          const status = complaint.status;
+          acc[status] = (acc[status] || 0) + 1;
+          return acc;
+        }, {});
+  
+        // Prepare labels and data for charts
+        const labels = Object.keys(groupedByStatus);
+        const data = Object.values(groupedByStatus);
+  
+        // Create report data with labels and data for charts
+        const reportData = {
+          summary: `Complaint Report from ${startDate} to ${endDate}`,
+          complaints,
+          labels,
+          data
+        };
+  
+        return res.json(reportData);
+      }
+  
+      // If no valid report type is provided
+      res.status(400).json({ error: 'Invalid report type' });
+    } catch (error) {
+      console.error('Error filtering data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  
+  
+   
+  
+  
+  
+  
 
   router.post('/filterData11', async (req, res) => {
     try {
