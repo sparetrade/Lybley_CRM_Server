@@ -48,6 +48,35 @@ const adminLoginController = async (req, res) => {
 
 module.exports = adminLoginController;
 
+
+
+const dashboardLoginController = async (req, res) => {
+    try {
+        const { userId } = req.body;
+ 
+
+        // Validate input
+        if (!userId) {
+            return res.status(400).json({ status: false, msg: "User ID is required" });
+        }
+
+        // Check if the user exists in the UserModel
+        const user = await UserModel.findOne({ _id:userId });
+        if (user) {
+            return res.status(200).json({ status: true, msg: "USER login successful", user });
+        }
+
+        // If no user is found
+        return res.status(401).json({ status: false, msg: "Invalid User ID" });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send({ status: false, msg: "An error occurred", error: err.message });
+    }
+};
+
+ 
+
+
 const adminRegistration = async (req, res) => {
     try {
         const { email } = req.body;
@@ -653,7 +682,7 @@ const forgetPassword = async (req, res) => {
 
 
 module.exports = {
-    getProfileById,adminLoginController, brandRegistration, serviceRegistration, empolyeeRegistration, dealerRegistration, adminRegistration, userRegistration,
+    getProfileById,adminLoginController,dashboardLoginController, brandRegistration, serviceRegistration, empolyeeRegistration, dealerRegistration, adminRegistration, userRegistration,
     getAllBrand, getBrandById, editBrand, deleteBrand, getAllServiceCenter, getServiceCenterById, editServiceCenter, deleteServiceCenter,
     getAllEmployee, getEmployeeById, editEmployee, deleteEmployee, getAllUser, getUserById, editUser, deleteUser
     , getAllDealer, getDealerById, editDealer, deleteDealer, otpVerification, otpVerificationSending, mobileEmailVerification, forgetPassword, otpSending
