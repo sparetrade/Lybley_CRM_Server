@@ -21,15 +21,37 @@ const getAllRecharge = async (req, res) => {
         res.status(400).send(err);
     }
 }
+// const getRechargeById = async (req, res) => {
+//     try {
+//         let _id = req.params.id;
+//         let data = await BrandRechargeModel.findById(_id);
+//         res.send(data);
+//     } catch (err) {
+//         res.status(400).send(err);
+//     }
+// }
 const getRechargeById = async (req, res) => {
     try {
         let _id = req.params.id;
         let data = await BrandRechargeModel.findById(_id);
+
+        if (!data) {
+            // If no data is found, send a custom response
+            return res.status(401).send({
+                message: "No recharge data found",
+                amount: 0,
+            });
+        }
+
         res.send(data);
     } catch (err) {
-        res.status(400).send(err);
+        res.status(400).send({
+            message: "An error occurred while fetching recharge data",
+            error: err.message,
+        });
     }
-}
+};
+
 
 const editRecharge = async (req, res) => {
     try {
