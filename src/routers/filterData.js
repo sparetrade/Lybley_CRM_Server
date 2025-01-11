@@ -282,6 +282,7 @@ router.post('/filterUserData', async (req, res) => {
       const { reportType, startDate, endDate, filters } = req.body;
       const brandId = req?.body?.filters?.brandId || null;
       const userRole = req?.body?.filters?.userRole || null;
+  // console.log(userRole);
   
       let query = {};
       let dateQuery = {};
@@ -293,7 +294,10 @@ router.post('/filterUserData', async (req, res) => {
   
       // Handle USER Report
       if (reportType === 'USER') {
+        const userTypes = Object.keys(filters.userType).filter(type => filters.userType[type]);
+        let responseData = {};
         // Fetch complaints filtered by brandId if provided
+      if(userRole==="BRAND") {
         const complaints = await ComplaintModal.find(brandId ? { brandId, ...dateQuery } : dateQuery);
   
         // Extract unique user IDs from complaints
@@ -301,17 +305,44 @@ router.post('/filterUserData', async (req, res) => {
   
         // Find users who match the extracted user IDs
         const customers = await UserModel.find({ _id: { $in: userIds } });
+        
+        if(customers)
+        {
+          responseData.customers = customers;
+        }
+      } else{
+        if (userTypes.includes('customer')) {
+          const customers = await UserModel.find(dateQuery);
+          responseData.customers = customers;
+        }
+      }
+      
+
+       
+        if (userTypes.includes('serviceCenter')) {
+          const serviceCenters = await ServiceModel.find(dateQuery);
+          responseData.serviceCenters = serviceCenters;
+        }
   
+        if (userTypes.includes('technician')) {
+          const technicians = await TechnicianModal.find(dateQuery);
+          responseData.technicians = technicians;
+        }
+  
+        if (userTypes.includes('brand')) {
+          const brands = await BrandRegistrationModel.find(dateQuery);
+          responseData.brands = brands;
+        }
         // Create report data with labels and data for charts (if required)
-        const reportData = {
-          summary: `User Report from ${startDate} to ${endDate}`,
-          customers,
-          totalCustomers: customers.length,
-          labels: ['Customer Count'],
-          data: [customers.length] // Example: Count of customers for charting
-        };
+        // const reportData = {
+        //   summary: `User Report from ${startDate} to ${endDate}`,
+        //   customers,
+        //   totalCustomers: customers.length,
+        //   labels: ['Customer Count'],
+        //   data: [customers.length] // Example: Count of customers for charting
+        // };
   
-        return res.json({ summary: 'User Report', data: reportData });
+        return res.json({ summary: 'User Report', data: responseData });
       }
   
       // Handle COMPLAINT Report
