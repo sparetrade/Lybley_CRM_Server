@@ -313,12 +313,12 @@ const productId=req.body.productId
     }
 
     // Check if the user already exists
-    let user = await UserModel.findOne({ email });
+    let user = await UserModel.findOne({ contact });
     if (!user) {
       // Hash the password and create a new user
 
       user = new UserModel({
-        _id,
+        
         name,
         contact,
         email,
@@ -348,7 +348,7 @@ const productId=req.body.productId
     lat, long, pincode,
       // Activate the warranty
       record.isActivated = true;
-    record.userName = name;
+    record.userName = user.name;
     record.userId = user._id;
     record.email = email;
     record.contact = contact;
