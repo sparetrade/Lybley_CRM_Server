@@ -54,6 +54,7 @@ const dashboardLoginController = async (req, res) => {
     try {
         const { userId } = req.body;
  
+// console.log(userId);
 
         // Validate input
         if (!userId) {
@@ -62,6 +63,7 @@ const dashboardLoginController = async (req, res) => {
 
         // Check if the user exists in the UserModel
         const user = await UserModel.findOne({ _id:userId });
+        // console.log(user);
         if (user) {
             return res.status(200).json({ status: true, msg: "USER login successful", user });
         }
