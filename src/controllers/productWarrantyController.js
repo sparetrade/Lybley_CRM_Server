@@ -306,8 +306,8 @@ const generateUniqueId = async () => {
 
 const activateWarranty = async (req, res) => {
   try {
-    const { name, contact, email, address, lat, long, pincode, district, state, password, uniqueId } = req.body;
-
+    const { name, contact, email, address, lat, long, pincode, district, state, password, uniqueId ,} = req.body;
+const productId=req.body.productId
     if (!name || !contact || !address || !uniqueId) {
       return res.status(400).json({ status: false, msg: 'Missing required fields' });
     }
@@ -358,8 +358,15 @@ const activateWarranty = async (req, res) => {
     record.district = district;
     record.state = state;
     record.pincode = pincode;
+   
     record.activationDate = new Date();
-
+if(productId){
+  record.productName = req.body.productName;
+  record.productId = productId;
+  record.categoryName = req.body.categoryName;
+  record.categoryId = req.body.categoryId;
+  record.year = req.body.year;
+}
     // Save the updated warranty
     await warranty.save();
 
