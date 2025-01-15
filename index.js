@@ -138,21 +138,23 @@ app.use(express.json());
 //     next();
 // });
 
-
-app.use(cors({
-    origin: '*', // Allow all origins; use specific domains for better security.
+const corsOptions = {
+    origin: '*', // Replace '*' with specific domains for security
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization', 'Referer', 'Origin', 'X-Requested-With', 'Accept'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
 
-// Handle OPTIONS requests globally
-app.options('*', cors());
 
-// Middleware to add additional headers (if needed)
+
+// Handle OPTIONS preflight requests
+app.options('*', cors(corsOptions));
+
+// Example Referrer-Policy header
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin, X-Requested-With, Accept");
+    res.header("Referrer-Policy", "strict-origin-when-cross-origin");
     next();
 });
 const PORT = process.env.PORT || 5000;
