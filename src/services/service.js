@@ -10,7 +10,7 @@ require('dotenv').config();
 async function smsSend(otp, mobile) {
   try {
     let options = {
-      authorization: "GMIqeHJdlrcbvYoySzmKTOPX947Q6DjZWpwaNsV3unR1kB0tghPLlWdGfDmyQwhgIeRzJqA3VTcCk0i7",
+      authorization: "Ik2U0hmvgBQ9doVNpXTAfP8HJ3xuaFtyicwMqje1KD75EbC4S6gi3BjVoPRaEMKA9wdGyxc76FNYZ80S",
       message: otp,
       numbers: [mobile]
     }
