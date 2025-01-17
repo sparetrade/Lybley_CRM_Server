@@ -393,7 +393,52 @@ const getAllProductWarranty = async (req, res) => {
   } catch (err) {
     res.status(400).send(err);
   }
-}
+}                   
+const getAllProductWarrantyWithPage = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Get the total count of documents
+    const totalRecords = await ProductWarrantyModal.countDocuments();
+
+    // Fetch the data with pagination
+    let data = await ProductWarrantyModal.find({})
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Send response with data and total count
+    res.send({ data, totalRecords });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+
+const getAllProductWarrantyByIdWithPage = async (req, res) => {
+  try {
+    // console.log(req.params);
+    
+    const { id: brandId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalRecords = await ProductWarrantyModal.countDocuments({ brandId });
+
+    const warranties = await ProductWarrantyModal.find({ brandId })
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).send({ data: warranties, totalRecords });
+  } catch (err) {
+    res.status(400).send({ error: "Error fetching product warranties", details: err.message });
+  }
+};
+
 const getAllProductWarrantyById = async (req, res) => {
   try {
     const { id: brandId } = req.params;
@@ -412,7 +457,6 @@ const getAllProductWarrantyById = async (req, res) => {
     res.status(400).send({ error: "Error fetching product warranties", details: err.message });
   }
 };
-
   
 
 const getAllProductWarrantyByBrandIdTotal = async (req, res) => {
@@ -600,4 +644,4 @@ const deleteProductWarranty = async (req, res) => {
   }
 }
 
-module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById, editProductWarranty, deleteProductWarranty };
+module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById, editProductWarranty, deleteProductWarranty };
