@@ -560,6 +560,42 @@ const editComplaint = async (req, res) => {
       res.status(500).send(err);
    }
 };
+const updateComplaintComments = async (req, res) => {
+   try {
+      const _id = req.params.id;
+      const body = req.body;
+
+      // Prepare the changes to be logged in updateComments
+      const changes = {};
+      for (const key in body) {
+         if (body.hasOwnProperty(key) && key !== 'updateComments') {
+            changes[key] = body[key];
+         }
+      }
+
+      // Find the complaint by ID
+      const complaint = await ComplaintModal.findById(_id);
+      if (!complaint) {
+         return res.status(404).json({ status: false, msg: "Complaint not found" });
+      }
+
+      // Push the update details into updateComments
+      complaint.updateComments.push({
+         updatedAt: new Date(),
+         changes: changes,
+      });
+
+      // Update the complaint fields
+      Object.assign(complaint, body);
+
+      // Save the updated complaint
+      await complaint.save();
+
+      res.json({ status: true, msg: "Complaint Updated" });
+   } catch (err) {
+      res.status(500).send({ status: false, msg: "Error updating complaint", error: err.message });
+   }
+};
 
 const deleteComplaint = async (req, res) => {
    try {
@@ -582,4 +618,4 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, addDealerComplaint, addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint, addDealerComplaint, addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById,updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };

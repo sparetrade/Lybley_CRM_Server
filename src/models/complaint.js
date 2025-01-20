@@ -23,6 +23,12 @@ const complaintSchema = new mongoose.Schema({
   userId: { type: String },
   dealerName: { type: String },
   dealerId: { type: String },
+  updateComments: [
+    {
+      updatedAt: { type: Date, default: Date.now },
+      changes: { type: Map, of: String },
+    },
+  ],
   updateHistory: [
     {
       updatedAt: { type: Date, default: Date.now },
