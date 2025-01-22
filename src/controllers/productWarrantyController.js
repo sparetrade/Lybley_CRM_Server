@@ -569,6 +569,7 @@ const getActivationWarrantyById = async (req, res) => {
           state: "$records.state",
           complaintId: "$records.complaintId",
           activationDate: "$records.activationDate",
+          isActivated: "$records.isActivated",
         },
       },
     ]);
@@ -634,6 +635,54 @@ const editProductWarranty = async (req, res) => {
     res.status(500).send(err);
   }
 }
+const editActivationWarranty = async (req, res) => {
+  const { uniqueId, updates } = req.body;
+  // console.log("uniqueId", uniqueId);
+
+  // Ensure both uniqueId and updates are present
+  if (!uniqueId || !updates) {
+    return res.status(400).json({ error: 'UniqueId and updates are required.' });
+  }
+
+  try {
+    // Define the fields to be updated dynamically
+    const updateFields = {};
+    if (updates.userName) updateFields['records.$[record].userName'] = updates.userName;
+    if (updates.contact) updateFields['records.$[record].contact'] = updates.contact;
+    if (updates.email) updateFields['records.$[record].email'] = updates.email;
+    if (updates.address) updateFields['records.$[record].address'] = updates.address;
+    if (updates.lat) updateFields['records.$[record].lat'] = updates.lat;
+    if (updates.long) updateFields['records.$[record].long'] = updates.long;
+    if (updates.pincode) updateFields['records.$[record].pincode'] = updates.pincode;
+    if (updates.isActivated !== undefined) updateFields['records.$[record].isActivated'] = updates.isActivated;
+
+    // Perform the update using arrayFilters to update only the matching record
+    const updatedDoc = await ProductWarrantyModal.findOneAndUpdate(
+      { 'records.uniqueId': uniqueId }, // Find document that contains the matching uniqueId in records array
+      { $set: updateFields }, // Apply updates to the matched record
+      {
+        new: true, // Return the updated document
+        arrayFilters: [{ 'record.uniqueId': uniqueId }] // Filter to match the specific record in the array
+      }
+    );
+
+    // console.log("updatedDoc", updatedDoc);
+
+    // If no document is found with the matching uniqueId, return a 404
+    if (!updatedDoc) {
+      return res.status(404).json({ error: 'Record not found.' });
+    }
+
+    // Return success response with updated document
+    res.status(200).json({ message: 'Record updated successfully.', data: updatedDoc });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while updating the record.' });
+  }
+};
+
+
+
 const deleteProductWarranty = async (req, res) => {
   try {
     let _id = req.params.id;
@@ -644,4 +693,4 @@ const deleteProductWarranty = async (req, res) => {
   }
 }
 
-module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById, editProductWarranty, deleteProductWarranty };
+module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById,editActivationWarranty, editProductWarranty, deleteProductWarranty };
