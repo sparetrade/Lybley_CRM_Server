@@ -280,10 +280,11 @@ router.post('/filterUserData', async (req, res) => {
   router.post('/filterData', async (req, res) => {
     try {
       const { reportType, startDate, endDate, filters } = req.body;
-      const brandId = req?.body?.filters?.brandId || null;
+      const brandId = req?.body?.filters?.brand || null;
       const userRole = req?.body?.filters?.userRole || null;
   // console.log(userRole);
-  
+  // console.log("req.body",req.body);
+  // console.log("brandId",brandId);
       let query = {};
       let dateQuery = {};
   
@@ -382,6 +383,8 @@ router.post('/filterUserData', async (req, res) => {
         // Apply brandId filter if provided
         if (brandId) {
           query.brandId = brandId;
+          console.log("brandId",brandId);
+          
         }
   
         // Apply date filter
