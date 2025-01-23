@@ -525,6 +525,7 @@ const editComplaint = async (req, res) => {
                brandId: data.brandId,
                brandName: data.productBrand,
                amount: -body?.paymentBrand,
+               complaintId:data._id,
                description: "Complaint Close  Payout"
             });
             await brandTrans.save();
