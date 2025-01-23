@@ -3,7 +3,7 @@
 const express=require("express");
 const router=express.Router();
  
-const {addProductWarranty,activateWarranty,getAllProductWarranty,editActivationWarranty,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage,getAllProductWarrantyByBrandIdTotal,getAllProductWarrantyById,getActivationWarrantyById,getAllActivationWarranty,getProductWarrantyByUniqueId,getProductWarrantyById,editProductWarranty,deleteProductWarranty }=require("../controllers/productWarrantyController")
+const {addProductWarranty,activateWarranty,getAllProductWarranty,editActivationWarranty,getActivationWarrantyByUserId,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage,getAllProductWarrantyByBrandIdTotal,getAllProductWarrantyById,getActivationWarrantyById,getAllActivationWarranty,getProductWarrantyByUniqueId,getProductWarrantyById,editProductWarranty,deleteProductWarranty }=require("../controllers/productWarrantyController")
 
 router.post("/addProductWarranty",addProductWarranty );
 router.post("/activateWarranty",activateWarranty );
@@ -14,6 +14,7 @@ router.get("/getAllProductWarrantyById/:id",getAllProductWarrantyById );
 router.get("/getAllProductWarrantyByBrandIdTotal/:id",getAllProductWarrantyByBrandIdTotal );
 router.get("/getAllActivationWarranty",getAllActivationWarranty );
 router.get("/getActivationWarrantyById/:id",getActivationWarrantyById );
+router.get("/getActivationWarrantyByUserId/:id",getActivationWarrantyByUserId );
 router.get("/getProductWarranty/:id",getProductWarrantyById );
 router.get("/getProductWarrantyByUniqueId/:id",getProductWarrantyByUniqueId );
 router.patch("/editProductWarranty/:id",editProductWarranty );
