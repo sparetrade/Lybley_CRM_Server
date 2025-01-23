@@ -308,6 +308,8 @@ const activateWarranty = async (req, res) => {
   try {
     const { name, contact, email, address, lat, long, pincode, district, state, password, uniqueId ,} = req.body;
 const productId=req.body.productId
+// console.log("");
+
     if (!name || !contact || !address || !uniqueId) {
       return res.status(400).json({ status: false, msg: 'Missing required fields' });
     }
@@ -527,7 +529,7 @@ const getAllActivationWarranty = async (req, res) => {
 const getActivationWarrantyByUserId = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("Requested User ID:", id);
+    // console.log("Requested User ID:", id);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).send({ message: "Invalid ID format" });
@@ -574,6 +576,9 @@ const getActivationWarrantyByUserId = async (req, res) => {
           activationDate: "$records.activationDate",
           isActivated: "$records.isActivated",
         },
+      },
+      {
+        $sort: { activationDate: -1 }, // Sort by activationDate in descending order
       },
     ]);
 
