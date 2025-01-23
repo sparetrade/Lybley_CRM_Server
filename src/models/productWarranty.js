@@ -17,7 +17,7 @@ const productWarrantySchema=new mongoose.Schema({
     productId: { type: String },
     categoryId: { type: String },
      productId: { type: String },
-    categorName: { type: String },
+     categoryName: { type: String },
     numberOfGenerate: Number,
     warrantyInDays: Number,
     year: {type:Date},
@@ -28,6 +28,7 @@ const productWarrantySchema=new mongoose.Schema({
       productName: { type: String },
       productId: { type: String },
       categoryId: { type: String },
+      categoryName: { type: String },
        productId: { type: String },
        
       uniqueId:{type: String},

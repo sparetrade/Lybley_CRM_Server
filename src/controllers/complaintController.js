@@ -152,7 +152,9 @@ const addComplaint = async (req, res) => {
          assignServiceCenter: serviceCenter?.serviceCenterName,
          assignServiceCenterTime: new Date()
       };
-
+      if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
+         obj.status = "ASSIGN";
+      }
       // Save the complaint
       let data = new ComplaintModal(obj);
       await data.save();
@@ -207,6 +209,9 @@ const addAPPComplaint = async (req, res) => {
             assignServiceCenter: serviceCenter?.serviceCenterName,
             assignServiceCenterTime: new Date()
          };
+         if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
+            obj.status = "ASSIGN";
+         }
          let data = new ComplaintModal(obj);
          await data.save();
          const notification = new NotificationModel({
@@ -231,6 +236,9 @@ const addAPPComplaint = async (req, res) => {
          assignServiceCenter: serviceCenter?.serviceCenterName,
          assignServiceCenterTime: new Date()
       };
+      if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
+         obj.status = "ASSIGN";
+      }
       let data = new ComplaintModal(obj);
       await data.save();
 

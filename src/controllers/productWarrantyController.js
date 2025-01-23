@@ -493,6 +493,7 @@ const getAllActivationWarranty = async (req, res) => {
           productName: "$records.productName",
           productId: "$records.productId",
           categoryId: "$records.categoryId",
+          categoryName: "$records.categoryName",
           uniqueId: "$records.uniqueId",
           year: "$records.year",
           batchNo: "$records.batchNo",
@@ -510,6 +511,7 @@ const getAllActivationWarranty = async (req, res) => {
           state: "$records.state",
           complaintId: "$records.complaintId",
           activationDate: "$records.activationDate",
+          isActivated: "$records.isActivated",
         },
       },
       { $sort: { _id: -1 } },
@@ -518,6 +520,71 @@ const getAllActivationWarranty = async (req, res) => {
     res.send(data);
   } catch (err) {
     res.status(400).send(err);
+  }
+};
+
+
+const getActivationWarrantyByUserId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("Requested User ID:", id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid ID format" });
+    }
+
+    const objectId = new mongoose.Types.ObjectId(id);
+    const stringId = id.toString();
+
+    const data = await ProductWarrantyModal.aggregate([
+      { $unwind: "$records" },
+      {
+        $match: {
+          $or: [
+            { "records.userId": objectId }, // Match ObjectId format
+            { "records.userId": stringId }  // Match string format
+          ]
+        }
+      },
+      {
+        $project: {
+          _id: "$records._id",
+          brandName: "$records.brandName",
+          brandId: "$records.brandId",
+          productName: "$records.productName",
+          productId: "$records.productId",
+          categoryId: "$records.categoryId",
+          categoryName: "$records.categoryName",
+          uniqueId: "$records.uniqueId",
+          year: "$records.year",
+          batchNo: "$records.batchNo",
+          warrantyInDays: "$records.warrantyInDays",
+          qrCodes: "$records.qrCodes",
+          userId: "$records.userId", // Include userId in the response
+          userName: "$records.userName",
+          email: "$records.email",
+          contact: "$records.contact",
+          address: "$records.address",
+          lat: "$records.lat",
+          long: "$records.long",
+          pincode: "$records.pincode",
+          district: "$records.district",
+          state: "$records.state",
+          complaintId: "$records.complaintId",
+          activationDate: "$records.activationDate",
+          isActivated: "$records.isActivated",
+        },
+      },
+    ]);
+
+    if (!data || data.length === 0) {
+      return res.status(404).send({ message: "Record not found" });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send({ message: "Error fetching data", error: error.message });
   }
 };
 
@@ -552,6 +619,7 @@ const getActivationWarrantyById = async (req, res) => {
           productName: "$records.productName",
           productId: "$records.productId",
           categoryId: "$records.categoryId",
+          categoryName: "$records.categoryName",
           uniqueId: "$records.uniqueId",
           year: "$records.year",
           batchNo: "$records.batchNo",
@@ -587,7 +655,6 @@ const getActivationWarrantyById = async (req, res) => {
     res.status(500).send({ message: "Error fetching data", error: error.message });
   }
 };
-
 
 
 
@@ -693,4 +760,4 @@ const deleteProductWarranty = async (req, res) => {
   }
 }
 
-module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById,editActivationWarranty, editProductWarranty, deleteProductWarranty };
+module.exports = { addProductWarranty, activateWarranty, getAllProductWarranty,getAllProductWarrantyWithPage, getAllProductWarrantyByIdWithPage, getAllProductWarrantyByBrandIdTotal, getAllProductWarrantyById, getAllActivationWarranty,getActivationWarrantyByUserId, getActivationWarrantyById, getProductWarrantyByUniqueId, getProductWarrantyById,editActivationWarranty, editProductWarranty, deleteProductWarranty };
