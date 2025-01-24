@@ -360,6 +360,7 @@ const productId=req.body.productId
     record.district = district;
     record.state = state;
     record.pincode = pincode;
+    record.termsCondtions = req.body.termsCondtions;
    
     record.activationDate = new Date();
 if(productId){
@@ -514,6 +515,7 @@ const getAllActivationWarranty = async (req, res) => {
           complaintId: "$records.complaintId",
           activationDate: "$records.activationDate",
           isActivated: "$records.isActivated",
+          termsCondtions: "$records.termsCondtions",
         },
       },
       { $sort: { _id: -1 } },
@@ -575,6 +577,7 @@ const getActivationWarrantyByUserId = async (req, res) => {
           complaintId: "$records.complaintId",
           activationDate: "$records.activationDate",
           isActivated: "$records.isActivated",
+          termsCondtions: "$records.termsCondtions",
         },
       },
       {
@@ -643,6 +646,7 @@ const getActivationWarrantyById = async (req, res) => {
           complaintId: "$records.complaintId",
           activationDate: "$records.activationDate",
           isActivated: "$records.isActivated",
+          termsCondtions: "$records.termsCondtions",
         },
       },
     ]);

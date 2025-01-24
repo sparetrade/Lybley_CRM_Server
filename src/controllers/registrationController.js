@@ -258,6 +258,34 @@ const editBrand = async (req, res) => {
         res.status(500).send(err);
     }
 }
+const updateBrandTerms = async (req, res) => {
+    const { warrantyCondition } = req.body;
+    try {
+    // Validate the input
+    if (!warrantyCondition) {
+      return res.status(400).json({ message: "Warranty Condition is required" });
+    }
+
+    // Update the brand in the database
+    const updatedBrand = await BrandRegistrationModel.findByIdAndUpdate(
+      req.params.id, // The brand ID
+      { warrantyCondition }, // Fields to update
+      { new: true, runValidators: true } // Return the updated document
+    );
+
+    if (!updatedBrand) {
+      return res.status(404).json({ status: false, msg: "Brand not found" });
+    }
+
+    res.status(200).json({
+        status: true, msg: "Brand Terms & conditions updated successfully",
+       
+    });
+  } catch (error) {
+    console.error("Error updating brand:", error);
+    res.status(500).json({ status: false, msg: "Internal server error" });
+  }
+}
 const deleteBrand = async (req, res) => {
     try {
         let _id = req.params.id;
@@ -685,7 +713,7 @@ const forgetPassword = async (req, res) => {
 
 module.exports = {
     getProfileById,adminLoginController,dashboardLoginController, brandRegistration, serviceRegistration, empolyeeRegistration, dealerRegistration, adminRegistration, userRegistration,
-    getAllBrand, getBrandById, editBrand, deleteBrand, getAllServiceCenter, getServiceCenterById, editServiceCenter, deleteServiceCenter,
+    getAllBrand, getBrandById,updateBrandTerms, editBrand, deleteBrand, getAllServiceCenter, getServiceCenterById, editServiceCenter, deleteServiceCenter,
     getAllEmployee, getEmployeeById, editEmployee, deleteEmployee, getAllUser, getUserById, editUser, deleteUser
     , getAllDealer, getDealerById, editDealer, deleteDealer, otpVerification, otpVerificationSending, mobileEmailVerification, forgetPassword, otpSending
 };
