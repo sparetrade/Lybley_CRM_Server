@@ -3,7 +3,7 @@ const router = express.Router();
 const { upload} = require("../services/service");
 
 const {getProfileById,adminLoginController,dashboardLoginController,brandRegistration,serviceRegistration,empolyeeRegistration,dealerRegistration, adminRegistration,userRegistration,
-  getAllBrand,getBrandById,editBrand,deleteBrand,getAllServiceCenter,getServiceCenterById,editServiceCenter,deleteServiceCenter,
+  getAllBrand,getBrandById,editBrand,updateBrandTerms,deleteBrand,getAllServiceCenter,getServiceCenterById,editServiceCenter,deleteServiceCenter,
 getAllEmployee,getEmployeeById,editEmployee,deleteEmployee ,getAllDealer,getDealerById,editDealer,deleteDealer,getAllUser,
 getUserById,editUser,deleteUser,otpVerification,otpVerificationSending,forgetPassword,mobileEmailVerification,
 otpSending}=require("../controllers/registrationController")
@@ -32,6 +32,7 @@ router.post("/dashboardLogin",dashboardLoginController )
 router.get("/getAllBrand",getAllBrand )
 router.get("/getBrandBy/:id",getBrandById )
 router.patch("/editBrand/:id",editBrand )
+router.patch("/updateBrandTerms/:id",updateBrandTerms )
 router.delete("/deleteBrand/:id",deleteBrand )
  
 router.get("/getProfileById/:id",getProfileById )
