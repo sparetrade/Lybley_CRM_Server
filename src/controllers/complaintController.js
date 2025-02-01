@@ -142,6 +142,24 @@ const addComplaint = async (req, res) => {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
 
+      // let serviceCenter;
+      // if (pincode) {
+      //     serviceCenter = await ServiceModel.findOne({
+      //         $or: [
+      //             { postalCode: pincode },
+      //             { pincodeSupported: { $in: [pincode] } }
+      //         ],
+      //         "brandsSupported.value": req?.body?.brandId // Matching inside array of objects
+      //     });
+      // } else if (city) {
+      //     serviceCenter = await ServiceModel.findOne({
+      //         city: city,
+      //         "brandsSupported.value": req?.body?.brandId
+      //     });
+      // }
+      
+
+
       // Prepare the complaint object
       let obj = {
          ...body,
@@ -201,6 +219,23 @@ const addAPPComplaint = async (req, res) => {
       } else if (city) {
          serviceCenter = await ServiceModel.findOne({ city: city });
       }
+      // let serviceCenter;
+      // if (pincode) {
+      //     serviceCenter = await ServiceModel.findOne({
+      //         $or: [
+      //             { postalCode: pincode },
+      //             { pincodeSupported: { $in: [pincode] } }
+      //         ],
+      //         "brandsSupported.value": req?.body?.brandId // Matching inside array of objects
+      //     });
+      // } else if (city) {
+      //     serviceCenter = await ServiceModel.findOne({
+      //         city: city,
+      //         "brandsSupported.value": req?.body?.brandId
+      //     });
+      // }
+
+
       if (!serviceCenter) {
          let obj = {
             ...body,
@@ -525,7 +560,7 @@ const editComplaint = async (req, res) => {
                brandId: data.brandId,
                brandName: data.productBrand,
                amount: -body?.paymentBrand,
-               complaintId:data._id,
+               complaintId: data._id,
                description: "Complaint Close  Payout"
             });
             await brandTrans.save();
@@ -627,4 +662,4 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, addDealerComplaint, addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById,updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint, addDealerComplaint, addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };

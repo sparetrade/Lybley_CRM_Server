@@ -297,7 +297,7 @@ const deleteBrand = async (req, res) => {
 }
 const getAllServiceCenter = async (req, res) => {
     try {
-        const data = await ServiceModel.find({});
+        const data = await ServiceModel.find({}).sort({ _id: -1 });
         res.send(data);
     } catch (err) {
         res.status(400).send(err);
