@@ -1,6 +1,6 @@
 const express = require("express")
 
-const {addComplaint,addDealerComplaint,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
+const {addComplaint,addDealerComplaint,getPendingComplaints,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
 const {upload}  = require("../services/service");
  
  
@@ -14,6 +14,7 @@ router.post("/createDealerComplaint",upload().single("warrantyImage")  , addDeal
 // router.post("/createComplaint",  addComplaint);
 router.get("/getAllComplaint",getAllComplaint)
 router.get("/getComplaintById/:id",getComplaintById)
+router.get("/getPendingComplaints/:days",getPendingComplaints)
 router.get("/getComplaintByUserId/:id",getComplaintByUserId)
 router.get("/getComplaintByTechId/:id",getComplaintByTechId)
 router.patch("/editImage/:id", upload().single("issueImages"),editIssueImage );

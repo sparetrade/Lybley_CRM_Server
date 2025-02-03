@@ -453,6 +453,63 @@ const getComplaintByTechId = async (req, res) => {
    }
 };
 
+const getPendingComplaints = async (req, res) => {
+   try {
+     const { days } = req.params; // Get days filter from params
+     let startDate, endDate;
+     const currentDate = new Date();
+ 
+   //   console.log("Received days:", days);
+ 
+     if (days === "0-1") {
+       startDate = new Date();
+       startDate.setDate(currentDate.getDate() - 1);
+       startDate.setHours(0, 0, 0, 0);
+ 
+       endDate = new Date();
+       endDate.setHours(23, 59, 59, 999);
+     } else if (days === "2-5") {
+       startDate = new Date();
+       startDate.setDate(currentDate.getDate() - 5);
+       startDate.setHours(0, 0, 0, 0);
+ 
+       endDate = new Date();
+       endDate.setDate(currentDate.getDate() - 2);
+       endDate.setHours(23, 59, 59, 999);
+     } else if (days === "more-than-week") {
+       endDate = new Date();
+       endDate.setDate(currentDate.getDate() - 6);
+       endDate.setHours(23, 59, 59, 999);
+     }
+ 
+   //   console.log("Start Date:", startDate);
+   //   console.log("End Date:", endDate);
+ 
+     let filter = { status: "PENDING" };
+ 
+     if (days === "0-1" || days === "2-5") {
+       filter.createdAt = { $gte: startDate, $lte: endDate };
+     } else if (days === "more-than-week") {
+       filter.createdAt = { $lte: endDate }; // Fetch complaints **older** than 7 days
+     }
+ 
+   //   console.log("Filter Query:", JSON.stringify(filter, null, 2));
+ 
+     const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
+ 
+   //   console.log("Found complaints:", complaints.length);
+ 
+     res.status(200).json({ success: true, data: complaints });
+   } catch (error) {
+     console.error("Error fetching pending complaints:", error);
+     res.status(500).json({ success: false, message: "Server error" });
+   }
+ };
+ 
+ 
+ 
+
+
 // const editComplaint = async (req, res) => {
 //    try {
 //       let _id = req.params.id;
@@ -662,4 +719,4 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, addDealerComplaint, addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint, addDealerComplaint, getPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
