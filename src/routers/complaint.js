@@ -1,6 +1,8 @@
 const express = require("express")
 
-const {addComplaint,addDealerComplaint,getPendingComplaints,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
+const {addComplaint,addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
+    ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
+    getPendingComplaints,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
 const {upload}  = require("../services/service");
  
  
@@ -13,6 +15,15 @@ router.post("/createDealerComplaint",upload().single("warrantyImage")  , addDeal
  
 // router.post("/createComplaint",  addComplaint);
 router.get("/getAllComplaint",getAllComplaint)
+
+router.get("/getComplaintsByAssign",getComplaintsByAssign)
+router.get("/getComplaintsByCancel",getComplaintsByCancel)
+router.get("/getComplaintsByComplete",getComplaintsByComplete)
+router.get("/getComplaintsByInProgress",getComplaintsByInProgress)
+router.get("/getComplaintsByPartPending",getComplaintsByPartPending)
+router.get("/getComplaintsByPending",getComplaintsByPending)
+router.get("/getComplaintsByFinalVerification",getComplaintsByFinalVerification)
+ 
 router.get("/getComplaintById/:id",getComplaintById)
 router.get("/getPendingComplaints/:days",getPendingComplaints)
 router.get("/getComplaintByUserId/:id",getComplaintByUserId)

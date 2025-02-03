@@ -452,7 +452,83 @@ const getComplaintByTechId = async (req, res) => {
       res.status(400).send(err);
    }
 };
-
+const getComplaintsByPending = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "PENDING" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByAssign = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "ASSIGN" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByInProgress = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "IN PROGRESS" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByComplete = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "COMPLETED" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByCancel = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "CANCELED" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByFinalVerification = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "FINAL VERIFICATION" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByPartPending = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "PART PENDING" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
 const getPendingComplaints = async (req, res) => {
    try {
      const { days } = req.params; // Get days filter from params
@@ -719,4 +795,6 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, addDealerComplaint, getPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint, addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
+   ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
+   getPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
