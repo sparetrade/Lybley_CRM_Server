@@ -613,14 +613,36 @@ router.get("/dashboardDetailsByUserId/:id", async (req, res) => {
 });
 
 
+// const calculateDateRanges = () => {
+//   const now = new Date();
+//   const oneDayAgo = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+//   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+//   const fiveDaysAgo = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+
+//   return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo };
+// };
 const calculateDateRanges = () => {
   const now = new Date();
-  const oneDayAgo = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
-  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-  const fiveDaysAgo = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+  now.setHours(23, 59, 59, 999); // Ensure the current date is set to end of the day
+
+  const oneDayAgo = new Date(now);
+  oneDayAgo.setDate(now.getDate() - 1);
+  oneDayAgo.setHours(0, 0, 0, 0); // Start of the day
+
+  const twoDaysAgo = new Date(now);
+  twoDaysAgo.setDate(now.getDate() - 2);
+  twoDaysAgo.setHours(0, 0, 0, 0);
+
+  const fiveDaysAgo = new Date(now);
+  fiveDaysAgo.setDate(now.getDate() - 5);
+  fiveDaysAgo.setHours(0, 0, 0, 0);
 
   return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo };
 };
+
+// Example usage
+// console.log(calculateDateRanges());
+
 router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
   try {
     const id = req.params.id;
