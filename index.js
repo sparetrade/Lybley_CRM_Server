@@ -108,6 +108,7 @@ const wallet = require("./src/routers/wallet");
 const payment = require("./src/routers/payments");
 const shipyariOrder = require("./src/routers/shipyariOrder");
 const brandRecharge = require("./src/routers/brandRecharge");
+const appApk = require("./src/routers/appAPK");
 
 app.use(express.json());
 
@@ -163,6 +164,7 @@ app.get("/", (req, res) => {
     res.json("Server is running");
 });
 
+app.use(appApk);
 app.use(registration);
 app.use(technician);
 app.use(product);
