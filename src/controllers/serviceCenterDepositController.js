@@ -17,22 +17,24 @@ const addServiceCenterDeposit  = async (req, res) => {
 
 // Using req.params
 const getAllServiceCenterDeposit = async (req, res) => {
-   try {
-       const { serviceCenterId } = req.params;  // Use req.params if passed in the path
-       let data = await ServiceCenterDepositModal.find({ serviceCenterId }).sort({ _id: -1 });
-       res.send(data);
-   } catch (err) {
-       res.status(400).send(err);
+   try{
+      let data=await ServiceCenterDepositModal.find({}).sort({ _id: -1 });
+      res.send(data);
+   }catch(err){
+      res.status(400).send(err);
    }
 };
 
 const getServiceCenterAllDepositById=async(req,res)=>{
-   try{
-       let data=await ServiceCenterDepositModal.find({}).sort({ _id: -1 });
-       res.send(data);
-    }catch(err){
-       res.status(400).send(err);
-    }
+  
+    try {
+     
+      let serviceCenterId=req.params.id;  // Use req.params if passed in the path
+      let data = await ServiceCenterDepositModal.find({ serviceCenterId }).sort({ _id: -1 });
+      res.send(data);
+  } catch (err) {
+      res.status(400).send(err);
+  }
 }
 const getServiceCenterDepositById=async(req,res)=>{
     try{
