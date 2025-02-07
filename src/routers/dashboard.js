@@ -808,12 +808,61 @@ router.get('/getNoServiceableAreaComplaints', async (req, res) => {
     res.status(500).json({ error: 'Error fetching no serviceable area complaints' });
   }
 });
+// router.get('/getComplaintInsights', async (req, res) => {
+//   try {
+//     const [
+//       complaintsByBrand,
+//       complaintsByLocationAndProduct,
+//       commonFaults
+//     ] = await Promise.all([
+//       Complaints.aggregate([
+//         // Group complaints by productBrand and count them
+//         { $group: { _id: "$productBrand", count: { $sum: 1 } } },
+//         { $sort: { count: -1 } }
+//       ]),
+//       Complaints.aggregate([
+//         // Group complaints by both product and productBrand
+//         { 
+//           $group: { 
+//             _id: { product: "$productName", productBrand: "$productBrand" }, 
+//             count: { $sum: 1 } 
+//           } 
+//         },
+//         { $sort: { count: -1 } }
+//       ]),
+//       Complaints.aggregate([
+//         // Unwind the issueType array
+//         { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },  // Use preserveNullAndEmptyArrays to avoid issues if issueType is not an array
+//         { 
+//           $group: { 
+//             _id: "$issueType", 
+//             productBrand: { $first: "$productBrand" },  // Get the first productBrand for each issueType
+//             count: { $sum: 1 } 
+//           } 
+//         },
+//         { $sort: { count: -1 } }
+//       ])
+//     ]);
+
+//     res.status(200).json({
+//       complaintsByBrand,
+//       complaintsByLocationAndProduct,
+//       commonFaults
+//     });
+//   } catch (error) {
+//     console.error('Error fetching complaint insights:', error);
+//     res.status(500).json({ error: 'Error fetching complaint insights' });
+//   }
+// });
+
+
 router.get('/getComplaintInsights', async (req, res) => {
   try {
     const [
       complaintsByBrand,
       complaintsByLocationAndProduct,
-      commonFaults
+      commonFaults,
+      pendingComplaintsByBrand
     ] = await Promise.all([
       Complaints.aggregate([
         // Group complaints by productBrand and count them
@@ -832,14 +881,20 @@ router.get('/getComplaintInsights', async (req, res) => {
       ]),
       Complaints.aggregate([
         // Unwind the issueType array
-        { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },  // Use preserveNullAndEmptyArrays to avoid issues if issueType is not an array
+        { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },  
         { 
           $group: { 
             _id: "$issueType", 
-            productBrand: { $first: "$productBrand" },  // Get the first productBrand for each issueType
+            productBrand: { $first: "$productBrand" },  
             count: { $sum: 1 } 
           } 
         },
+        { $sort: { count: -1 } }
+      ]),
+      Complaints.aggregate([
+        // Filter only complaints with 'pending' status and group by brand
+        { $match: { status: "PENDING" } },
+        { $group: { _id: "$productBrand", count: { $sum: 1 } } },
         { $sort: { count: -1 } }
       ])
     ]);
@@ -847,15 +902,14 @@ router.get('/getComplaintInsights', async (req, res) => {
     res.status(200).json({
       complaintsByBrand,
       complaintsByLocationAndProduct,
-      commonFaults
+      commonFaults,
+      pendingComplaintsByBrand
     });
   } catch (error) {
     console.error('Error fetching complaint insights:', error);
     res.status(500).json({ error: 'Error fetching complaint insights' });
   }
 });
-
-
 
 
 
