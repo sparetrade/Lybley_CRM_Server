@@ -499,7 +499,46 @@ const getProfileById = async (req, res) => {
     }
   };
   
-  
+  const getUserServerById = async (req, res) => {
+    try {
+        let _id = req.params.id;
+
+        // Check if email and password are provided
+        if (!_id) {
+            return res.status(400).json({ status: false, msg: "Id is required" });
+        }
+
+        let user;
+        let role;
+
+        // Function to check a model and log the result
+        const checkModel = async (model, roleName) => {
+            const foundUser = await model.findOne({ _id });
+            if (foundUser) {
+                // console.log(`User found in ${roleName} model`);
+                user = foundUser;
+                role = roleName;
+                return true;
+            }
+            return false;
+        };
+
+        // Sequentially check each model
+        if (await checkModel(AdminModel, 'ADMIN')) return res.status(200).json({ status: true, msg: "ADMIN login successful", user });
+        if (await checkModel(BrandRegistrationModel, 'BRAND')) return res.status(200).json({ status: true, msg: "BRAND login successful", user });
+        if (await checkModel(EmployeeModel, 'EMPLOYEE')) return res.status(200).json({ status: true, msg: "EMPLOYEE login successful", user });
+        if (await checkModel(ServiceModel, 'SERVICE')) return res.status(200).json({ status: true, msg: "SERVICE login successful", user });
+        if (await checkModel(TechnicianModal, 'TECHNICIAN')) return res.status(200).json({ status: true, msg: "TECHNICIAN login successful", user });
+        if (await checkModel(UserModel, 'USER')) return res.status(200).json({ status: true, msg: "USER login successful", user });
+        if (await checkModel(DealerModel, 'DEALER')) return res.status(200).json({ status: true, msg: "DEALER login successful", user });
+
+        // If no user is found
+        return res.status(401).json({ status: false, msg: "Incorrect user _id" });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send(err);
+    }
+  }; 
   
 
 const otpSending = async (req, res) => {
@@ -712,7 +751,7 @@ const forgetPassword = async (req, res) => {
 
 
 module.exports = {
-    getProfileById,adminLoginController,dashboardLoginController, brandRegistration, serviceRegistration, empolyeeRegistration, dealerRegistration, adminRegistration, userRegistration,
+    getProfileById,getUserServerById,adminLoginController,dashboardLoginController, brandRegistration, serviceRegistration, empolyeeRegistration, dealerRegistration, adminRegistration, userRegistration,
     getAllBrand, getBrandById,updateBrandTerms, editBrand, deleteBrand, getAllServiceCenter, getServiceCenterById, editServiceCenter, deleteServiceCenter,
     getAllEmployee, getEmployeeById, editEmployee, deleteEmployee, getAllUser, getUserById, editUser, deleteUser
     , getAllDealer, getDealerById, editDealer, deleteDealer, otpVerification, otpVerificationSending, mobileEmailVerification, forgetPassword, otpSending
