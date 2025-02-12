@@ -3,6 +3,7 @@ const router = express.Router();
 const { upload} = require("../services/service");
 
 const {getProfileById,adminLoginController,dashboardLoginController,brandRegistration,serviceRegistration,empolyeeRegistration,dealerRegistration, adminRegistration,userRegistration,
+  brandEmpolyeeRegistration,getAllBrandEmployee,getBrandEmployeeById,editBrandEmployee,deleteBrandEmployee,
   getAllBrand,getBrandById,getUserServerById,editBrand,updateBrandTerms,deleteBrand,getAllServiceCenter,getServiceCenterById,editServiceCenter,deleteServiceCenter,
 getAllEmployee,getEmployeeById,editEmployee,deleteEmployee ,getAllDealer,getDealerById,editDealer,deleteDealer,getAllUser,
 getUserById,editUser,deleteUser,otpVerification,otpVerificationSending,forgetPassword,mobileEmailVerification,
@@ -21,6 +22,8 @@ router.post("/brandRegistration", brandRegistration
 router.post("/serviceRegistration", serviceRegistration
 );
 router.post("/employeeRegistration", empolyeeRegistration
+);
+router.post("/brandEmployeeRegistration", brandEmpolyeeRegistration
 );
 router.post("/dealerRegistration", dealerRegistration
 );
@@ -48,6 +51,11 @@ router.get("/getAllEmployee",getAllEmployee )
 router.get("/getEmployeeBy/:id",getEmployeeById )
 router.patch("/editEmployee/:id",editEmployee )
 router.delete("/deleteEmployee/:id",deleteEmployee )
+
+router.get("/getAllEmployee",getAllBrandEmployee )
+router.get("/getEmployeeBy/:id",getBrandEmployeeById )
+router.patch("/editEmployee/:id",editBrandEmployee )
+router.delete("/deleteEmployee/:id",deleteBrandEmployee )
 
 router.get("/getAllDealer",getAllDealer )
 router.get("/getDealerBy/:id",getDealerById )

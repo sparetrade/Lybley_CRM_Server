@@ -1,7 +1,7 @@
 
 const otpGenerator = require("otp-generator")
 const { smsSend, sendMail } = require("../services/service")
-const { AdminModel, BrandRegistrationModel, ServiceModel,TechnicianModal, EmployeeModel, DealerModel, UserModel } = require('../models/registration');
+const { AdminModel, BrandRegistrationModel, ServiceModel,TechnicianModal, EmployeeModel,BrandEmployeeModel, DealerModel, UserModel } = require('../models/registration');
 const NotificationModel = require("../models/notification")
 
 
@@ -33,6 +33,7 @@ const adminLoginController = async (req, res) => {
         if (await checkModel(AdminModel, 'ADMIN')) return res.status(200).json({ status: true, msg: "ADMIN login successful", user });
         if (await checkModel(BrandRegistrationModel, 'BRAND')) return res.status(200).json({ status: true, msg: "BRAND login successful", user });
         if (await checkModel(EmployeeModel, 'EMPLOYEE')) return res.status(200).json({ status: true, msg: "EMPLOYEE login successful", user });
+        if (await checkModel(BrandEmployeeModel, 'Brand EMPLOYEE')) return res.status(200).json({ status: true, msg: "EMPLOYEE login successful", user });
         if (await checkModel(ServiceModel, 'SERVICE')) return res.status(200).json({ status: true, msg: "SERVICE login successful", user });
         if (await checkModel(TechnicianModal, 'TECHNICIAN')) return res.status(200).json({ status: true, msg: "TECHNICIAN login successful", user });
         if (await checkModel(UserModel, 'USER')) return res.status(200).json({ status: true, msg: "USER login successful", user });
@@ -378,6 +379,62 @@ const deleteEmployee = async (req, res) => {
         res.status(500).send(err);
     }
 }
+const brandEmpolyeeRegistration = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const existingUser = await BrandEmployeeModel.findOne({ email });
+
+        if (existingUser) {
+            return res.status(400).json({ status: false, msg: "Email already registered" });
+        }
+
+        // Email does not exist, proceed with registration
+        const newData = new BrandEmployeeModel(req.body);
+        await newData.save();
+        return res.json({ status: true, msg: "Registration successful" });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send(err);
+    }
+};
+const getAllBrandEmployee = async (req, res) => {
+    try {
+        const data = await BrandEmployeeModel.find({}).sort({ _id: -1 });
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
+const getBrandEmployeeById = async (req, res) => {
+    try {
+        let _id = req.params.id;
+        let data = await BrandEmployeeModel.findById(_id);
+        res.send(data);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+}
+
+const editBrandEmployee = async (req, res) => {
+    try {
+        let _id = req.params.id;
+        let body = req.body;
+        let data = await BrandEmployeeModel.findByIdAndUpdate(_id, body);
+        res.json({ status: true, msg: "Brand Employee Updated" });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
+const deleteBrandEmployee = async (req, res) => {
+    try {
+        let _id = req.params.id;
+        let data = await BrandEmployeeModel.findByIdAndDelete(_id);
+        res.json({ status: true, msg: "Brand Employee Deteled" });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
 
 const getAllUser = async (req, res) => {
     try {
@@ -527,6 +584,7 @@ const getProfileById = async (req, res) => {
         if (await checkModel(AdminModel, 'ADMIN')) return res.status(200).json({ status: true, msg: "ADMIN login successful", user });
         if (await checkModel(BrandRegistrationModel, 'BRAND')) return res.status(200).json({ status: true, msg: "BRAND login successful", user });
         if (await checkModel(EmployeeModel, 'EMPLOYEE')) return res.status(200).json({ status: true, msg: "EMPLOYEE login successful", user });
+        if (await checkModel(BrandEmployeeModel, 'EMPLOYEE')) return res.status(200).json({ status: true, msg: "Brand EMPLOYEE login successful", user });
         if (await checkModel(ServiceModel, 'SERVICE')) return res.status(200).json({ status: true, msg: "SERVICE login successful", user });
         if (await checkModel(TechnicianModal, 'TECHNICIAN')) return res.status(200).json({ status: true, msg: "TECHNICIAN login successful", user });
         if (await checkModel(UserModel, 'USER')) return res.status(200).json({ status: true, msg: "USER login successful", user });
@@ -753,6 +811,7 @@ const forgetPassword = async (req, res) => {
 module.exports = {
     getProfileById,getUserServerById,adminLoginController,dashboardLoginController, brandRegistration, serviceRegistration, empolyeeRegistration, dealerRegistration, adminRegistration, userRegistration,
     getAllBrand, getBrandById,updateBrandTerms, editBrand, deleteBrand, getAllServiceCenter, getServiceCenterById, editServiceCenter, deleteServiceCenter,
-    getAllEmployee, getEmployeeById, editEmployee, deleteEmployee, getAllUser, getUserById, editUser, deleteUser
-    , getAllDealer, getDealerById, editDealer, deleteDealer, otpVerification, otpVerificationSending, mobileEmailVerification, forgetPassword, otpSending
+    getAllEmployee, getEmployeeById, editEmployee, deleteEmployee, getAllUser, getUserById, editUser, deleteUser,
+    brandEmpolyeeRegistration,getAllBrandEmployee,getBrandEmployeeById,editBrandEmployee,deleteBrandEmployee,
+     getAllDealer, getDealerById, editDealer, deleteDealer, otpVerification, otpVerificationSending, mobileEmailVerification, forgetPassword, otpSending
 };
