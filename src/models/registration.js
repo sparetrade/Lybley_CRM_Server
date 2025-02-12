@@ -271,10 +271,21 @@ const employeeRegistrationSchema = new mongoose.Schema({
     email: { type: String, required: true },
     contact: { type: Number, required: true },
     password: { type: String, required: true },
+    brandId: { type: String },
+    brandName: { type: String  },
     role: { type: String, default: "EMPLOYEE" }
 },
     { timestamps: true });
-
+    const brandEmployeeRegistrationSchema = new mongoose.Schema({
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+      contact: { type: Number, required: true },
+      password: { type: String, required: true },
+      brandId: { type: Number, required: true },
+      brandName: { type: String, required: true },
+      role: { type: String, default: "BRAND EMPLOYEE" }
+  },
+      { timestamps: true });
 
 const dealerRegistrationSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -348,6 +359,7 @@ const DealerModel = mongoose.model("DealerRegistration", dealerRegistrationSchem
 const ServiceModel = mongoose.model("ServiceRegistration", serviceCenterRegistrationSchema);
 const TechnicianModal=  mongoose.model("Technician",technicianSchema);
 const EmployeeModel = mongoose.model("EmpolyeeRegistration", employeeRegistrationSchema);
+const BrandEmployeeModel = mongoose.model("BrandEmpolyeeRegistration", brandEmployeeRegistrationSchema);
 const UserModel = mongoose.model("UserRegistration", userRegistrationSchema);
 
 module.exports = {
@@ -356,6 +368,7 @@ module.exports = {
     ServiceModel,
     TechnicianModal,
     EmployeeModel,
+    BrandEmployeeModel,
     DealerModel,
     UserModel
 };
