@@ -168,6 +168,7 @@ const addComplaint = async (req, res) => {
          issueImages: req.file?.location,
          assignServiceCenterId: serviceCenter?._id,
          assignServiceCenter: serviceCenter?.serviceCenterName,
+         serviceCenterContact: serviceCenter?.contact,
          assignServiceCenterTime: new Date()
       };
       if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
@@ -242,6 +243,7 @@ const addAPPComplaint = async (req, res) => {
 
             assignServiceCenterId: serviceCenter?._id,
             assignServiceCenter: serviceCenter?.serviceCenterName,
+            serviceCenterContact: serviceCenter?.contact,
             assignServiceCenterTime: new Date()
          };
          if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
@@ -269,6 +271,7 @@ const addAPPComplaint = async (req, res) => {
          // warrantyImage: req.file ? req.file.location : "", 
          assignServiceCenterId: serviceCenter?._id,
          assignServiceCenter: serviceCenter?.serviceCenterName,
+         serviceCenterContact: serviceCenter?.contact,
          assignServiceCenterTime: new Date()
       };
       if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
@@ -353,6 +356,7 @@ const addDealerComplaint = async (req, res) => {
             warrantyImage: req.file ? req.file.location : "",
             assignServiceCenterId: serviceCenter?._id,
             assignServiceCenter: serviceCenter?.serviceCenterName,
+            serviceCenterContact: serviceCenter?.contact,
             assignServiceCenterTime: new Date()
          };
          let data = new ComplaintModal(obj);
@@ -380,6 +384,7 @@ const addDealerComplaint = async (req, res) => {
          warrantyImage: req.file ? req.file.location : "",
          assignServiceCenterId: serviceCenter?._id,
          assignServiceCenter: serviceCenter?.serviceCenterName,
+         serviceCenterContact: serviceCenter?.contact,
          assignServiceCenterTime: new Date()
       };
       let data = new ComplaintModal(obj);
