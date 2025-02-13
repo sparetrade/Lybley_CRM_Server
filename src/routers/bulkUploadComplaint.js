@@ -24,7 +24,88 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// router.post('/bulkServiceRequests', upload.single('file'), (req, res) => {
+
+ 
+
+router.post('/bulkServiceRequests', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ status: false, msg: 'No file uploaded.' });
+  }
+
+  const filePath = req.file.path;
+
+  try {
+    const { brandId, productBrand } = req.body; // Get brandId & productBrand from request body
+
+    if (!brandId || !productBrand) {
+      return res.status(400).json({ status: false, msg: 'Brand ID and Product Brand are required.' });
+    }
+
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    // Read data as JSON (avoid formatted copy-paste issues)
+    const results = xlsx.utils.sheet_to_json(sheet, { header: 1, raw: false });
+
+    // Expected Headers
+    const expectedHeaders = [
+      "complaintId", "productName", "categoryName", "brandId", "productBrand",
+      "modelNo", "serialNo", "purchaseDate", "warrantyStatus", "issueType",
+      "detailedDescription", "preferredServiceDate", "preferredServiceTime",
+      "serviceLocation", "serviceAddress", "pincode", "district", "state",
+      "fullName", "emailAddress", "phoneNumber"
+    ];
+
+    // Normalize headers from the Excel file (trim spaces, lowercase)
+    const uploadedHeaders = results[0].map(header => header.trim().toLowerCase());
+    const expectedHeadersLower = expectedHeaders.map(header => header.toLowerCase());
+
+    // Validate headers
+    const isValidHeaders = expectedHeadersLower.every(header => uploadedHeaders.includes(header));
+    if (!isValidHeaders) {
+      return res.status(400).json({ status: false, msg: 'Invalid file format. Ensure correct column headers.' });
+    }
+
+    // Process data rows (Skipping header row)
+    const mappedResults = results.slice(1).map(row => {
+      let rowData = {};
+      expectedHeaders.forEach((header, index) => {
+        let cellValue = row[index] ? row[index].toString().trim() : null; // Trim unnecessary spaces
+
+        // Handle Date Formatting
+        if (["purchaseDate", "preferredServiceDate"].includes(header)) {
+          cellValue = cellValue ? moment(cellValue, ["MM-DD-YYYY", "YYYY-MM-DD", "DD-MM-YYYY"]).toDate() : null;
+        }
+
+        rowData[header] = cellValue;
+      });
+
+      // Ensure brandId and productBrand are always set
+      rowData.brandId = brandId;
+      rowData.productBrand = productBrand;
+
+      return rowData;
+    });
+
+    // Insert into MongoDB
+    await ComplaintModal.insertMany(mappedResults);
+
+    res.json({ status: true, msg: 'Excel data successfully uploaded and saved to database!' });
+  } catch (error) {
+    console.error('Error processing the file:', error);
+    res.status(500).json({ status: false, msg: 'Error processing the file.' });
+  } finally {
+    // Delete the uploaded file to save space
+    try {
+      fs.unlinkSync(filePath);
+    } catch (err) {
+      console.error('Error deleting the file:', err);
+    }
+  }
+});
+
+// router.post('/bulkServiceRequests1', upload.single('file'), (req, res) => {
 //   if (!req.file) {
 //     return res.status(400).send('No file uploaded.');
 //   }
@@ -92,68 +173,68 @@ const upload = multer({ storage: storage });
 
 
 
-router.post('/bulkServiceRequests', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send({ status: false, msg: 'No file uploaded.' });
-  }
+// router.post('/bulkServiceRequests2', upload.single('file'), async (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).send({ status: false, msg: 'No file uploaded.' });
+//   }
 
-  const filePath = req.file.path;
+//   const filePath = req.file.path;
 
-  try {
-    const { brandId, productBrand } = req.body; // Get brandId & productBrand from request body
+//   try {
+//     const { brandId, productBrand } = req.body; // Get brandId & productBrand from request body
 
-    if (!brandId || !productBrand) {
-      return res.status(400).send({ status: false, msg: 'Brand ID and Product Brand are required.' });
-    }
+//     if (!brandId || !productBrand) {
+//       return res.status(400).send({ status: false, msg: 'Brand ID and Product Brand are required.' });
+//     }
 
-    const workbook = xlsx.readFile(filePath);
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const results = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+//     const workbook = xlsx.readFile(filePath);
+//     const sheetName = workbook.SheetNames[0];
+//     const sheet = workbook.Sheets[sheetName];
+//     const results = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-    // const expectedHeaders = [
-    //   "productName", "categoryName", "modelNo", "serialNo",
-    //   "purchaseDate", "warrantyStatus", "issueType", "detailedDescription",
-    //   "issueImages", "errorMessages", "preferredServiceDate",
-    //   "preferredServiceTime", "serviceLocation", "fullName",
-    //   "phoneNumber", "emailAddress", "alternateContactInfo", "serviceAddress"
-    // ];
-    const expectedHeaders = ["complaintId","productName", "categoryName", 
-      "brandId", "productBrand", "modelNo", "serialNo", "purchaseDate",
-       "warrantyStatus", "issueType", "detailedDescription", "preferredServiceDate",
-        "preferredServiceTime", "serviceLocation", "serviceAddress", "pincode", 
-        "district", "state",  "fullName", "emailAddress", "phoneNumber"]
-    const mappedResults = results.slice(1).map(row => {
-      let rowData = {};
-      expectedHeaders.forEach((header, index) => {
-        if (header === "purchaseDate" || header === "preferredServiceDate") {
-          rowData[header] = row[index] ? moment(row[index], ["MM-DD-YYYY", "YYYY-MM-DD", "DD-MM-YYYY"]).toDate() : null;
-        } else {
-          rowData[header] = row[index] || null;
-        }
-      });
+//     // const expectedHeaders = [
+//     //   "productName", "categoryName", "modelNo", "serialNo",
+//     //   "purchaseDate", "warrantyStatus", "issueType", "detailedDescription",
+//     //   "issueImages", "errorMessages", "preferredServiceDate",
+//     //   "preferredServiceTime", "serviceLocation", "fullName",
+//     //   "phoneNumber", "emailAddress", "alternateContactInfo", "serviceAddress"
+//     // ];
+//     const expectedHeaders = ["complaintId","productName", "categoryName", 
+//       "brandId", "productBrand", "modelNo", "serialNo", "purchaseDate",
+//        "warrantyStatus", "issueType", "detailedDescription", "preferredServiceDate",
+//         "preferredServiceTime", "serviceLocation", "serviceAddress", "pincode", 
+//         "district", "state",  "fullName", "emailAddress", "phoneNumber"]
+//     const mappedResults = results.slice(1).map(row => {
+//       let rowData = {};
+//       expectedHeaders.forEach((header, index) => {
+//         if (header === "purchaseDate" || header === "preferredServiceDate") {
+//           rowData[header] = row[index] ? moment(row[index], ["MM-DD-YYYY", "YYYY-MM-DD", "DD-MM-YYYY"]).toDate() : null;
+//         } else {
+//           rowData[header] = row[index] || null;
+//         }
+//       });
 
-      // Automatically append brandId and productBrand for each entry
-      rowData.brandId = brandId;
-      rowData.productBrand = productBrand;
+//       // Automatically append brandId and productBrand for each entry
+//       rowData.brandId = brandId;
+//       rowData.productBrand = productBrand;
 
-      return rowData;
-    });
+//       return rowData;
+//     });
 
-    // Insert into MongoDB
-    await ComplaintModal.insertMany(mappedResults);
+//     // Insert into MongoDB
+//     await ComplaintModal.insertMany(mappedResults);
 
-    res.send({ status: true, msg: 'Excel data successfully uploaded and saved to database!' });
-  } catch (error) {
-    console.error('Error processing the file:', error);
-    res.status(500).send({ status: false, msg: 'Error processing the file.' });
-  } finally {
-    try {
-      fs.unlinkSync(filePath); // Delete the uploaded file
-    } catch (err) {
-      console.error('Error deleting the file:', err);
-    }
-  }
-});
+//     res.send({ status: true, msg: 'Excel data successfully uploaded and saved to database!' });
+//   } catch (error) {
+//     console.error('Error processing the file:', error);
+//     res.status(500).send({ status: false, msg: 'Error processing the file.' });
+//   } finally {
+//     try {
+//       fs.unlinkSync(filePath); // Delete the uploaded file
+//     } catch (err) {
+//       console.error('Error deleting the file:', err);
+//     }
+//   }
+// });
 
 module.exports = router;
