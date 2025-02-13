@@ -3,7 +3,7 @@ const BankDetail = require("../models/bankDetails");
 const BankTransactionModel = require("../models/bankTransaction");
 const { default: axios } = require("axios");
 const NotificationModel = require("../models/notification")
-
+const {   ServiceModel  } = require('../models/registration');
 // const addWallet = async (req, res) => {
 //   try {
 //     const { serviceCenterName } = req.body;
@@ -69,12 +69,9 @@ const NotificationModel = require("../models/notification")
 const addWallet = async (req, res) => {
   try {
     const { serviceCenterName, accountHolderName, email, contact, bankDetailId, accountNumber, ifsc } = req.body;
+console.log("serviceCenterName",serviceCenterName);
 
-    // Check if the service center name already exists
-    const existingServiceCenter = await WalletModel.findOne({ serviceCenterName });
-    if (existingServiceCenter) {
-      return res.json({ status: false, msg: "Service Center already exists in Wallets" });
-    }
+    
 
     // Create new wallet data
     const walletData = new WalletModel(req.body);
@@ -339,18 +336,45 @@ const getTransactionByCenterId = async (req, res) => {
     res.status(400).send(err);
   }
 }
+// const getTransactionByBrandId = async (req, res) => {
+//   try {
+//     let userId = req.params.id;
+//     let data = await BankTransactionModel.find({ serviceCenterId: userId }).sort({ _id: -1 });
+//     if (!data) {
+//       return res.status(404).send({ message: "Transaction not found" });
+//     }
+//     res.send(data);
+//   } catch (err) {
+//     res.status(400).send(err);
+//   }
+// }
 const getTransactionByBrandId = async (req, res) => {
   try {
-    let userId = req.params.id;
-    let data = await BankTransactionModel.find({ userId: userId }).sort({ _id: -1 });
-    if (!data) {
-      return res.status(404).send({ message: "Transaction not found" });
+    let brandId = req.params.id;
+
+    // Find all service centers that belong to the given brandId
+    let serviceCenters = await ServiceModel.find({ brandId }).select('_id');
+
+    // Extract only the IDs
+    let serviceCenterIds = serviceCenters.map(sc => sc._id);
+
+    if (serviceCenterIds.length === 0) {
+      return res.status(404).send({ message: "No service centers found for this brand" });
     }
-    res.send(data);
+
+    // Find transactions where serviceCenterId is in the list of retrieved IDs
+    let transactions = await BankTransactionModel.find({ serviceCenterId: { $in: serviceCenterIds } }).sort({ _id: -1 });
+
+    if (!transactions || transactions.length === 0) {
+      return res.status(404).send({ message: "No transactions found for this brand" });
+    }
+
+    res.send(transactions);
   } catch (err) {
-    res.status(400).send(err);
+    res.status(500).send({ message: "Internal Server Error", error: err.message });
   }
-}
+};
+
 const getAllTransaction = async (req, res) => {
   try {
 
