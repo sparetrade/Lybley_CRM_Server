@@ -13,7 +13,7 @@ const bankTransactionSchema=new mongoose.Schema({
     accountNo:{type:String},
     ifscCode:{type:String},
     name:{type:String},
-    
+    payScreenshot:{type:String},
     status: { type: String, default: "PROCESSING" },
     // totalDue:{type:Number},
 },{timestamps:true})

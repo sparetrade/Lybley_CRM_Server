@@ -3,7 +3,7 @@ const BankDetail = require("../models/bankDetails");
 const BankTransactionModel = require("../models/bankTransaction");
 const { default: axios } = require("axios");
 const NotificationModel = require("../models/notification")
-const {   ServiceModel  } = require('../models/registration');
+const { ServiceModel } = require('../models/registration');
 // const addWallet = async (req, res) => {
 //   try {
 //     const { serviceCenterName } = req.body;
@@ -69,9 +69,9 @@ const {   ServiceModel  } = require('../models/registration');
 const addWallet = async (req, res) => {
   try {
     const { serviceCenterName, accountHolderName, email, contact, bankDetailId, accountNumber, ifsc } = req.body;
-console.log("serviceCenterName",serviceCenterName);
+    console.log("serviceCenterName", serviceCenterName);
 
-    
+
 
     // Create new wallet data
     const walletData = new WalletModel(req.body);
@@ -88,15 +88,15 @@ console.log("serviceCenterName",serviceCenterName);
 const createTransaction = async (req, res) => {
   try {
     let body = req.body;
-// console.log(body);
-  
+    // console.log(body);
+
     // Create and save the transaction record
     const transaction = new BankTransactionModel({
       // name:body.fund_account.bank_account.name,
-      name:body.fund_account.bank_account.name,
-      bankName:body.fund_account.bank_account.bankName,
-      accountNo:body.fund_account.bank_account.account_number,
-      ifscCode:body.fund_account.bank_account.ifsc,
+      name: body.fund_account.bank_account.name,
+      bankName: body.fund_account.bank_account.bankName,
+      accountNo: body.fund_account.bank_account.account_number,
+      ifscCode: body.fund_account.bank_account.ifsc,
       dealerId: body.fund_account.contact.reference_id,
       technicianId: body.fund_account.contact.reference_id,
       brandId: body.fund_account.contact.reference_id,
@@ -107,7 +107,7 @@ const createTransaction = async (req, res) => {
     await transaction.save();
 
     // Send response after transaction is successfully saved
-   
+
 
     // After sending the response, continue with additional operations
     const notification = new NotificationModel({
@@ -179,41 +179,92 @@ const updateTransactionStatus = async (req, res) => {
 
 
 
+// const updateTransaction = async (req, res) => {
+//   try {
+//     let _id = req.params.id;
+//     let obj = await BankTransactionModel.findById(_id);
+//     const payScreenshot = req.file.location;
+//     // console.log("obj",obj);
+//     // console.log("payScreenshot",payScreenshot);
+//     if (!obj) {
+//       return res.json({ status: false, msg: "Payment status not updated" });
+//     }
+//     let obj1 = await BankTransactionModel.findByIdAndUpdate(_id, { payScreenshot: payScreenshot, status: "SUCCESS" }, { new: true });
+
+//     //  const updatedWallet = await BankTransactionModel.findByIdAndUpdate(_id, body, { new: true });
+
+//     if (obj1) {
+//       // Create a notification
+//       const notification = new NotificationModel({
+//         // You might want to include dynamic IDs or user details in the notification
+//         title: 'Payment',
+//         message: 'Payment Successfuly   ',
+//         // Add the relevant user IDs if needed:
+//         // serviceCenterId: body.serviceCenterId,
+//         // dealerId: body.dealerId,
+//         // technicianId: body.technicianId,
+//         // userId: body.userId,
+//       });
+
+//       // Save the notification to the database
+//       await notification.save();
+
+//       // Send a success response
+//       // res.json({ status: true, msg: "Update Transaction status", data: obj1 });
+//       return res.json({ status: true, msg: "Payment status updated successfully", data: obj1 });
+//     } else {
+//       // Send a failure response if no document was updated
+//       return res.json({ status: false, msg: "Payment status not updated" });
+//     }
+
+//   } catch (err) {
+//     res.status(500).send(err);
+//   }
+// };
 const updateTransaction = async (req, res) => {
   try {
-     let _id = req.params.id;
-     let obj = await BankTransactionModel.findById(_id);
-     obj.images = req.file.location;
+    let _id = req.params.id;
 
-     let obj1 = await BankTransactionModel.findByIdAndUpdate(_id, { payScreenshot: obj.images,status:"SUCCESS" }, { new: true });
-    //  const updatedWallet = await BankTransactionModel.findByIdAndUpdate(_id, body, { new: true });
+    // console.log("Transaction ID:", _id);
 
-     if (obj1) {
-       // Create a notification
-       const notification = new NotificationModel({
-         // You might want to include dynamic IDs or user details in the notification
-         title: 'Payment',
-         message: 'Payment Successfuly   ',
-         // Add the relevant user IDs if needed:
-         // serviceCenterId: body.serviceCenterId,
-         // dealerId: body.dealerId,
-         // technicianId: body.technicianId,
-         // userId: body.userId,
-       });
- 
-       // Save the notification to the database
-       await notification.save();
- 
-       // Send a success response
-        // res.json({ status: true, msg: "Update Transaction status", data: obj1 });
-       return res.json({ status: true, msg: "Payment status updated successfully", data: obj1 });
-     } else {
-       // Send a failure response if no document was updated
-       return res.json({ status: false, msg: "Payment status not updated" });
-     }
-    
+    let obj = await BankTransactionModel.findById(_id);
+    if (!obj) {
+      return res.json({ status: false, msg: "Transaction not found" });
+    }
+
+    // Check if file is uploaded
+    const payScreenshot = req.file?.location;
+    if (!payScreenshot) {
+      return res.status(400).json({ status: false, msg: "File upload failed" });
+    }
+
+    // console.log("Uploaded Screenshot URL:", payScreenshot);
+
+    let obj1 = await BankTransactionModel.findByIdAndUpdate(
+      _id,
+      { payScreenshot: payScreenshot, status: "SUCCESS" },
+      { new: true }
+    );
+
+    // console.log("Updated Transaction:", obj1);
+
+    if (!obj1) {
+      return res.json({ status: false, msg: "Payment status not updated" });
+    }
+
+    // Create and save notification
+    const notification = new NotificationModel({
+      title: "Payment",
+      message: "Payment successfully updated",
+    });
+
+    await notification.save();
+
+    return res.json({ status: true, msg: "Payment status updated successfully", data: obj1 });
+
   } catch (err) {
-     res.status(500).send(err);
+    console.error("Error in updateTransaction:", err);
+    res.status(500).json({ status: false, msg: "Internal Server Error", error: err.message });
   }
 };
 
@@ -407,4 +458,4 @@ const deleteWallet = async (req, res) => {
   }
 }
 
-module.exports = { addWallet, createTransaction,updateTransaction,updateTransactionStatus, getTransactionByBrandId, getAllTransaction, getTransactionByCenterId, getAllWallet, getWalletById, getWalletByCenterId, editWallet, deleteWallet };
+module.exports = { addWallet, createTransaction, updateTransaction, updateTransactionStatus, getTransactionByBrandId, getAllTransaction, getTransactionByCenterId, getAllWallet, getWalletById, getWalletByCenterId, editWallet, deleteWallet };
