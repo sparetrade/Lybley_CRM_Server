@@ -610,11 +610,12 @@ const getPendingComplaints = async (req, res) => {
        endDate.setHours(23, 59, 59, 999);
      } else if (days === "more-than-week") {
        endDate = new Date(now);
-       endDate.setDate(now.getDate() - 7); // Ensure correct range
+       endDate.setDate(now.getDate() - 5); // Ensure correct range
        endDate.setHours(23, 59, 59, 999);
      }
 
-     let filter = { status: "PENDING" };
+   //   let filter = { status: "PENDING"||"IN PROGRESS" };
+   let filter = { status: { $in: ["PENDING", "IN PROGRESS"] } };
 
      if (days === "0-1" || days === "2-5") {
        filter.createdAt = { $gte: startDate, $lte: endDate };
@@ -631,7 +632,50 @@ const getPendingComplaints = async (req, res) => {
    }
 };
 
- 
+const getPartPendingComplaints = async (req, res) => {
+   try {
+     const { days } = req.params; // Get days filter from params
+     const now = new Date();
+     let startDate, endDate;
+
+     if (days === "0-1") {
+       startDate = new Date(now);
+       startDate.setDate(now.getDate() - 1);
+       startDate.setHours(0, 0, 0, 0);
+
+       endDate = new Date(now);
+       endDate.setHours(23, 59, 59, 999);
+     } else if (days === "2-5") {
+       startDate = new Date(now);
+       startDate.setDate(now.getDate() - 5);
+       startDate.setHours(0, 0, 0, 0);
+
+       endDate = new Date(now);
+       endDate.setDate(now.getDate() - 2);
+       endDate.setHours(23, 59, 59, 999);
+     } else if (days === "more-than-week") {
+       endDate = new Date(now);
+       endDate.setDate(now.getDate() - 5); // Ensure correct range
+       endDate.setHours(23, 59, 59, 999);
+     }
+
+     let filter = { status: "PART PENDING" };
+   
+
+     if (days === "0-1" || days === "2-5") {
+       filter.createdAt = { $gte: startDate, $lte: endDate };
+     } else if (days === "more-than-week") {
+       filter.createdAt = { $lte: endDate };
+     }
+
+     const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
+
+     res.status(200).json({ success: true, data: complaints });
+   } catch (error) {
+     console.error("Error fetching pending complaints:", error);
+     res.status(500).json({ success: false, message: "Server error" });
+   }
+};
 
 
 // const editComplaint = async (req, res) => {
@@ -845,4 +889,4 @@ const updateComplaint = async (req, res) => {
 
 module.exports = { addComplaint, addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
    ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
-   getPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+   getPendingComplaints,getPartPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };

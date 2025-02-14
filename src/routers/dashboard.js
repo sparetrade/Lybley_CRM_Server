@@ -16,7 +16,7 @@ const ComplaintModal = require("../models/complaint");
 
 router.get("/dashboardDetails", async (req, res) => {
   try {
-    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
+    const { now, oneDayAgo, fiveDaysAgo,todayStart } = calculateDateRanges();
 
     const [
       customerCount,
@@ -36,7 +36,11 @@ router.get("/dashboardDetails", async (req, res) => {
       complaintFinalVerificationCount,
       complaints0To1Days,
       complaints2To5Days,
-      complaintsMoreThan5Days
+      complaintsMoreThan5Days,
+      complaintsCompletedToday,
+      complaints0To1PartPendingDays,
+      complaints2To5PartPendingDays,
+      complaintsMoreThan5PartPendingDays,
     ] = await Promise.all([
       UserModel.countDocuments({}),
       Orders.countDocuments({}),
@@ -58,9 +62,26 @@ router.get("/dashboardDetails", async (req, res) => {
       // Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
     // ]);
-    Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
-    Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-    Complaints.countDocuments({ status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
+    // Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+    // Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+    // Complaints.countDocuments({ status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
+    Complaints.countDocuments({ 
+      $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }], 
+      createdAt: { $gte: oneDayAgo } 
+    }),
+    Complaints.countDocuments({ 
+      $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }], 
+      createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } 
+    }),
+    Complaints.countDocuments({ 
+      $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }], 
+      createdAt: { $lt: fiveDaysAgo } 
+    }),
+    Complaints.countDocuments({ status: 'COMPLETED', createdAt: { $gte: todayStart } }),
+
+     Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
+    Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+    Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
   ]);
 
     res.json({
@@ -82,7 +103,12 @@ router.get("/dashboardDetails", async (req, res) => {
         finalVerification: complaintFinalVerificationCount,
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
-        moreThanFiveDays: complaintsMoreThan5Days
+        moreThanFiveDays: complaintsMoreThan5Days,
+        completedToday: complaintsCompletedToday,
+        zeroToOneDaysPartPending: complaints0To1PartPendingDays,
+        twoToFiveDaysPartPending: complaints2To5PartPendingDays,
+        moreThanFiveDaysPartPending: complaintsMoreThan5PartPendingDays,
+        completedToday: complaintsCompletedToday,
       }
     });
   } catch (err) {
@@ -636,8 +662,9 @@ const calculateDateRanges = () => {
   const fiveDaysAgo = new Date(now);
   fiveDaysAgo.setDate(now.getDate() - 5);
   fiveDaysAgo.setHours(0, 0, 0, 0);
-
-  return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo };
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0); 
+  return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo,todayStart };
 };
 
 // Example usage
@@ -656,6 +683,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       complaintCompleteCount,
       complaintCancelCount,
       complaintPartPendingCount,
+      complaintFinalVerificationCount,
       complaints0To1Days,
       complaints2To5Days,
       complaintsMoreThan5Days
@@ -667,6 +695,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'FINAL VERIFICATION' }),
       Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
@@ -681,9 +710,11 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
         partPending: complaintPartPendingCount,
+        finalVerification: complaintFinalVerificationCount,
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
-        moreThanFiveDays: complaintsMoreThan5Days
+        moreThanFiveDays: complaintsMoreThan5Days,
+        
       }
     });
   } catch (err) {
