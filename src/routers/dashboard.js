@@ -887,6 +887,8 @@ router.get('/getComplaintCountByBrand', async (req, res) => {
       } 
     ]);
 
+
+    
     res.status(200).json({ success: true, data: complaintCounts });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error retrieving complaints", error });
