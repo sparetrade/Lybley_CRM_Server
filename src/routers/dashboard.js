@@ -755,7 +755,9 @@ router.get('/getComplaintCountByCityState', async (req, res) => {
           FINAL_VERIFICATION: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "FINAL VERIFICATION"] }, 1, 0] } }
         }
       },
-      { $sort: { "state": 1, "_id.city": 1 } } // Sort alphabetically by city name (A-Z)
+      {
+        $sort: { PENDING: -1 } // Sort by PENDING complaints in descending order
+      }  
     ]);
 
     res.status(200).json({ success: true, data: complaintCounts });
@@ -801,70 +803,6 @@ router.get("/getComplaintCountByServiceCenter", async (req, res) => {
 
 
  
-
-// router.get("/getComplaintCountByServiceCenter", async (req, res) => {
-//   try {
-//     const complaintCounts = await Complaints.aggregate([
-//       {
-//         $match: { assignServiceCenterId: { $ne: null } } // Exclude complaints without assignServiceCenterId
-//       },
-//       {
-//         $group: {
-//           _id: "$assignServiceCenterId",
-//           assignServiceCenter: { $first: "$assignServiceCenter" },
-//           TOTAL: { $sum: 1 },
-//           PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PENDING"] }, 1, 0] } },
-//           INPROGRESS: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "INPROGRESS"] }, 1, 0] } },
-//           PART_PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PART PENDING"] }, 1, 0] } },
-//           ASSIGN: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "ASSIGN"] }, 1, 0] } },
-//           CANCEL: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "CANCELED"] }, 1, 0] } },
-//           COMPLETE: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "COMPLETED"] }, 1, 0] } },
-//           FINAL_VERIFICATION: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "FINAL VERIFICATION"] }, 1, 0] } }
-//         }
-//       },
-//       {
-//         $addFields: {
-//           assignServiceCenterId: { $toObjectId: "$_id" } // Convert to ObjectId for `$lookup`
-//         }
-//       },
-//       {
-//         $lookup: {
-//           from: "servicecenters", // Correct collection name
-//           localField: "assignServiceCenterId",
-//           foreignField: "_id",
-//           as: "serviceCenterDetails"
-//         }
-//       },
-//       {
-//         $unwind: { path: "$serviceCenterDetails", preserveNullAndEmptyArrays: true }
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           assignServiceCenter: 1,
-//           city: "$serviceCenterDetails.city", // Get the city from the ServiceCenter model
-//           TOTAL: 1,
-//           PENDING: 1,
-//           INPROGRESS: 1,
-//           PART_PENDING: 1,
-//           ASSIGN: 1,
-//           CANCEL: 1,
-//           COMPLETE: 1,
-//           FINAL_VERIFICATION: 1
-//         }
-//       },
-//       {
-//         $sort: { PENDING: -1 } // Sort by PENDING complaints in descending order
-//       }
-//     ]);
-
-//     res.status(200).json({ success: true, data: complaintCounts });
-//   } catch (error) {
-//     console.error("Error fetching complaint count:", error);
-//     res.status(500).json({ success: false, message: "Error retrieving complaints", error });
-//   }
-// });
-
 router.get('/getComplaintCountByBrand', async (req, res) => {
   try {
     const complaintCounts = await Complaints.aggregate([
