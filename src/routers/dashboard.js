@@ -16,7 +16,7 @@ const ComplaintModal = require("../models/complaint");
 
 router.get("/dashboardDetails", async (req, res) => {
   try {
-    const { now, oneDayAgo, fiveDaysAgo,todayStart } = calculateDateRanges();
+    const { now, oneDayAgo, fiveDaysAgo, todayStart } = calculateDateRanges();
 
     const [
       customerCount,
@@ -56,33 +56,33 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
       Complaints.countDocuments({ status: 'PART PENDING' }),
-      Complaints.countDocuments({  status: 'FINAL VERIFICATION' }),
+      Complaints.countDocuments({ status: 'FINAL VERIFICATION' }),
 
       // Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
-    // ]);
-    // Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
-    // Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-    // Complaints.countDocuments({ status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
-    Complaints.countDocuments({ 
-      $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }], 
-      createdAt: { $gte: oneDayAgo } 
-    }),
-    Complaints.countDocuments({ 
-      $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }], 
-      createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } 
-    }),
-    Complaints.countDocuments({ 
-      $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }], 
-      createdAt: { $lt: fiveDaysAgo } 
-    }),
-    Complaints.countDocuments({ status: 'COMPLETED', createdAt: { $gte: todayStart } }),
+      // ]);
+      // Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+      // Complaints.countDocuments({ status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      // Complaints.countDocuments({ status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
+      Complaints.countDocuments({
+        $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }],
+        createdAt: { $gte: oneDayAgo }
+      }),
+      Complaints.countDocuments({
+        $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }],
+        createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo }
+      }),
+      Complaints.countDocuments({
+        $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }],
+        createdAt: { $lt: fiveDaysAgo }
+      }),
+      Complaints.countDocuments({ status: 'COMPLETED', createdAt: { $gte: todayStart } }),
 
-     Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
-    Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-    Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
-  ]);
+      Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
+    ]);
 
     res.json({
       customers: customerCount,
@@ -150,8 +150,8 @@ router.get('/getUserAndProduct', async (req, res) => {
 });
 router.get('/getCustomers/:id', async (req, res) => {
   try {
-   const brandId= req.params.id; // Extract brandId from query parameters
-// console.log(brandId);
+    const brandId = req.params.id; // Extract brandId from query parameters
+    // console.log(brandId);
 
     // Find complaints based on the brandId
     const complaints = await Complaints.find(brandId ? { brandId } : {});
@@ -173,154 +173,6 @@ router.get('/getCustomers/:id', async (req, res) => {
 });
 
 
-// router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
-//   try {
-//     const id = req.params.id;
-//     const query = {assignServiceCenterId:id};
-//     const [
-//       allComplaintCount,
-//       complaintNewCount,
-//       complaintAssignCount,
-//       complaintPendingCount,
-//       complaintCompleteCount,
-//       complaintCancelCount,
-//       complaintPartPendingCount
-//     ] = await Promise.all([
-//       Complaints.countDocuments(query),
-//       Complaints.countDocuments({ ...query, status: 'NEW' }),
-//       Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
-//       Complaints.countDocuments({ ...query, status: 'PENDING' }),
-//       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
-//       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-//       Complaints.countDocuments({ ...query, status: 'PART PENDING' })
-//     ]);
-
-//     res.json({
-//       complaints: {
-//         allComplaints: allComplaintCount,
-//         new: complaintNewCount,
-//         assign: complaintAssignCount,
-//         pending: complaintPendingCount,
-//         complete: complaintCompleteCount,
-//         cancel: complaintCancelCount,
-//         partPending: complaintPartPendingCount
-//       }
-//     });
-//   } catch (err) {
-//     console.error('Error in /dashboardDetailsById/:id:', err);
-//     res.status(500).send(err);
-//   }
-// });
-
-
-// router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
-//   try {
-//     const id = req.params.id;
-
-//     // Get the current date and calculate the start dates for the current month, week, and day
-//     const now = new Date();
-//     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-//     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-//     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-//     // Query to filter complaints by assignServiceCenterId
-//     const query = { assignServiceCenterId: id };
-
-//     // Fetch counts for all complaints and complaints with specific statuses
-//     const [
-//       allComplaintCount,
-//       complaintNewCount,
-//       complaintAssignCount,
-//       complaintPendingCount,
-//       complaintCompleteCount,
-//       complaintCancelCount,
-//       complaintPartPendingCount,
-//       monthlyNewCount,
-//       monthlyAssignCount,
-//       monthlyPendingCount,
-//       monthlyCompleteCount,
-//       monthlyCancelCount,
-//       weeklyNewCount,
-//       weeklyAssignCount,
-//       weeklyPendingCount,
-//       weeklyCompleteCount,
-//       weeklyCancelCount,
-//       dailyNewCount,
-//       dailyAssignCount,
-//       dailyPendingCount,
-//       dailyCompleteCount,
-//       dailyCancelCount
-//     ] = await Promise.all([
-//       // Total counts
-//       Complaints.countDocuments(query),
-//       Complaints.countDocuments({ ...query, status: 'NEW' }),
-//       Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
-//       Complaints.countDocuments({ ...query, status: 'PENDING' }),
-//       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
-//       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-//       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
-
-//       // Monthly counts
-//       Complaints.countDocuments({ ...query, status: 'NEW', createdAt: startOfMonth }),
-//       Complaints.countDocuments({ ...query, status: 'ASSIGN', createdAt: { $gte: startOfMonth } }),
-//       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: startOfMonth } }),
-//       Complaints.countDocuments({ ...query, status: 'COMPLETED', createdAt: { $gte: startOfMonth } }),
-//       Complaints.countDocuments({ ...query, status: 'CANCELED', createdAt: { $gte: startOfMonth } }),
-
-//       // Weekly counts
-//       Complaints.countDocuments({ ...query, status: 'NEW', createdAt: { $gte: startOfWeek } }),
-//       Complaints.countDocuments({ ...query, status: 'ASSIGN', createdAt: { $gte: startOfWeek } }),
-//       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: startOfWeek } }),
-//       Complaints.countDocuments({ ...query, status: 'COMPLETED', createdAt: { $gte: startOfWeek } }),
-//       Complaints.countDocuments({ ...query, status: 'CANCELED', createdAt: { $gte: startOfWeek } }),
-
-//       // Daily counts
-//       Complaints.countDocuments({ ...query, status: 'NEW', createdAt: { $gte: startOfDay } }),
-//       Complaints.countDocuments({ ...query, status: 'ASSIGN', createdAt: { $gte: startOfDay } }),
-//       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: startOfDay } }),
-//       Complaints.countDocuments({ ...query, status: 'COMPLETED', createdAt: { $gte: startOfDay } }),
-//       Complaints.countDocuments({ ...query, status: 'CANCELED', createdAt: { $gte: startOfDay } })
-//     ]);
-
-//     // Return aggregated data as JSON response
-//     res.json({
-//       complaints: {
-//         allComplaints: allComplaintCount,
-//         new: complaintNewCount,
-//         assign: complaintAssignCount,
-//         pending: complaintPendingCount,
-//         complete: complaintCompleteCount,
-//         cancel: complaintCancelCount,
-//         partPending: complaintPartPendingCount,
-//         monthly: {
-//           new: monthlyNewCount,
-//           assign: monthlyAssignCount,
-//           pending: monthlyPendingCount,
-//           complete: monthlyCompleteCount,
-//           cancel: monthlyCancelCount
-//         },
-//         weekly: {
-//           new: weeklyNewCount,
-//           assign: weeklyAssignCount,
-//           pending: weeklyPendingCount,
-//           complete: weeklyCompleteCount,
-//           cancel: weeklyCancelCount
-//         },
-//         daily: {
-//           new: dailyNewCount,
-//           assign: dailyAssignCount,
-//           pending: dailyPendingCount,
-//           complete: dailyCompleteCount,
-//           cancel: dailyCancelCount
-//         }
-//       }
-//     });
-
-//   } catch (err) {
-//     console.error('Error in /dashboardDetailsBySeviceCenterId/:id:', err);
-//     res.status(500).send(err);
-//   }
-// });
 
 router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
   try {
@@ -373,7 +225,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       lastMonthCancelCount,
       lastMonthPartPendingCount,
       allWeekComplaintCount,
-      
+
       lastWeekNewCount,
       lastWeekAssignCount,
       lastWeekPendingCount,
@@ -399,8 +251,8 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
       // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
-      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: oneDayAgo } }),
-      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
       // Last Month counts
       Complaints.countDocuments({ ...query, createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
@@ -537,13 +389,13 @@ router.get("/dashboardDetailsByTechnicianId/:id", async (req, res) => {
   }
 });
 
-    
+
 
 router.get("/dashboardDetailsByDealerId/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const query = { dealerId: id };
- const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
+    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
     const [
       allComplaintCount,
       complaintProdressCount,
@@ -663,8 +515,8 @@ const calculateDateRanges = () => {
   fiveDaysAgo.setDate(now.getDate() - 5);
   fiveDaysAgo.setHours(0, 0, 0, 0);
   const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0); 
-  return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo,todayStart };
+  todayStart.setHours(0, 0, 0, 0);
+  return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo, todayStart };
 };
 
 // Example usage
@@ -696,8 +548,8 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
       Complaints.countDocuments({ ...query, status: 'FINAL VERIFICATION' }),
-      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: oneDayAgo } }),
-      Complaints.countDocuments({ ...query,status: 'PENDING',  createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
     ]);
 
@@ -714,7 +566,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
         moreThanFiveDays: complaintsMoreThan5Days,
-        
+
       }
     });
   } catch (err) {
@@ -734,8 +586,8 @@ router.get('/getStatewisePendingComplaints', async (req, res) => {
     // Aggregation pipeline to get count of pending complaints by state
     const complaints = await Complaints.aggregate([
       { $match: { status: 'PENDING' } },  // Filter to include only pending complaints
-      { $group: { _id: "$state", count: { $sum: 1 } } } , // Group by state and count
-      { $sort: { count: -1 } } 
+      { $group: { _id: "$state", count: { $sum: 1 } } }, // Group by state and count
+      { $sort: { count: -1 } }
     ]);
 
     res.status(200).json(complaints);  // Send response with aggregated data
@@ -745,36 +597,21 @@ router.get('/getStatewisePendingComplaints', async (req, res) => {
   }
 });
 
-// router.get('/getDistrictWisePendingComplaints', async (req, res) => {
-//   try {
-//     // Aggregation pipeline to get count of pending complaints by district
-//     const complaints = await Complaints.aggregate([
-//       { $match: { status: 'PENDING' } },  // Filter to include only pending complaints
-//       { $group: { _id: "$district", count: { $sum: 1 } } },  // Group by district and count
-//       { $sort: { count: -1 } } 
-//     ]);
-
-//     res.status(200).json(complaints);  // Send response with aggregated data
-//   } catch (error) {
-//     console.error('Error fetching district-wise pending complaints:', error);
-//     res.status(500).json({ error: 'Error fetching district-wise pending complaints' });
-//   }
-// });
 
 router.get('/getDistrictWisePendingComplaints', async (req, res) => {
   try {
     // Aggregation pipeline to get count of pending complaints by state and district
     const complaints = await Complaints.aggregate([
-      { 
+      {
         $match: { status: 'PENDING' }  // Filter to include only pending complaints
       },
-      { 
-        $group: { 
+      {
+        $group: {
           _id: { state: "$state", district: "$district" },  // Group by state and district
           count: { $sum: 1 }  // Count the number of complaints
-        } 
+        }
       },
-      { 
+      {
         $sort: { "count": -1 }  // Sort by count in descending order
       }
     ]);
@@ -793,21 +630,7 @@ router.get('/getDistrictWisePendingComplaints', async (req, res) => {
   }
 });
 
-// router.get('/getServiceCenterWisePendingComplaints', async (req, res) => {
-//   try {
-//     // Aggregation pipeline to get count of pending complaints by service center, sorted by count in descending order
-//     const complaints = await Complaints.aggregate([
-//       { $match: { status: 'PENDING' } },                    // Filter to include only pending complaints
-//       { $group: { _id: "$assignServiceCenter", count: { $sum: 1 } } },  // Group by service center and count
-//       { $sort: { count: -1 } }                              // Sort by count in descending order
-//     ]);
 
-//     res.status(200).json(complaints);  // Send response with sorted data
-//   } catch (error) {
-//     console.error('Error fetching service-center-wise pending complaints:', error);
-//     res.status(500).json({ error: 'Error fetching service-center-wise pending complaints' });
-//   }
-// });
 
 router.get('/getServiceCenterWisePendingComplaints', async (req, res) => {
   try {
@@ -830,7 +653,7 @@ router.get('/getNoServiceableAreaComplaints', async (req, res) => {
     // Aggregation pipeline to get pending complaints with no associated service center, including userName and district
     const complaints = await Complaints.aggregate([
       { $match: { status: 'PENDING', assignServiceCenter: { $exists: false } } },  // Filter for pending complaints without service center
-      { $project: { userName: 1, district: 1 , state: 1, phoneNumber: 1} }                             // Project only userName and district fields
+      { $project: { userName: 1, district: 1, state: 1, phoneNumber: 1 } }                             // Project only userName and district fields
     ]);
 
     res.status(200).json(complaints);  // Send response with list of complaints
@@ -839,52 +662,6 @@ router.get('/getNoServiceableAreaComplaints', async (req, res) => {
     res.status(500).json({ error: 'Error fetching no serviceable area complaints' });
   }
 });
-// router.get('/getComplaintInsights', async (req, res) => {
-//   try {
-//     const [
-//       complaintsByBrand,
-//       complaintsByLocationAndProduct,
-//       commonFaults
-//     ] = await Promise.all([
-//       Complaints.aggregate([
-//         // Group complaints by productBrand and count them
-//         { $group: { _id: "$productBrand", count: { $sum: 1 } } },
-//         { $sort: { count: -1 } }
-//       ]),
-//       Complaints.aggregate([
-//         // Group complaints by both product and productBrand
-//         { 
-//           $group: { 
-//             _id: { product: "$productName", productBrand: "$productBrand" }, 
-//             count: { $sum: 1 } 
-//           } 
-//         },
-//         { $sort: { count: -1 } }
-//       ]),
-//       Complaints.aggregate([
-//         // Unwind the issueType array
-//         { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },  // Use preserveNullAndEmptyArrays to avoid issues if issueType is not an array
-//         { 
-//           $group: { 
-//             _id: "$issueType", 
-//             productBrand: { $first: "$productBrand" },  // Get the first productBrand for each issueType
-//             count: { $sum: 1 } 
-//           } 
-//         },
-//         { $sort: { count: -1 } }
-//       ])
-//     ]);
-
-//     res.status(200).json({
-//       complaintsByBrand,
-//       complaintsByLocationAndProduct,
-//       commonFaults
-//     });
-//   } catch (error) {
-//     console.error('Error fetching complaint insights:', error);
-//     res.status(500).json({ error: 'Error fetching complaint insights' });
-//   }
-// });
 
 
 router.get('/getComplaintInsights', async (req, res) => {
@@ -902,23 +679,23 @@ router.get('/getComplaintInsights', async (req, res) => {
       ]),
       Complaints.aggregate([
         // Group complaints by both product and productBrand
-        { 
-          $group: { 
-            _id: { product: "$productName", productBrand: "$productBrand" }, 
-            count: { $sum: 1 } 
-          } 
+        {
+          $group: {
+            _id: { product: "$productName", productBrand: "$productBrand" },
+            count: { $sum: 1 }
+          }
         },
         { $sort: { count: -1 } }
       ]),
       Complaints.aggregate([
         // Unwind the issueType array
-        { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },  
-        { 
-          $group: { 
-            _id: "$issueType", 
-            productBrand: { $first: "$productBrand" },  
-            count: { $sum: 1 } 
-          } 
+        { $unwind: { path: "$issueType", preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: "$issueType",
+            productBrand: { $first: "$productBrand" },
+            count: { $sum: 1 }
+          }
         },
         { $sort: { count: -1 } }
       ]),
@@ -941,6 +718,188 @@ router.get('/getComplaintInsights', async (req, res) => {
     res.status(500).json({ error: 'Error fetching complaint insights' });
   }
 });
+
+
+router.get('/getAllUnAssignComplaint', async (req, res) => {
+  try {
+    const unassignedComplaints = await Complaints.find({
+      $or: [
+        { assignServiceCenterId: null },
+        { assignServiceCenterId: { $exists: false } }
+      ],
+      status: { $in: ["PENDING", "IN PROGRESS", "PART PENDING"] } // Filtering based on status
+    });
+
+    res.status(200).json({ success: true, data: unassignedComplaints });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error retrieving complaints", error });
+  }
+});
+
+
+
+router.get('/getComplaintCountByCityState', async (req, res) => {
+  try {
+    const complaintCounts = await Complaints.aggregate([
+      {
+        $group: {
+          _id: { city: "$district" }, // Group by city (district)
+          TOTAL: { $sum: 1 },
+          state: { $first: "$state" },  
+          PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PENDING"] }, 1, 0] } },
+          INPROGRESS: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "IN PROGRESS"] }, 1, 0] } },
+          PART_PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PART PENDING"] }, 1, 0] } },
+          ASSIGN: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "ASSIGN"] }, 1, 0] } },
+          CANCEL: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "CANCELED"] }, 1, 0] } },
+          COMPLETE: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "COMPLETED"] }, 1, 0] } },
+          FINAL_VERIFICATION: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "FINAL VERIFICATION"] }, 1, 0] } }
+        }
+      },
+      { $sort: { "state": 1, "_id.city": 1 } } // Sort alphabetically by city name (A-Z)
+    ]);
+
+    res.status(200).json({ success: true, data: complaintCounts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error retrieving complaints", error });
+  }
+});
+
+ 
+ 
+router.get("/getComplaintCountByServiceCenter", async (req, res) => {
+  try {
+    const complaintCounts = await Complaints.aggregate([
+      {
+        $match: { assignServiceCenterId: { $ne: null } } // Exclude complaints without assignServiceCenterId
+      },
+      {
+        $group: {
+          _id: "$assignServiceCenterId",
+          assignServiceCenter: { $first: "$assignServiceCenter" },
+          city: { $first: "$district" },
+          TOTAL: { $sum: 1 },
+          PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PENDING"] }, 1, 0] } },
+          INPROGRESS: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "IN PROGRESS"] }, 1, 0] } },
+          PART_PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PART PENDING"] }, 1, 0] } },
+          ASSIGN: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "ASSIGN"] }, 1, 0] } },
+          CANCEL: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "CANCELED"] }, 1, 0] } },
+          COMPLETE: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "COMPLETED"] }, 1, 0] } },
+          FINAL_VERIFICATION: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "FINAL VERIFICATION"] }, 1, 0] } }
+        }
+      },
+      {
+        $sort: { PENDING: -1 } // Sort by PENDING complaints in descending order
+      }
+    ]);
+
+    res.status(200).json({ success: true, data: complaintCounts });
+  } catch (error) {
+    console.error("Error fetching complaint count:", error);
+    res.status(500).json({ success: false, message: "Error retrieving complaints", error });
+  }
+});
+
+
+ 
+
+// router.get("/getComplaintCountByServiceCenter", async (req, res) => {
+//   try {
+//     const complaintCounts = await Complaints.aggregate([
+//       {
+//         $match: { assignServiceCenterId: { $ne: null } } // Exclude complaints without assignServiceCenterId
+//       },
+//       {
+//         $group: {
+//           _id: "$assignServiceCenterId",
+//           assignServiceCenter: { $first: "$assignServiceCenter" },
+//           TOTAL: { $sum: 1 },
+//           PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PENDING"] }, 1, 0] } },
+//           INPROGRESS: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "INPROGRESS"] }, 1, 0] } },
+//           PART_PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PART PENDING"] }, 1, 0] } },
+//           ASSIGN: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "ASSIGN"] }, 1, 0] } },
+//           CANCEL: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "CANCELED"] }, 1, 0] } },
+//           COMPLETE: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "COMPLETED"] }, 1, 0] } },
+//           FINAL_VERIFICATION: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "FINAL VERIFICATION"] }, 1, 0] } }
+//         }
+//       },
+//       {
+//         $addFields: {
+//           assignServiceCenterId: { $toObjectId: "$_id" } // Convert to ObjectId for `$lookup`
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: "servicecenters", // Correct collection name
+//           localField: "assignServiceCenterId",
+//           foreignField: "_id",
+//           as: "serviceCenterDetails"
+//         }
+//       },
+//       {
+//         $unwind: { path: "$serviceCenterDetails", preserveNullAndEmptyArrays: true }
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           assignServiceCenter: 1,
+//           city: "$serviceCenterDetails.city", // Get the city from the ServiceCenter model
+//           TOTAL: 1,
+//           PENDING: 1,
+//           INPROGRESS: 1,
+//           PART_PENDING: 1,
+//           ASSIGN: 1,
+//           CANCEL: 1,
+//           COMPLETE: 1,
+//           FINAL_VERIFICATION: 1
+//         }
+//       },
+//       {
+//         $sort: { PENDING: -1 } // Sort by PENDING complaints in descending order
+//       }
+//     ]);
+
+//     res.status(200).json({ success: true, data: complaintCounts });
+//   } catch (error) {
+//     console.error("Error fetching complaint count:", error);
+//     res.status(500).json({ success: false, message: "Error retrieving complaints", error });
+//   }
+// });
+
+router.get('/getComplaintCountByBrand', async (req, res) => {
+  try {
+    const complaintCounts = await Complaints.aggregate([
+      {
+        $group: {
+          _id: { brandId: "$brandId" }, // Group by city (district)
+          TOTAL: { $sum: 1 },
+          productBrand: { $first: "$productBrand" },  
+          PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PENDING"] }, 1, 0] } },
+          INPROGRESS: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "IN PROGRESS"] }, 1, 0] } },
+          PART_PENDING: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "PART PENDING"] }, 1, 0] } },
+          ASSIGN: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "ASSIGN"] }, 1, 0] } },
+          CANCEL: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "CANCELED"] }, 1, 0] } },
+          COMPLETE: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "COMPLETED"] }, 1, 0] } },
+          FINAL_VERIFICATION: { $sum: { $cond: [{ $eq: [{ $toUpper: "$status" }, "FINAL VERIFICATION"] }, 1, 0] } }
+        }
+      },
+      {
+        $sort: { PENDING: -1 } // Sort by PENDING complaints in descending order
+      } 
+    ]);
+
+
+    
+    res.status(200).json({ success: true, data: complaintCounts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error retrieving complaints", error });
+  }
+});
+
+
+
+
+
+
 
 
 
