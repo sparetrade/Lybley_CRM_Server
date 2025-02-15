@@ -77,7 +77,7 @@ router.get("/dashboardDetails", async (req, res) => {
         $or: [{ status: 'PENDING' }, { status: 'IN PROGRESS' }],
         createdAt: { $lt: fiveDaysAgo }
       }),
-      Complaints.countDocuments({ status: 'COMPLETED', createdAt: { $gte: todayStart } }),
+      Complaints.countDocuments({ status: 'COMPLETED', updatedAt: { $gte: todayStart } }),
 
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
@@ -888,7 +888,7 @@ router.get('/getComplaintCountByBrand', async (req, res) => {
     ]);
 
 
-    
+
     res.status(200).json({ success: true, data: complaintCounts });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error retrieving complaints", error });
