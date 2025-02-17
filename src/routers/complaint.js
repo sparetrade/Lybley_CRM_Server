@@ -2,7 +2,7 @@ const express = require("express")
 
 const {addComplaint,addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
     ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
-    getPendingComplaints,getPartPendingComplaints,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
+    getPendingComplaints,getPartPendingComplaints,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,updateFinalVerification,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
 const {upload}  = require("../services/service");
  
  
@@ -30,6 +30,7 @@ router.get("/getPartPendingComplaints/:days",getPartPendingComplaints)
 router.get("/getComplaintByUserId/:id",getComplaintByUserId)
 router.get("/getComplaintByTechId/:id",getComplaintByTechId)
 router.patch("/editImage/:id", upload().single("issueImages"),editIssueImage );
+router.patch("/updateFinalVerification/:id", upload().single("partImage"),updateFinalVerification );
 router.patch("/editComplaint/:id",editComplaint)
 router.patch("/updateComplaintComments/:id",updateComplaintComments)
 router.delete("/deleteComplaint/:id",deleteComplaint)

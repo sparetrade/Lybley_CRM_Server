@@ -171,7 +171,8 @@ const addComplaint = async (req, res) => {
          serviceCenterContact: serviceCenter?.contact,
          assignServiceCenterTime: new Date()
       };
-      if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
+      //  && serviceCenter.serviceCenterType === "Independent"
+      if (serviceCenter) {
          obj.status = "ASSIGN";
       }
       // Save the complaint
@@ -246,7 +247,7 @@ const addAPPComplaint = async (req, res) => {
             serviceCenterContact: serviceCenter?.contact,
             assignServiceCenterTime: new Date()
          };
-         if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
+         if (serviceCenter  ) {
             obj.status = "ASSIGN";
          }
          let data = new ComplaintModal(obj);
@@ -274,7 +275,7 @@ const addAPPComplaint = async (req, res) => {
          serviceCenterContact: serviceCenter?.contact,
          assignServiceCenterTime: new Date()
       };
-      if (serviceCenter && serviceCenter.serviceCenterType === "Independent") {
+      if (serviceCenter ) {
          obj.status = "ASSIGN";
       }
       let data = new ComplaintModal(obj);
@@ -421,6 +422,9 @@ const editIssueImage = async (req, res) => {
       res.status(500).send(err);
    }
 };
+
+
+
 
 const getAllComplaint = async (req, res) => {
    try {
@@ -829,6 +833,126 @@ const editComplaint = async (req, res) => {
       res.status(500).send(err);
    }
 };
+const updateFinalVerification = async (req, res) => { 
+   try {
+      let _id = req.params.id;
+      let body = req.body;
+      let image = req.file ? req.file.location : null;
+
+      // console.log("Received Image:", image);
+      // console.log("Complaint ID:", _id);
+      // console.log("Request Body:", body);
+
+      // Validate ID
+      if (!_id) {
+         return res.status(400).json({ status: false, msg: "Invalid ID" });
+      }
+
+      // Find the complaint
+      let data = await ComplaintModal.findById(_id);
+      if (!data) {
+         return res.status(404).json({ status: false, msg: "Complaint not found" });
+      }
+
+      // Prepare update object
+      let updateFields = { ...body };
+      if (image) {
+         updateFields.partImage = image;
+      }
+
+      // Append update history
+      const changes = { ...updateFields };
+      delete changes.updateHistory;
+
+      data.updateHistory.push({
+         updatedAt: new Date(),
+         changes,
+      });
+
+      // Update document safely
+      Object.assign(data, updateFields);
+      await data.save();
+
+      // Handle notifications
+      if (body.assignServiceCenterId) {
+         await NotificationModel.create({
+            complaintId: data._id,
+            userId: data.userId,
+            technicianId: body.technicianId,
+            serviceCenterId: body.assignServiceCenterId,
+            brandId: data.brandId,
+            dealerId: data.dealerId,
+            userName: data.productBrand,
+            title: "Brand Assign Service Center",
+            message: "Assign Service Center on Your Complaint!",
+         });
+      }
+
+      if (body.technicianId) {
+         await NotificationModel.create({
+            complaintId: data._id,
+            userId: data.userId,
+            technicianId: body.technicianId,
+            serviceCenterId: body.assignServiceCenterId,
+            brandId: data.brandId,
+            dealerId: data.dealerId,
+            userName: data.assignServiceCenter,
+            title: "Service Center Assign Technician",
+            message: "Assign Technician on Your Complaint!",
+         });
+      }
+
+      // Handle completed complaint logic
+      if (body.status === "COMPLETED") {
+         let subCatData = await SubCategoryModal.findOne({ categoryId: data.categoryId });
+
+         if (subCatData) {
+            let payout = parseInt(subCatData.payout || 0);
+            if (isNaN(payout) || payout <= 0) {
+               console.error("Invalid payout amount:", subCatData.payout);
+               return res.json({ status: true, msg: "Complaint Updated with invalid payout" });
+            }
+
+            // Brand transaction
+            await BrandRechargeModel.create({
+               brandId: data.brandId,
+               brandName: data.productBrand,
+               amount: -body?.paymentBrand || 0,
+               complaintId: data._id,
+               description: "Complaint Close Payout",
+            });
+
+            // Service Center Wallet Update
+            let serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: data.assignServiceCenterId });
+            if (serviceCenterWallet) {
+               serviceCenterWallet.totalCommission += payout;
+               serviceCenterWallet.dueAmount += payout;
+               await serviceCenterWallet.save();
+            } else {
+               console.warn("No wallet found for service center:", data.assignServiceCenterId);
+            }
+
+            // Dealer Wallet Update
+            let dealerWallet = await WalletModel.findOne({ dealerId: data.dealerId });
+            if (dealerWallet) {
+               let commissionToAdd = data.dealerId ? payout * 0.2 : payout;
+               dealerWallet.totalCommission += commissionToAdd;
+               dealerWallet.dueAmount += commissionToAdd;
+               await dealerWallet.save();
+            } else {
+               console.warn("No wallet found for dealer:", data.dealerId);
+            }
+         }
+      }
+
+      res.json({ status: true, msg: "Complaint Updated" });
+   } catch (err) {
+      console.error("Error updating complaint:", err);
+      res.status(500).json({ status: false, msg: "Internal Server Error", error: err.message });
+   }
+};
+
+
 const updateComplaintComments = async (req, res) => {
    try {
       const _id = req.params.id;
@@ -889,4 +1013,4 @@ const updateComplaint = async (req, res) => {
 
 module.exports = { addComplaint, addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
    ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
-   getPendingComplaints,getPartPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+   getPendingComplaints,getPartPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage,updateFinalVerification, editComplaint, deleteComplaint, updateComplaint };
