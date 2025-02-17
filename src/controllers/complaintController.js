@@ -850,6 +850,7 @@ const updateFinalVerification = async (req, res) => {
 
       // Find the complaint
       let data = await ComplaintModal.findById(_id);
+      // console.log("data ID:", data);
       if (!data) {
          return res.status(404).json({ status: false, msg: "Complaint not found" });
       }
@@ -912,15 +913,9 @@ const updateFinalVerification = async (req, res) => {
                console.error("Invalid payout amount:", subCatData.payout);
                return res.json({ status: true, msg: "Complaint Updated with invalid payout" });
             }
+ 
 
-            // Brand transaction
-            await BrandRechargeModel.create({
-               brandId: data.brandId,
-               brandName: data.productBrand,
-               amount: -body?.paymentBrand || 0,
-               complaintId: data._id,
-               description: "Complaint Close Payout",
-            });
+           
 
             // Service Center Wallet Update
             let serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: data.assignServiceCenterId });
@@ -943,6 +938,14 @@ const updateFinalVerification = async (req, res) => {
                console.warn("No wallet found for dealer:", data.dealerId);
             }
          }
+          // Brand transaction
+          await BrandRechargeModel.create({
+            brandId: data.brandId,
+            brandName: data.productBrand,
+            amount: -(body?.paymentBrand) || 0,
+            complaintId: data._id,
+            description: "Complaint Close Payout",
+         });
       }
 
       res.json({ status: true, msg: "Complaint Updated" });
