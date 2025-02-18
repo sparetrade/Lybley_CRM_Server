@@ -110,6 +110,7 @@ const shipyariOrder = require("./src/routers/shipyariOrder");
 const brandRecharge = require("./src/routers/brandRecharge");
 const appApk = require("./src/routers/appAPK");
 const serviceCenterDeposit = require("./src/routers/serviceCenterDeposit");
+const serviceCenterPayment = require("./src/routers/servicePayment");
 
 app.use(express.json());
 
@@ -191,6 +192,7 @@ app.use(payment);
 app.use(shipyariOrder);
 app.use(brandRecharge);
 app.use(serviceCenterDeposit);
+app.use(serviceCenterPayment);
 
 app.listen(PORT, () => {
     console.log("Server is running on PORT", PORT);

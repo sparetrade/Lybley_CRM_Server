@@ -938,6 +938,14 @@ const updateFinalVerification = async (req, res) => {
                console.warn("No wallet found for dealer:", data.dealerId);
             }
          }
+         let serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: data.assignServiceCenterId });
+            if (serviceCenterWallet) {
+               serviceCenterWallet.totalCommission += payout;
+               serviceCenterWallet.dueAmount += payout;
+               await serviceCenterWallet.save();
+            } else {
+               console.warn("No wallet found for service center:", data.assignServiceCenterId);
+            }
           // Brand transaction
           await BrandRechargeModel.create({
             brandId: data.brandId,
