@@ -5,7 +5,7 @@ const {upload}  = require("../services/service");
  const { addServicePayment,getAllServicePayment,getServicePaymentById,editServicePayment,deleteServicePayment}=require("../controllers/servicePaymentController")
 
 // router.post("/addServicePayment",addServicePayment );
-router.patch("/addServicePayment", upload().single("qrCode"),addServicePayment );
+router.post("/addServicePayment", upload().single("qrCode"),addServicePayment );
 router.get("/getAllServicePayment",getAllServicePayment );
 router.get("/getServicePayment/:id",getServicePaymentById );
 // router.patch("/editServicePayment/:id",editServicePayment );
