@@ -131,16 +131,31 @@ const addComplaint = async (req, res) => {
 
       // Find a service center based on city or pincode
       let serviceCenter;
+      // if (pincode) {
+      //    serviceCenter = await ServiceModel.findOne({
+      //       $or: [
+      //          { postalCode: pincode },
+      //          { pincodeSupported: { $in: [pincode] } }
+      //       ]
+      //    });
+      // } 
       if (pincode) {
          serviceCenter = await ServiceModel.findOne({
-            $or: [
-               { postalCode: pincode },
-               { pincodeSupported: { $in: [pincode] } }
+            $and: [
+              {
+                $or: [
+                  { postalCode: pincode },
+                  { pincodeSupported: { $in: [pincode] } }
+                ]
+              },
+              { brandsSupported: { $in: [brandId] } }
             ]
-         });
-      } else if (city) {
-         serviceCenter = await ServiceModel.findOne({ city: city });
-      }
+          });
+
+   } 
+      // else if (city) {
+      //    serviceCenter = await ServiceModel.findOne({ city: city });
+      // }
 
       // let serviceCenter;
       // if (pincode) {
@@ -206,21 +221,41 @@ const addAPPComplaint = async (req, res) => {
       let body = req.body;
 
 
-      let { city, pincode } = body; // Extract city and pincode from request body
+      let { city, pincode,brandId } = body; // Extract city and pincode from request body
 
       // Find a service center based on city or pincode
       let serviceCenter;
       if (pincode) {
+         // serviceCenter = await ServiceModel.findOne({
+         //    $or: [
+         //       { postalCode: pincode },
+         //       { pincodeSupported: { $in: [pincode] } }
+         //    ]
+         
+         // });
+         // serviceCenter = await ServiceModel.findOne({
+         //    $or: [
+         //      { postalCode: pincode },
+         //      { pincodeSupported: { $in: [pincode] } }
+         //    ],
+         //    brandsSupported: { $in: [brandId] }
+         //  });
          serviceCenter = await ServiceModel.findOne({
-            $or: [
-               { postalCode: pincode },
-               { pincodeSupported: { $in: [pincode] } }
+            $and: [
+              {
+                $or: [
+                  { postalCode: pincode },
+                  { pincodeSupported: { $in: [pincode] } }
+                ]
+              },
+              { brandsSupported: { $in: [brandId] } }
             ]
-         });
+          });
 
-      } else if (city) {
-         serviceCenter = await ServiceModel.findOne({ city: city });
-      }
+      } 
+      // else if (city) {
+      //    serviceCenter = await ServiceModel.findOne({ city: city });
+      // }
       // let serviceCenter;
       // if (pincode) {
       //     serviceCenter = await ServiceModel.findOne({
@@ -245,7 +280,7 @@ const addAPPComplaint = async (req, res) => {
             assignServiceCenterId: serviceCenter?._id,
             assignServiceCenter: serviceCenter?.serviceCenterName,
             serviceCenterContact: serviceCenter?.contact,
-            assignServiceCenterTime: new Date()
+            // assignServiceCenterTime: new Date()
          };
          if (serviceCenter  ) {
             obj.status = "ASSIGN";
@@ -339,15 +374,20 @@ const addDealerComplaint = async (req, res) => {
       if (pincode) {
          // serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
          serviceCenter = await ServiceModel.findOne({
-            $or: [
-               { postalCode: pincode },
-               { pincodeSupported: { $in: [pincode] } }
+            $and: [
+              {
+                $or: [
+                  { postalCode: pincode },
+                  { pincodeSupported: { $in: [pincode] } }
+                ]
+              },
+              { brandsSupported: { $in: [brandId] } }
             ]
-         });
-
-      } else if (city) {
-         serviceCenter = await ServiceModel.findOne({ city: city });
-      }
+          });
+         }
+      // else if (city) {
+      //    serviceCenter = await ServiceModel.findOne({ city: city });
+      // }
       // console.log(serviceCenter);
 
       if (!serviceCenter) {
@@ -358,7 +398,7 @@ const addDealerComplaint = async (req, res) => {
             assignServiceCenterId: serviceCenter?._id,
             assignServiceCenter: serviceCenter?.serviceCenterName,
             serviceCenterContact: serviceCenter?.contact,
-            assignServiceCenterTime: new Date()
+            // assignServiceCenterTime: new Date()
          };
          let data = new ComplaintModal(obj);
          await data.save();
