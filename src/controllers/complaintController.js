@@ -87,7 +87,7 @@ const ProductWarrantyModal = require("../models/productWarranty")
 const addComplaint = async (req, res) => {
    try {
       let body = req.body;
-      let { city, pincode, emailAddress, fullName, phoneNumber, serviceAddress } = body; // Extract email and fullName from request body
+      let { city, pincode, emailAddress, fullName, phoneNumber, serviceAddress,brandId } = body; // Extract email and fullName from request body
       const email = emailAddress;
       const uniqueId = body?.uniqueId;
       // Check if user is already registered based on email
@@ -367,7 +367,7 @@ const addDealerComplaint = async (req, res) => {
       let body = req.body;
 
 
-      let { city, pincode } = body; // Extract city and pincode from request body
+      let { city, pincode,brandId } = body; // Extract city and pincode from request body
 
       // Find a service center based on city or pincode
       let serviceCenter;
@@ -385,6 +385,9 @@ const addDealerComplaint = async (req, res) => {
             ]
           });
          }
+
+         console.log("serviceCenter",serviceCenter);
+         
       // else if (city) {
       //    serviceCenter = await ServiceModel.findOne({ city: city });
       // }
@@ -401,6 +404,7 @@ const addDealerComplaint = async (req, res) => {
             // assignServiceCenterTime: new Date()
          };
          let data = new ComplaintModal(obj);
+         
          await data.save();
 
 
