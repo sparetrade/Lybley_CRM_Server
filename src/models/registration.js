@@ -326,6 +326,9 @@ const dealerRegistrationSchema = new mongoose.Schema({
       type: Boolean,
       // required: true,
     },
+    state: { type: String},
+    city: { type: String},
+    otherCities: { type: Array},
     verification: { type: String, default: "VERIFIED" }
     , otp: { type: Number },
     role: { type: String, default: "DEALER" },
