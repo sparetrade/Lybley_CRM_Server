@@ -3,8 +3,7 @@ const mongoose = require("mongoose")
 const OrderSchema = mongoose.Schema({
     ticketID: {
         type: String,
-        // unique: true,
-        // sparse: true  
+          
     },
     sparepartId: {
         type: String
@@ -66,7 +65,19 @@ const OrderSchema = mongoose.Schema({
     // attachments: {
     //     type: [String]
     // },
- 
+    spareParts: [
+        {
+            sparePartId: { type: String, required: true },
+            sparePartName: { type: String, required: true },
+            quantity: { type: Number, required: true },
+            price: { type: Number, required: true },
+        }
+    ],
+    serviceCenterId: { type: String, required: true },
+    serviceCenter: { type: String, required: true },
+    docketNo: { type: String, required: true },
+    trackLink: { type: String, required: true },
+    chalanImage: { type: String, required: true },
     status: { type: String, default: "ORDER" },
     comments: {
         type: String
