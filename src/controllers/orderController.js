@@ -107,71 +107,227 @@ const UserStockModel = require("../models/userStock")
 //     }
 //   };
 
+// const addOrder = async (req, res) => {
+//   try {
+//       let { spareParts, serviceCenterId, serviceCenter, docketNo, trackLink } = req.body;
+
+//       if (!spareParts || spareParts.length === 0) {
+//           return res.status(400).json({ status: false, msg: "No spare parts selected" });
+//       }
+
+//       let chalanImage = req.file ? req.file.path : null; // Store image path
+
+//       for (const part of spareParts) {
+//           let { sparePartId, quantity } = part;
+
+//           // Retrieve spare part stock
+//           const sparePart = await BrandStockModel.findOne({ sparepartId: sparePartId });
+
+//           if (!sparePart) {
+//               return res.status(404).json({ status: false, msg: `Spare part not found: ${sparePartId}` });
+//           }
+
+//           if (parseInt(sparePart.freshStock) < quantity) {
+//               return res.status(400).json({ status: false, msg: `Insufficient stock for ${sparePart?.sparePartName}` });
+//           }
+
+//           // Deduct quantity from brand stock
+//           sparePart.freshStock = parseInt(sparePart.freshStock) - quantity;
+//           await sparePart.save();
+
+//           // Update service center stock
+//           if (serviceCenterId) {
+//               const serviceCenterStock = await UserStockModel.findOne({ serviceCenterId, sparepartId: sparePartId });
+
+//               if (serviceCenterStock) {
+//                   serviceCenterStock.freshStock = parseInt(serviceCenterStock.freshStock) + quantity;
+//                   await serviceCenterStock.save();
+//               } else {
+//                   await UserStockModel.create({
+//                       serviceCenterId,
+//                       serviceCenterName: serviceCenter,
+//                       sparepartId: sparePartId,
+//                       sparepartName: sparePart.name,
+//                       freshStock: quantity,
+//                   });
+//               }
+//           }
+//       }
+
+//       // Save the order with the uploaded image path
+//       let newOrder = new OrderModel({
+//           spareParts,
+//           serviceCenterId,
+//           serviceCenter,
+//           docketNo,
+//           trackLink,
+//           chalanImage, // Store image path in MongoDB
+//       });
+
+//       await newOrder.save();
+
+//       res.json({ status: true, msg: "Order Added", order: newOrder });
+//   } catch (err) {
+//       console.error("Error in addOrder:", err);
+//       res.status(500).json({ status: false, msg: "Internal Server Error" });
+//   }
+// };
+ 
+
 const addOrder = async (req, res) => {
   try {
-      let { spareParts, serviceCenterId, serviceCenter, docketNo, trackLink } = req.body;
+    let { spareParts, serviceCenterId, serviceCenter, docketNo, trackLink, brandId, brandName } = req.body;
 
-      if (!spareParts || spareParts.length === 0) {
-          return res.status(400).json({ status: false, msg: "No spare parts selected" });
+    // Convert spareParts from string to an array if needed
+    if (typeof spareParts === "string") {
+      try {
+        spareParts = JSON.parse(spareParts);
+      } catch (error) {
+        return res.status(400).json({ status: false, msg: "Invalid spareParts format" });
       }
+    }
 
-      let chalanImage = req.file ? req.file.path : null; // Store image path
+    if (!Array.isArray(spareParts) || spareParts.length === 0) {
+      return res.status(400).json({ status: false, msg: "No spare parts selected" });
+    }
 
-      for (const part of spareParts) {
-          let { sparePartId, quantity } = part;
+    let chalanImage = req.file ? req.file.location : null;
 
-          // Retrieve spare part stock
-          const sparePart = await BrandStockModel.findOne({ sparepartId: sparePartId });
-
-          if (!sparePart) {
-              return res.status(404).json({ status: false, msg: `Spare part not found: ${sparePartId}` });
-          }
-
-          if (parseInt(sparePart.freshStock) < quantity) {
-              return res.status(400).json({ status: false, msg: `Insufficient stock for ${sparePart?.sparePartName}` });
-          }
-
-          // Deduct quantity from brand stock
-          sparePart.freshStock = parseInt(sparePart.freshStock) - quantity;
-          await sparePart.save();
-
-          // Update service center stock
-          if (serviceCenterId) {
-              const serviceCenterStock = await UserStockModel.findOne({ serviceCenterId, sparepartId: sparePartId });
-
-              if (serviceCenterStock) {
-                  serviceCenterStock.freshStock = parseInt(serviceCenterStock.freshStock) + quantity;
-                  await serviceCenterStock.save();
-              } else {
-                  await UserStockModel.create({
-                      serviceCenterId,
-                      serviceCenterName: serviceCenter,
-                      sparepartId: sparePartId,
-                      sparepartName: sparePart.name,
-                      freshStock: quantity,
-                  });
-              }
-          }
+    // Ensure freshStock is a number before processing
+    for (const part of spareParts) {
+      let { sparePartId, quantity } = part;
+      let numericQuantity = parseInt(quantity, 10) || 0; // Ensure quantity is a number
+    
+      let sparePart = await BrandStockModel.findOne({ sparepartId: sparePartId });
+    
+      if (!sparePart) {
+        return res.status(404).json({ status: false, msg: `Spare part not found: ${sparePartId}` });
       }
+    
+      // Convert freshStock to a number if it's a string
+      if (typeof sparePart.freshStock !== "number") {
+        sparePart.freshStock = parseInt(sparePart.freshStock, 10) || 0;
+      }
+    
+      if (sparePart.freshStock < numericQuantity) {
+        return res.status(400).json({ status: false, msg: `Insufficient stock for ${sparePart.sparePartName}` });
+      }
+    }
 
-      // Save the order with the uploaded image path
-      let newOrder = new OrderModel({
-          spareParts,
-          serviceCenterId,
-          serviceCenter,
-          docketNo,
-          trackLink,
-          chalanImage, // Store image path in MongoDB
+    // **Step 1: Create order first**
+    let newOrder = new OrderModel({
+      spareParts,
+      brandId,
+      brandName,
+      serviceCenterId,
+      serviceCenter,
+      docketNo,
+      trackLink,
+      chalanImage,
+    });
+
+    await newOrder.save();
+
+    // **Step 2: Prepare stock updates**
+    let brandStockUpdates = [];
+    let userStockUpdates = [];
+
+    for (const part of spareParts) {
+      let { sparePartId, quantity, sparePartName } = part;
+      let numericQuantity = parseInt(quantity, 10) || 0; // Ensure quantity is a number
+
+      // **Step 2a: Decrease freshStock separately**
+      brandStockUpdates.push({
+        updateOne: {
+          filter: { sparepartId: sparePartId },
+          update: { $inc: { freshStock: -numericQuantity } }, // Reduce freshStock
+        },
       });
 
-      await newOrder.save();
+      // **Step 2b: Push stock entry separately**
+      brandStockUpdates.push({
+        updateOne: {
+          filter: { sparepartId: sparePartId },
+          update: {
+            $push: {
+              stock: {
+                fresh: numericQuantity,
+                title: "Admin Order",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            },
+          },
+        },
+      });
 
-      res.json({ status: true, msg: "Order Added", order: newOrder });
+      // **Step 3: Update service center stock (increase stock)**
+      if (serviceCenterId) {
+        let serviceCenterStock = await UserStockModel.findOne({ serviceCenterId, sparepartId: sparePartId });
+    
+        if (serviceCenterStock) {
+            // Convert freshStock to a number if it's a string
+            if (typeof serviceCenterStock.freshStock !== "number") {
+                await UserStockModel.updateOne(
+                    { serviceCenterId, sparepartId: sparePartId },
+                    { $set: { freshStock: parseInt(serviceCenterStock.freshStock, 10) || 0 } }
+                );
+            }
+    
+            userStockUpdates.push({
+                updateOne: {
+                    filter: { serviceCenterId, sparepartId: sparePartId },
+                    update: { 
+                        $inc: { freshStock: numericQuantity }, // Increase freshStock
+                        $push: { 
+                            stock: { 
+                                fresh: numericQuantity, 
+                                title: "Admin Order", 
+                                createdAt: new Date(), 
+                                updatedAt: new Date() 
+                            } 
+                        }
+                    },
+                },
+            });
+        } else {
+            await UserStockModel.create({
+                serviceCenterId,
+                serviceCenterName: serviceCenter,
+                sparepartId: sparePartId,
+                sparepartName: sparePartName,
+                freshStock: numericQuantity, // Ensure freshStock is a number
+                stock: [{
+                    fresh: numericQuantity,
+                    title: "Admin Order",
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }]
+            });
+        }
+    }
+    
+    
+    }
+
+    // **Step 4: Execute stock updates**
+    if (brandStockUpdates.length > 0) {
+      await BrandStockModel.bulkWrite(brandStockUpdates);
+    }
+    if (userStockUpdates.length > 0) {
+      await UserStockModel.bulkWrite(userStockUpdates);
+    }
+
+    res.json({ status: true, msg: "Order Added and Stock Updated", order: newOrder });
+
   } catch (err) {
-      console.error("Error in addOrder:", err);
-      res.status(500).json({ status: false, msg: "Internal Server Error" });
+    console.error("Error in addOrder:", err);
+    res.status(500).json({ status: false, msg: "Internal Server Error" });
   }
 };
+
+
+
 
   const addDefectiveOrder = async (req, res) => {
     try {
