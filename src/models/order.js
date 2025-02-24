@@ -73,6 +73,11 @@ const OrderSchema = mongoose.Schema({
             price: { type: Number, required: true },
         }
     ],
+    brandId: {
+        type: String
+    }, brandName: {
+        type: String
+    },
     serviceCenterId: { type: String, required: true },
     serviceCenter: { type: String, required: true },
     docketNo: { type: String, required: true },
