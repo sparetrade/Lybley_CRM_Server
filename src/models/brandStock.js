@@ -10,6 +10,7 @@ const brandStockSchema = new mongoose.Schema({
     stock: [
         {
           fresh:{type:Number },
+          defective:{type:Number },
           title:{type:String },
           createdAt: { type: Date, default: Date.now },
           updatedAt: { type: Date, default: Date.now },

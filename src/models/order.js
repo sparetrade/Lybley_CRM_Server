@@ -87,7 +87,7 @@ const OrderSchema = mongoose.Schema({
     comments: {
         type: String
     },
-    brandApproval: { type: String, default: "APPROVED" }
+    brandApproval: { type: String, default: "DISAPPROVED" }
 
 }, { timestamps: true });
 const OrderModel = mongoose.model("Order", OrderSchema)
