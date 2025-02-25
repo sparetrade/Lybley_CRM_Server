@@ -1,4 +1,5 @@
 const BrandStockModel =require("../models/brandStock")
+const CenterStockModel =require("../models/userStock")
 
 const addStock = async (req, res) => {
    try {
@@ -20,13 +21,21 @@ const addStock = async (req, res) => {
 };
 
 
-const getAllStock=async(req,res)=>{
+const getAllBrandStock=async(req,res)=>{
     try{
         let data=await BrandStockModel.find({}).sort({ _id: -1 });
         res.send(data);
      }catch(err){
         res.status(400).send(err);
      }
+}
+const getAllUserStock=async(req,res)=>{
+   try{
+       let data=await CenterStockModel.find({}).sort({ _id: -1 });
+       res.send(data);
+    }catch(err){
+       res.status(400).send(err);
+    }
 }
 const getStockById=async(req,res)=>{
     try{
@@ -37,7 +46,15 @@ const getStockById=async(req,res)=>{
         res.status(400).send(err);
      }
 }
-
+const getStockByCenterId=async(req,res)=>{
+   try{
+       let _id=req.params.id;
+       let data=await CenterStockModel.findById(_id);
+       res.send(data);
+    }catch(err){
+       res.status(400).send(err);
+    }
+}
 // const editStock=async (req,res)=>{
 //     try{
 //         let _id=req.params.id;
@@ -100,4 +117,4 @@ const editStock = async (req, res) => {
      }
  }
 
-module.exports = { addStock,getAllStock,getStockById,editStock,deleteStock };
+module.exports = { addStock,getAllUserStock,getAllBrandStock,getStockById,getStockByCenterId,editStock,deleteStock };
