@@ -533,12 +533,13 @@ const getProfileById = async (req, res) => {
       let _id = req.params.id;
   
       // Fetch data from all models concurrently
-      const [serviceData, brandData,dealerData,technicianData, userData] = await Promise.all([
+      const [serviceData, brandData,dealerData,technicianData, userData,empData] = await Promise.all([
         ServiceModel.findById(_id),
         BrandRegistrationModel.findById(_id),
         UserModel.findById(_id),
         TechnicianModal.findById(_id),
         DealerModel.findById(_id),
+        EmployeeModel.findById(_id),
       ]);
   
       // Combine the data into a single response
@@ -548,6 +549,7 @@ const getProfileById = async (req, res) => {
         user: userData,
         dealer: dealerData,
         technician: technicianData,
+        emp:empData,
       };
   
       res.send(combinedData);

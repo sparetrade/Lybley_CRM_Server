@@ -266,6 +266,8 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     walletAmount: { type: Number, default: 0 }
 }, { timestamps: true });
 
+
+
 const employeeRegistrationSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -273,6 +275,7 @@ const employeeRegistrationSchema = new mongoose.Schema({
     password: { type: String, required: true },
     brandId: { type: String },
     brandName: { type: String  },
+    stateZone:{type:Array},
     role: { type: String, default: "EMPLOYEE" }
 },
     { timestamps: true });
