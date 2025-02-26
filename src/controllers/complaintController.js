@@ -670,10 +670,16 @@ const getPendingComplaints = async (req, res) => {
      } else if (days === "more-than-week") {
        filter.createdAt = { $lte: endDate };
      }
-
+     const today = new Date();
+     today.setHours(0, 0, 0, 0);
+ 
+     const complaintsForToday = await ComplaintModal.find({
+       
+      preferredServiceDate: { $gte: today  }
+    }).sort({ createdAt: -1 });
      const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
 
-     res.status(200).json({ success: true, data: complaints });
+     res.status(200).json({ success: true, data: complaints, scheduleToday:complaintsForToday });
    } catch (error) {
      console.error("Error fetching pending complaints:", error);
      res.status(500).json({ success: false, message: "Server error" });

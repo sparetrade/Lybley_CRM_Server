@@ -13,6 +13,7 @@ const SpareParts = require("../models/sparePart");
 const ProductModel = require("../models/product");
 const Complaints = require("../models/complaint");
 const ComplaintModal = require("../models/complaint");
+const ServicePayment = require("../models/servicePaymentModel");
 
 router.get("/dashboardDetails", async (req, res) => {
   try {
@@ -41,6 +42,10 @@ router.get("/dashboardDetails", async (req, res) => {
       complaints0To1PartPendingDays,
       complaints2To5PartPendingDays,
       complaintsMoreThan5PartPendingDays,
+      scheduleUpcomming,
+      centerPayment,
+      centerPaidPayment,
+      centerUnPaidPayment,
     ] = await Promise.all([
       UserModel.countDocuments({}),
       Orders.countDocuments({}),
@@ -82,6 +87,11 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
+      Complaints.countDocuments({  preferredServiceDate: { $gte: todayStart  } }),
+      ServicePayment.countDocuments({} ),
+      ServicePayment.countDocuments({ status: 'PAID' }),
+      ServicePayment.countDocuments({ status: 'UNPAID' }),
+     
     ]);
 
     res.json({
@@ -109,7 +119,12 @@ router.get("/dashboardDetails", async (req, res) => {
         twoToFiveDaysPartPending: complaints2To5PartPendingDays,
         moreThanFiveDaysPartPending: complaintsMoreThan5PartPendingDays,
         completedToday: complaintsCompletedToday,
-      }
+        scheduleUpcomming: scheduleUpcomming,
+       
+      },
+      centerPayment:centerPayment,
+      centerPaidPayment:centerPaidPayment,
+      centerUnPaidPayment:centerUnPaidPayment,
     });
   } catch (err) {
     res.status(500).send(err);
