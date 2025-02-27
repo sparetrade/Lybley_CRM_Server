@@ -42,6 +42,7 @@ router.get("/dashboardDetails", async (req, res) => {
       complaints0To1PartPendingDays,
       complaints2To5PartPendingDays,
       complaintsMoreThan5PartPendingDays,
+      schedule,
       scheduleUpcomming,
       centerPayment,
       centerPaidPayment,
@@ -62,6 +63,7 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'CANCELED' }),
       Complaints.countDocuments({ status: 'PART PENDING' }),
       Complaints.countDocuments({ status: 'FINAL VERIFICATION' }),
+     
 
       // Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
       // Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
@@ -87,7 +89,14 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
-      Complaints.countDocuments({  preferredServiceDate: { $gte: todayStart  } }),
+      Complaints.countDocuments({ status: 'SCHEDULE UPCOMMING' }),
+      // Complaints.countDocuments({  preferredServiceDate: { $gte: todayStart  } }),
+       Complaints.countDocuments({
+        $or: [
+          { preferredServiceDate: { $gte: todayStart } }, // Future or today
+          { preferredServiceDate: { $lt: todayStart },  status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed
+        ]
+      }),
       ServicePayment.countDocuments({} ),
       ServicePayment.countDocuments({ status: 'PAID' }),
       ServicePayment.countDocuments({ status: 'UNPAID' }),
@@ -119,6 +128,7 @@ router.get("/dashboardDetails", async (req, res) => {
         twoToFiveDaysPartPending: complaints2To5PartPendingDays,
         moreThanFiveDaysPartPending: complaintsMoreThan5PartPendingDays,
         completedToday: complaintsCompletedToday,
+        schedule: schedule,
         scheduleUpcomming: scheduleUpcomming,
        
       },

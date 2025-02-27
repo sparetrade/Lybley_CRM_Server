@@ -87,7 +87,7 @@ const ProductWarrantyModal = require("../models/productWarranty")
 const addComplaint = async (req, res) => {
    try {
       let body = req.body;
-      let { city, pincode, emailAddress, fullName, phoneNumber, serviceAddress,brandId } = body; // Extract email and fullName from request body
+      let { city, pincode, emailAddress, fullName, phoneNumber, serviceAddress, brandId } = body; // Extract email and fullName from request body
       const email = emailAddress;
       const uniqueId = body?.uniqueId;
       // Check if user is already registered based on email
@@ -142,17 +142,17 @@ const addComplaint = async (req, res) => {
       if (pincode) {
          serviceCenter = await ServiceModel.findOne({
             $and: [
-              {
-                $or: [
-                  { postalCode: pincode },
-                  { pincodeSupported: { $in: [pincode] } }
-                ]
-              },
-              { brandsSupported: { $in: [brandId] } }
+               {
+                  $or: [
+                     { postalCode: pincode },
+                     { pincodeSupported: { $in: [pincode] } }
+                  ]
+               },
+               { brandsSupported: { $in: [brandId] } }
             ]
-          });
+         });
 
-   } 
+      }
       // else if (city) {
       //    serviceCenter = await ServiceModel.findOne({ city: city });
       // }
@@ -172,7 +172,7 @@ const addComplaint = async (req, res) => {
       //         "brandsSupported.value": req?.body?.brandId
       //     });
       // }
-      
+
 
 
       // Prepare the complaint object
@@ -221,7 +221,7 @@ const addAPPComplaint = async (req, res) => {
       let body = req.body;
 
 
-      let { city, pincode,brandId } = body; // Extract city and pincode from request body
+      let { city, pincode, brandId } = body; // Extract city and pincode from request body
 
       // Find a service center based on city or pincode
       let serviceCenter;
@@ -231,7 +231,7 @@ const addAPPComplaint = async (req, res) => {
          //       { postalCode: pincode },
          //       { pincodeSupported: { $in: [pincode] } }
          //    ]
-         
+
          // });
          // serviceCenter = await ServiceModel.findOne({
          //    $or: [
@@ -242,17 +242,17 @@ const addAPPComplaint = async (req, res) => {
          //  });
          serviceCenter = await ServiceModel.findOne({
             $and: [
-              {
-                $or: [
-                  { postalCode: pincode },
-                  { pincodeSupported: { $in: [pincode] } }
-                ]
-              },
-              { brandsSupported: { $in: [brandId] } }
+               {
+                  $or: [
+                     { postalCode: pincode },
+                     { pincodeSupported: { $in: [pincode] } }
+                  ]
+               },
+               { brandsSupported: { $in: [brandId] } }
             ]
-          });
+         });
 
-      } 
+      }
       // else if (city) {
       //    serviceCenter = await ServiceModel.findOne({ city: city });
       // }
@@ -282,7 +282,7 @@ const addAPPComplaint = async (req, res) => {
             serviceCenterContact: serviceCenter?.contact,
             // assignServiceCenterTime: new Date()
          };
-         if (serviceCenter  ) {
+         if (serviceCenter) {
             obj.status = "ASSIGN";
          }
          let data = new ComplaintModal(obj);
@@ -310,7 +310,7 @@ const addAPPComplaint = async (req, res) => {
          serviceCenterContact: serviceCenter?.contact,
          assignServiceCenterTime: new Date()
       };
-      if (serviceCenter ) {
+      if (serviceCenter) {
          obj.status = "ASSIGN";
       }
       let data = new ComplaintModal(obj);
@@ -367,7 +367,7 @@ const addDealerComplaint = async (req, res) => {
       let body = req.body;
 
 
-      let { city, pincode,brandId } = body; // Extract city and pincode from request body
+      let { city, pincode, brandId } = body; // Extract city and pincode from request body
 
       // Find a service center based on city or pincode
       let serviceCenter;
@@ -375,19 +375,19 @@ const addDealerComplaint = async (req, res) => {
          // serviceCenter = await ServiceModel.findOne({ postalCode: pincode });
          serviceCenter = await ServiceModel.findOne({
             $and: [
-              {
-                $or: [
-                  { postalCode: pincode },
-                  { pincodeSupported: { $in: [pincode] } }
-                ]
-              },
-              { brandsSupported: { $in: [brandId] } }
+               {
+                  $or: [
+                     { postalCode: pincode },
+                     { pincodeSupported: { $in: [pincode] } }
+                  ]
+               },
+               { brandsSupported: { $in: [brandId] } }
             ]
-          });
-         }
+         });
+      }
 
-         console.log("serviceCenter",serviceCenter);
-         
+      console.log("serviceCenter", serviceCenter);
+
       // else if (city) {
       //    serviceCenter = await ServiceModel.findOne({ city: city });
       // }
@@ -404,7 +404,7 @@ const addDealerComplaint = async (req, res) => {
             // assignServiceCenterTime: new Date()
          };
          let data = new ComplaintModal(obj);
-         
+
          await data.save();
 
 
@@ -509,7 +509,7 @@ const getComplaintsByPending = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "PENDING" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -520,7 +520,7 @@ const getComplaintsByAssign = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "ASSIGN" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -531,7 +531,7 @@ const getComplaintsByInProgress = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "IN PROGRESS" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -542,7 +542,7 @@ const getComplaintsByComplete = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "COMPLETED" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -553,7 +553,18 @@ const getComplaintsByCancel = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "CANCELED" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
+      }
+      res.send(data);
+   } catch (err) {
+      res.status(400).send(err);
+   }
+};
+const getComplaintsByUpcomming = async (req, res) => {
+   try {
+      let data = await ComplaintModal.find({ status: "SCHEDULE UPCOMMING" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      if (data.length === 0) {
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -564,7 +575,7 @@ const getComplaintsByFinalVerification = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "FINAL VERIFICATION" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -575,7 +586,7 @@ const getComplaintsByPartPending = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "PART PENDING" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
       if (data.length === 0) {
-         return res.status(404).send({ status:false ,msg: "No pending complaints found." });
+         return res.status(404).send({ status: false, msg: "No pending complaints found." });
       }
       res.send(data);
    } catch (err) {
@@ -587,21 +598,21 @@ const getComplaintsByPartPending = async (req, res) => {
 //      const { days } = req.params; // Get days filter from params
 //      let startDate, endDate;
 //      const currentDate = new Date();
- 
+
 //    //   console.log("Received days:", days);
- 
+
 //      if (days === "0-1") {
 //        startDate = new Date();
 //        startDate.setDate(currentDate.getDate() - 1);
 //        startDate.setHours(0, 0, 0, 0);
- 
+
 //        endDate = new Date();
 //        endDate.setHours(23, 59, 59, 999);
 //      } else if (days === "2-5") {
 //        startDate = new Date();
 //        startDate.setDate(currentDate.getDate() - 5);
 //        startDate.setHours(0, 0, 0, 0);
- 
+
 //        endDate = new Date();
 //        endDate.setDate(currentDate.getDate() - 2);
 //        endDate.setHours(23, 59, 59, 999);
@@ -610,124 +621,127 @@ const getComplaintsByPartPending = async (req, res) => {
 //        endDate.setDate(currentDate.getDate() - 6);
 //        endDate.setHours(23, 59, 59, 999);
 //      }
- 
+
 //    //   console.log("Start Date:", startDate);
 //    //   console.log("End Date:", endDate);
- 
+
 //      let filter = { status: "PENDING" };
- 
+
 //      if (days === "0-1" || days === "2-5") {
 //        filter.createdAt = { $gte: startDate, $lte: endDate };
 //      } else if (days === "more-than-week") {
 //        filter.createdAt = { $lte: endDate }; // Fetch complaints **older** than 7 days
 //      }
- 
+
 //    //   console.log("Filter Query:", JSON.stringify(filter, null, 2));
- 
+
 //      const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
- 
+
 //    //   console.log("Found complaints:", complaints.length);
- 
+
 //      res.status(200).json({ success: true, data: complaints });
 //    } catch (error) {
 //      console.error("Error fetching pending complaints:", error);
 //      res.status(500).json({ success: false, message: "Server error" });
 //    }
 //  };
- 
+
 const getPendingComplaints = async (req, res) => {
    try {
-     const { days } = req.params; // Get days filter from params
-     const now = new Date();
-     let startDate, endDate;
+      const { days } = req.params; // Get days filter from params
+      const now = new Date();
+      let startDate, endDate;
 
-     if (days === "0-1") {
-       startDate = new Date(now);
-       startDate.setDate(now.getDate() - 1);
-       startDate.setHours(0, 0, 0, 0);
+      if (days === "0-1") {
+         startDate = new Date(now);
+         startDate.setDate(now.getDate() - 1);
+         startDate.setHours(0, 0, 0, 0);
 
-       endDate = new Date(now);
-       endDate.setHours(23, 59, 59, 999);
-     } else if (days === "2-5") {
-       startDate = new Date(now);
-       startDate.setDate(now.getDate() - 5);
-       startDate.setHours(0, 0, 0, 0);
+         endDate = new Date(now);
+         endDate.setHours(23, 59, 59, 999);
+      } else if (days === "2-5") {
+         startDate = new Date(now);
+         startDate.setDate(now.getDate() - 5);
+         startDate.setHours(0, 0, 0, 0);
 
-       endDate = new Date(now);
-       endDate.setDate(now.getDate() - 2);
-       endDate.setHours(23, 59, 59, 999);
-     } else if (days === "more-than-week") {
-       endDate = new Date(now);
-       endDate.setDate(now.getDate() - 5); // Ensure correct range
-       endDate.setHours(23, 59, 59, 999);
-     }
+         endDate = new Date(now);
+         endDate.setDate(now.getDate() - 2);
+         endDate.setHours(23, 59, 59, 999);
+      } else if (days === "more-than-week") {
+         endDate = new Date(now);
+         endDate.setDate(now.getDate() - 5); // Ensure correct range
+         endDate.setHours(23, 59, 59, 999);
+      }
 
-   //   let filter = { status: "PENDING"||"IN PROGRESS" };
-   let filter = { status: { $in: ["PENDING", "IN PROGRESS"] } };
+      //   let filter = { status: "PENDING"||"IN PROGRESS" };
+      let filter = { status: { $in: ["PENDING", "IN PROGRESS"] } };
 
-     if (days === "0-1" || days === "2-5") {
-       filter.createdAt = { $gte: startDate, $lte: endDate };
-     } else if (days === "more-than-week") {
-       filter.createdAt = { $lte: endDate };
-     }
-     const today = new Date();
-     today.setHours(0, 0, 0, 0);
- 
-     const complaintsForToday = await ComplaintModal.find({
-       
-      preferredServiceDate: { $gte: today  }
-    }).sort({ createdAt: -1 });
-     const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
+      if (days === "0-1" || days === "2-5") {
+         filter.createdAt = { $gte: startDate, $lte: endDate };
+      } else if (days === "more-than-week") {
+         filter.createdAt = { $lte: endDate };
+      }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
 
-     res.status(200).json({ success: true, data: complaints, scheduleToday:complaintsForToday });
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      const complaintsForToday = await ComplaintModal.find({
+         preferredServiceDate: { $lte: tomorrow }, // Today & future complaints
+         status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } // Exclude these statuses
+      }).sort({ preferredServiceDate: 1 });
+      const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
+
+      res.status(200).json({ success: true, data: complaints, scheduleToday: complaintsForToday });
    } catch (error) {
-     console.error("Error fetching pending complaints:", error);
-     res.status(500).json({ success: false, message: "Server error" });
+      console.error("Error fetching pending complaints:", error);
+      res.status(500).json({ success: false, message: "Server error" });
    }
 };
 
 const getPartPendingComplaints = async (req, res) => {
    try {
-     const { days } = req.params; // Get days filter from params
-     const now = new Date();
-     let startDate, endDate;
+      const { days } = req.params; // Get days filter from params
+      const now = new Date();
+      let startDate, endDate;
 
-     if (days === "0-1") {
-       startDate = new Date(now);
-       startDate.setDate(now.getDate() - 1);
-       startDate.setHours(0, 0, 0, 0);
+      if (days === "0-1") {
+         startDate = new Date(now);
+         startDate.setDate(now.getDate() - 1);
+         startDate.setHours(0, 0, 0, 0);
 
-       endDate = new Date(now);
-       endDate.setHours(23, 59, 59, 999);
-     } else if (days === "2-5") {
-       startDate = new Date(now);
-       startDate.setDate(now.getDate() - 5);
-       startDate.setHours(0, 0, 0, 0);
+         endDate = new Date(now);
+         endDate.setHours(23, 59, 59, 999);
+      } else if (days === "2-5") {
+         startDate = new Date(now);
+         startDate.setDate(now.getDate() - 5);
+         startDate.setHours(0, 0, 0, 0);
 
-       endDate = new Date(now);
-       endDate.setDate(now.getDate() - 2);
-       endDate.setHours(23, 59, 59, 999);
-     } else if (days === "more-than-week") {
-       endDate = new Date(now);
-       endDate.setDate(now.getDate() - 6); // Ensure correct range
-       endDate.setHours(23, 59, 59, 999);
-     }
+         endDate = new Date(now);
+         endDate.setDate(now.getDate() - 2);
+         endDate.setHours(23, 59, 59, 999);
+      } else if (days === "more-than-week") {
+         endDate = new Date(now);
+         endDate.setDate(now.getDate() - 6); // Ensure correct range
+         endDate.setHours(23, 59, 59, 999);
+      }
 
-     let filter = { status: "PART PENDING" };
-   
+      let filter = { status: "PART PENDING" };
 
-     if (days === "0-1" || days === "2-5") {
-       filter.createdAt = { $gte: startDate, $lte: endDate };
-     } else if (days === "more-than-week") {
-       filter.createdAt = { $lte: endDate };
-     }
 
-     const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
+      if (days === "0-1" || days === "2-5") {
+         filter.createdAt = { $gte: startDate, $lte: endDate };
+      } else if (days === "more-than-week") {
+         filter.createdAt = { $lte: endDate };
+      }
 
-     res.status(200).json({ success: true, data: complaints });
+      const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
+
+      res.status(200).json({ success: true, data: complaints });
    } catch (error) {
-     console.error("Error fetching pending complaints:", error);
-     res.status(500).json({ success: false, message: "Server error" });
+      console.error("Error fetching pending complaints:", error);
+      res.status(500).json({ success: false, message: "Server error" });
    }
 };
 
@@ -883,7 +897,7 @@ const editComplaint = async (req, res) => {
       res.status(500).send(err);
    }
 };
-const updateFinalVerification = async (req, res) => { 
+const updateFinalVerification = async (req, res) => {
    try {
       let _id = req.params.id;
       let body = req.body;
@@ -963,9 +977,9 @@ const updateFinalVerification = async (req, res) => {
                console.error("Invalid payout amount:", subCatData.payout);
                return res.json({ status: true, msg: "Complaint Updated with invalid payout" });
             }
- 
 
-           
+
+
 
             // Service Center Wallet Update
             let serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: data.assignServiceCenterId });
@@ -989,15 +1003,15 @@ const updateFinalVerification = async (req, res) => {
             }
          }
          let serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: data.assignServiceCenterId });
-            if (serviceCenterWallet) {
-               serviceCenterWallet.totalCommission += payout;
-               serviceCenterWallet.dueAmount += payout;
-               await serviceCenterWallet.save();
-            } else {
-               console.warn("No wallet found for service center:", data.assignServiceCenterId);
-            }
-          // Brand transaction
-          await BrandRechargeModel.create({
+         if (serviceCenterWallet) {
+            serviceCenterWallet.totalCommission += payout;
+            serviceCenterWallet.dueAmount += payout;
+            await serviceCenterWallet.save();
+         } else {
+            console.warn("No wallet found for service center:", data.assignServiceCenterId);
+         }
+         // Brand transaction
+         await BrandRechargeModel.create({
             brandId: data.brandId,
             brandName: data.productBrand,
             amount: -(body?.paymentBrand) || 0,
@@ -1072,6 +1086,8 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
-   ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
-   getPendingComplaints,getPartPendingComplaints,addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage,updateFinalVerification, editComplaint, deleteComplaint, updateComplaint };
+module.exports = {
+   addComplaint, addDealerComplaint, getComplaintsByAssign, getComplaintsByCancel, getComplaintsByComplete
+   , getComplaintsByInProgress,getComplaintsByUpcomming, getComplaintsByPartPending, getComplaintsByPending, getComplaintsByFinalVerification,
+   getPendingComplaints, getPartPendingComplaints, addAPPComplaint, getAllComplaint, getComplaintByUserId, getComplaintByTechId, getComplaintById, updateComplaintComments, editIssueImage, updateFinalVerification, editComplaint, deleteComplaint, updateComplaint
+};
