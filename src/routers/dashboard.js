@@ -200,16 +200,16 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
       partPending: { status: "PART PENDING" },
       finalVerification: { status: "FINAL VERIFICATION" },
       zeroToOneDays: {
-        $or: [{ status: "PENDING" }, { status: "IN PROGRESS" }],
-        createdAt: { $gte: oneDayAgo },
+        status: { $in: ["PENDING", "IN PROGRESS"] },
+        createdAt: { $gte: new Date(oneDayAgo) },
       },
       twoToFiveDays: {
-        $or: [{ status: "PENDING" }, { status: "IN PROGRESS" }],
-        createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo },
+        status: { $in: ["PENDING", "IN PROGRESS"] },
+        createdAt: { $gte: new Date(fiveDaysAgo), $lt: new Date(oneDayAgo) },
       },
       moreThanFiveDays: {
-        $or: [{ status: "PENDING" }, { status: "IN PROGRESS" }],
-        createdAt: { $lt: fiveDaysAgo },
+        status: { $in: ["PENDING", "IN PROGRESS"] },
+        createdAt: { $lt: new Date(fiveDaysAgo) },
       },
       completedToday: { status: "COMPLETED", updatedAt: { $gte: todayStart } },
       zeroToOneDaysPartPending: { status: "PART PENDING", createdAt: { $gte: oneDayAgo } },
