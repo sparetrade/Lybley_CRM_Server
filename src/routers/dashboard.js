@@ -178,28 +178,108 @@ router.get('/getUserAndProduct', async (req, res) => {
 
  
 
-router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
+// router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
+//   try {
+//     const { now, oneDayAgo, fiveDaysAgo, todayStart } = calculateDateRanges();
+//     const { stateZone } = req.body;
+
+//     // console.log("Received stateZone in req.body:", stateZone);
+
+//     if (!Array.isArray(stateZone) || stateZone.length === 0) {
+//       return res.status(400).json({ message: "Invalid or empty stateZone array" });
+//     }
+
+//     // Adjust filter based on whether stateZone is stored as an array or a string
+//     const stateZoneFilter = {
+//       $or: [
+//         { state: { $in: stateZone.map(zone => zone.trim()) } }, // If stateZone is a string
+//         { state: { $elemMatch: { $in: stateZone.map(zone => zone.trim()) } } }, // If stateZone is an array
+//       ],
+//     };
+
+//     // console.log("MongoDB Filter:", JSON.stringify(stateZoneFilter, null, 2));  
+
+//     // Define all complaint queries
+//     const queries = {
+//       allComplaints: {},
+//       inProgress: { status: "IN PROGRESS" },
+//       assign: { status: "ASSIGN" },
+//       pending: { status: "PENDING" },
+//       complete: { status: "COMPLETED" },
+//       cancel: { status: "CANCELED" },
+//       partPending: { status: "PART PENDING" },
+//       finalVerification: { status: "FINAL VERIFICATION" },
+//       schedule:{ status: 'SCHEDULE UPCOMMING' },
+//       zeroToOneDays: {
+//         status: { $in: ["PENDING", "IN PROGRESS"] },
+//         createdAt: { $gte: new Date(oneDayAgo) },
+//       },
+//       twoToFiveDays: {
+//         status: { $in: ["PENDING", "IN PROGRESS"] },
+//         createdAt: { $gte: new Date(fiveDaysAgo), $lt: new Date(oneDayAgo) },
+//       },
+//       moreThanFiveDays: {
+//         status: { $in: ["PENDING", "IN PROGRESS"] },
+//         createdAt: { $lt: new Date(fiveDaysAgo) },
+//       },
+//       completedToday: { status: "COMPLETED", updatedAt: { $gte: todayStart } },
+//       zeroToOneDaysPartPending: { status: "PART PENDING", createdAt: { $gte: oneDayAgo } },
+//       twoToFiveDaysPartPending: {
+//         status: "PART PENDING",
+//         createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo },
+//       },
+//       moreThanFiveDaysPartPending: { status: "PART PENDING", createdAt: { $lt: fiveDaysAgo } },
+//       scheduleUpcomming: {
+//         $or: [
+//           { preferredServiceDate: { $gte: todayStart } }, 
+//           {
+//             preferredServiceDate: { $lt: todayStart }, 
+//             status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }, 
+//           },
+//         ],
+//       },
+//     };
+    
+     
+//     // Execute all queries in parallel
+//     // const complaintCounts = await Promise.all(
+//     //   Object.entries(queries).map(([key, query]) =>
+//     //     Complaints.countDocuments({ ...query, ...stateZoneFilter })
+//     //   )
+//     // );
+//     const complaintCounts = await Promise.all(
+//       Object.entries(queries).map(([key, query]) =>
+//         Complaints.countDocuments({ ...query, ...stateZoneFilter })
+//       )
+//     );
+//     // Construct response dynamically
+//     const response = Object.fromEntries(
+//       Object.keys(queries).map((key, index) => [key, complaintCounts[index]])
+//     );
+
+//     res.json({ complaints: response });
+//   } catch (err) {
+//     console.error("Error fetching dashboard details:", err);
+//     res.status(500).json({ message: "Internal Server Error", error: err.message });
+//   }
+// });
+
+router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => { 
   try {
     const { now, oneDayAgo, fiveDaysAgo, todayStart } = calculateDateRanges();
     const { stateZone } = req.body;
-
-    // console.log("Received stateZone in req.body:", stateZone);
 
     if (!Array.isArray(stateZone) || stateZone.length === 0) {
       return res.status(400).json({ message: "Invalid or empty stateZone array" });
     }
 
-    // Adjust filter based on whether stateZone is stored as an array or a string
     const stateZoneFilter = {
       $or: [
-        { state: { $in: stateZone.map(zone => zone.trim()) } }, // If stateZone is a string
-        { state: { $elemMatch: { $in: stateZone.map(zone => zone.trim()) } } }, // If stateZone is an array
+        { state: { $in: stateZone.map(zone => zone.trim()) } },
+        { state: { $elemMatch: { $in: stateZone.map(zone => zone.trim()) } } },
       ],
     };
 
-    // console.log("MongoDB Filter:", JSON.stringify(stateZoneFilter, null, 2));  
-
-    // Define all complaint queries
     const queries = {
       allComplaints: {},
       inProgress: { status: "IN PROGRESS" },
@@ -209,6 +289,7 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
       cancel: { status: "CANCELED" },
       partPending: { status: "PART PENDING" },
       finalVerification: { status: "FINAL VERIFICATION" },
+      schedule: { status: "SCHEDULE UPCOMMING" },
       zeroToOneDays: {
         status: { $in: ["PENDING", "IN PROGRESS"] },
         createdAt: { $gte: new Date(oneDayAgo) },
@@ -228,8 +309,31 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
         createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo },
       },
       moreThanFiveDaysPartPending: { status: "PART PENDING", createdAt: { $lt: fiveDaysAgo } },
-      scheduleUpcomming: { preferredServiceDate: { $gte: todayStart } },
+
+      // ✅ Fixed `scheduleUpcomming`
+      scheduleUpcomming: {
+        $and: [
+          stateZoneFilter, // Ensure the stateZone filter is applied
+          {
+            $or: [
+              { preferredServiceDate: { $gte: todayStart } }, 
+              {
+                preferredServiceDate: { $lt: todayStart }, 
+                status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
+              }
+            ]
+          }
+        ]
+      },
+      
     };
+
+    // 🔍 Debug log: check scheduleUpcomming count
+    const scheduleUpcommingCount = await Complaints.countDocuments({
+      ...queries.scheduleUpcomming,
+      ...stateZoneFilter,
+    });
+    // console.log("🔍 Debug: scheduleUpcomming Count:", scheduleUpcommingCount);
 
     // Execute all queries in parallel
     const complaintCounts = await Promise.all(
@@ -238,7 +342,6 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
       )
     );
 
-    // Construct response dynamically
     const response = Object.fromEntries(
       Object.keys(queries).map((key, index) => [key, complaintCounts[index]])
     );
@@ -249,7 +352,6 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
 });
-
 
  
 
@@ -351,7 +453,9 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       dailyPendingCount,
       dailyCompleteCount,
       dailyCancelCount,
-      dailyPartPendingCount
+      dailyPartPendingCount,
+      complaintFinalVerificationCount,
+      schedule
     ] = await Promise.all([
       // Total counts
       Complaints.countDocuments(query),
@@ -394,7 +498,8 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED', createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({ ...query, status: 'CANCELED', createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING', createdAt: { $gte: startOfDay } }),
-
+      Complaints.countDocuments({...query, status: 'FINAL VERIFICATION' }),
+      Complaints.countDocuments({...query, status: 'SCHEDULE UPCOMMING' }),
     ]);
 
     // Return aggregated data as JSON response
@@ -410,6 +515,8 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
         moreThanFiveDays: complaintsMoreThan5Days,
+        finalVerification: complaintFinalVerificationCount,
+      schedule:schedule,
         lastMonth: {
           allComplaints: allMonthComplaintCount,
           inProgress: lastMonthNewCount,
@@ -440,7 +547,8 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
           cancel: dailyCancelCount,
           partPending: dailyPartPendingCount,
         }
-      }
+      },
+      
     });
 
   } catch (err) {
@@ -651,7 +759,8 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       complaintFinalVerificationCount,
       complaints0To1Days,
       complaints2To5Days,
-      complaintsMoreThan5Days
+      complaintsMoreThan5Days,
+      schedule,
     ] = await Promise.all([
       Complaints.countDocuments(query),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
@@ -663,7 +772,10 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'FINAL VERIFICATION' }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } })
+      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
+       Complaints.countDocuments({...query, status: 'SCHEDULE UPCOMMING' }),
+       
+      
     ]);
 
     res.json({
@@ -679,7 +791,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
         moreThanFiveDays: complaintsMoreThan5Days,
-
+        schedule:schedule
       }
     });
   } catch (err) {
