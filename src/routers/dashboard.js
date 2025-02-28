@@ -8,6 +8,7 @@ const {
   DealerModel,
   UserModel
 } = require('../models/registration');
+const WalletModel = require("../models/wallet")
 const Orders = require("../models/order");
 const SpareParts = require("../models/sparePart");
 const ProductModel = require("../models/product");
@@ -409,12 +410,23 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
+    const serviceCenter = await ServiceModel.findById(id);
+    if (!serviceCenter) {
+      return res.status(404).json({ message: "Service Center not found" });
+    }
+    const serviceCenterWallet = await WalletModel.findOne({ serviceCenterId: id }).exec();
+// console.log("serviceCenterWallet",serviceCenterWallet);
+
+// const {totalCommission}=serviceCenterWallet;
+    const { totalAmount } = serviceCenter;
     // Get the current date
     const now1 = new Date();
-
+    const datetoday = new Date();
+    datetoday.setHours(23, 59, 59, 999);
     // Start of today (midnight of the current day)
     const startOfDay = new Date(now1.getFullYear(), now1.getMonth(), now1.getDate());
-
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
     // Start of the current week (Sunday)
     const startOfWeek = new Date(now1);
     startOfWeek.setDate(now1.getDate() - now1.getDay());
@@ -445,6 +457,8 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       complaintCompleteCount,
       complaintCancelCount,
       complaintPartPendingCount,
+      schedule,
+      scheduleUpcomming ,
       allMonthComplaintCount,
       complaints0To1Days,
       complaints2To5Days,
@@ -471,7 +485,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       dailyCancelCount,
       dailyPartPendingCount,
       complaintFinalVerificationCount,
-      schedule
+    
     ] = await Promise.all([
       // Total counts
       Complaints.countDocuments(query),
@@ -481,6 +495,18 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+      Complaints.countDocuments({...query,
+        $or: [
+          
+          {...query, preferredServiceDate: { $gte: datetoday }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+        ]
+      }),
+      Complaints.countDocuments({
+        $or: [
+          
+          {...query, preferredServiceDate: { $lt: todayStart }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+        ]
+      }),
       // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
       // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
@@ -515,12 +541,15 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'CANCELED', createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING', createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({...query, status: 'FINAL VERIFICATION' }),
-      Complaints.countDocuments({...query, status: 'SCHEDULE UPCOMMING' }),
+     
     ]);
 
     // Return aggregated data as JSON response
     res.json({
+       
       complaints: {
+        totalAmount,
+        walletAmount:serviceCenterWallet?.totalCommission,
         allComplaints: allComplaintCount,
         inProgress: complaintNewCount,
         assign: complaintAssignCount,
@@ -533,6 +562,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
         moreThanFiveDays: complaintsMoreThan5Days,
         finalVerification: complaintFinalVerificationCount,
       schedule:schedule,
+      scheduleUpcomming: scheduleUpcomming,
         lastMonth: {
           allComplaints: allMonthComplaintCount,
           inProgress: lastMonthNewCount,
