@@ -1,7 +1,7 @@
 const express = require("express")
 
 const {addComplaint,addDealerComplaint,getComplaintsByAssign,getComplaintsByCancel,getComplaintsByComplete
-    ,getComplaintsByInProgress,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
+    ,getComplaintsByInProgress,getComplaintsByUpcomming,getComplaintsByPartPending,getComplaintsByPending,getComplaintsByFinalVerification, 
     getPendingComplaints,getPartPendingComplaints,addAPPComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,updateComplaintComments,editIssueImage ,updateFinalVerification,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
 const {upload}  = require("../services/service");
  
@@ -20,6 +20,7 @@ router.get("/getComplaintsByAssign",getComplaintsByAssign)
 router.get("/getComplaintsByCancel",getComplaintsByCancel)
 router.get("/getComplaintsByComplete",getComplaintsByComplete)
 router.get("/getComplaintsByInProgress",getComplaintsByInProgress)
+router.get("/getComplaintsByUpcomming",getComplaintsByUpcomming)
 router.get("/getComplaintsByPartPending",getComplaintsByPartPending)
 router.get("/getComplaintsByPending",getComplaintsByPending)
 router.get("/getComplaintsByFinalVerification",getComplaintsByFinalVerification)
