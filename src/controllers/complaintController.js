@@ -685,11 +685,16 @@ const getPendingComplaints = async (req, res) => {
       today.setHours(0, 0, 0, 0); // Start of today
 
       const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
+      tomorrow.setDate(today.getDate() +2);
 
       const complaintsForToday = await ComplaintModal.find({
-         preferredServiceDate: { $lte: tomorrow }, // Today & future complaints
-         status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } // Exclude these statuses
+         $or: [
+            { preferredServiceDate: { $gte: tomorrow } }, // Future or today
+            {
+               preferredServiceDate: { $lt: tomorrow },
+               status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
+            } // Past but not completed
+         ]
       }).sort({ preferredServiceDate: 1 });
       const complaints = await ComplaintModal.find(filter).sort({ createdAt: -1 });
 
