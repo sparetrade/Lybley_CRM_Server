@@ -560,17 +560,38 @@ const getComplaintsByCancel = async (req, res) => {
       res.status(400).send(err);
    }
 };
+
+// getComplaintsByUpcomming
 const getComplaintsByUpcomming = async (req, res) => {
    try {
-      let data = await ComplaintModal.find({ status: "SCHEDULE UPCOMMING" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+
+      const endOfToday = new Date();
+      endOfToday.setHours(23, 59, 59, 999); // End of today
+
+      // Find complaints where preferredServiceDate is strictly in the future
+      let data = await ComplaintModal.find({ 
+         preferredServiceDate: { $gt: endOfToday }, // Future complaints only (not today)
+         status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }// Exclude unwanted statuses
+      }).sort({ preferredServiceDate: 1 });
+
       if (data.length === 0) {
-         return res.status(404).send({ status: false, msg: "No pending complaints found." });
+         return res.status(404).json({ status: false, msg: "No upcoming complaints found." });
       }
+
       res.send(data);
    } catch (err) {
-      res.status(400).send(err);
+      console.error("Error fetching upcoming complaints:", err);
+      res.status(500).json({ status: false, msg: "Server error", error: err });
    }
 };
+
+
+
+
+
+
 const getComplaintsByFinalVerification = async (req, res) => {
    try {
       let data = await ComplaintModal.find({ status: "FINAL VERIFICATION" }).sort({ _id: -1 }); // Find all complaints with status "PENDING"
@@ -689,9 +710,9 @@ const getPendingComplaints = async (req, res) => {
 
       const complaintsForToday = await ComplaintModal.find({
          $or: [
-            { preferredServiceDate: { $gte: tomorrow } }, // Future or today
+            
             {
-               preferredServiceDate: { $lt: tomorrow },
+               preferredServiceDate: { $lt: today },
                status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
             } // Past but not completed
          ]

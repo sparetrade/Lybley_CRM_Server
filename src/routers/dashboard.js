@@ -18,7 +18,8 @@ const ServicePayment = require("../models/servicePaymentModel");
 router.get("/dashboardDetails", async (req, res) => {
   try {
     const { now, oneDayAgo, fiveDaysAgo, todayStart } = calculateDateRanges();
-
+    const datetoday = new Date();
+    datetoday.setHours(23, 59, 59, 999);
     const [
       customerCount,
       orderCount,
@@ -89,14 +90,21 @@ router.get("/dashboardDetails", async (req, res) => {
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
-      Complaints.countDocuments({ status: 'SCHEDULE UPCOMMING' }),
-      // Complaints.countDocuments({  preferredServiceDate: { $gte: todayStart  } }),
-       Complaints.countDocuments({
+      // Complaints.countDocuments({ status: 'SCHEDULE UPCOMMING' }),
+      Complaints.countDocuments({
         $or: [
-          { preferredServiceDate: { $gte: todayStart } }, // Future or today
-          { preferredServiceDate: { $lt: todayStart },  status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed
+          
+          { preferredServiceDate: { $gte: datetoday }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
         ]
       }),
+      // Complaints.countDocuments({  preferredServiceDate: { $gte: todayStart  } }),
+      Complaints.countDocuments({
+        $or: [
+          
+          { preferredServiceDate: { $lt: todayStart }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+        ]
+      }),
+      
       ServicePayment.countDocuments({} ),
       ServicePayment.countDocuments({ status: 'PAID' }),
       ServicePayment.countDocuments({ status: 'UNPAID' }),
@@ -268,7 +276,8 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
   try {
     const { now, oneDayAgo, fiveDaysAgo, todayStart } = calculateDateRanges();
     const { stateZone } = req.body;
-
+    const datetoday = new Date();
+    datetoday.setHours(23, 59, 59, 999);
     if (!Array.isArray(stateZone) || stateZone.length === 0) {
       return res.status(400).json({ message: "Invalid or empty stateZone array" });
     }
@@ -289,7 +298,17 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
       cancel: { status: "CANCELED" },
       partPending: { status: "PART PENDING" },
       finalVerification: { status: "FINAL VERIFICATION" },
-      schedule: { status: "SCHEDULE UPCOMMING" },
+      schedule: {
+        $and: [
+          stateZoneFilter, // Ensure the stateZone filter is applied
+          {
+            $or: [
+          
+              { preferredServiceDate: { $gte: datetoday }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+            ]
+          }
+        ]
+      },
       zeroToOneDays: {
         status: { $in: ["PENDING", "IN PROGRESS"] },
         createdAt: { $gte: new Date(oneDayAgo) },
@@ -316,11 +335,8 @@ router.post("/dashboardDetailsByEmployeeStateZone", async (req, res) => {
           stateZoneFilter, // Ensure the stateZone filter is applied
           {
             $or: [
-              { preferredServiceDate: { $gte: todayStart } }, 
-              {
-                preferredServiceDate: { $lt: todayStart }, 
-                status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
-              }
+          
+              { preferredServiceDate: { $lt: todayStart }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
             ]
           }
         ]
@@ -747,7 +763,9 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const query = { brandId: id };
-    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
+    const { now, oneDayAgo, fiveDaysAgo,todayStart } = calculateDateRanges();
+    const datetoday = new Date();
+    datetoday.setHours(23, 59, 59, 999);
     const [
       allComplaintCount,
       complaintProdressCount,
@@ -761,6 +779,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       complaints2To5Days,
       complaintsMoreThan5Days,
       schedule,
+      scheduleUpcomming,
     ] = await Promise.all([
       Complaints.countDocuments(query),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
@@ -773,8 +792,18 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
-       Complaints.countDocuments({...query, status: 'SCHEDULE UPCOMMING' }),
-       
+      Complaints.countDocuments({...query,
+        $or: [
+          
+          { preferredServiceDate: { $gte: datetoday }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+        ]
+      }),
+      Complaints.countDocuments({...query,
+        $or: [
+          
+          { preferredServiceDate: { $lt: todayStart }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+        ]
+      }), 
       
     ]);
 
@@ -791,7 +820,8 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
         moreThanFiveDays: complaintsMoreThan5Days,
-        schedule:schedule
+        schedule:schedule,
+        scheduleUpcomming:scheduleUpcomming
       }
     });
   } catch (err) {
