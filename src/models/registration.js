@@ -107,6 +107,16 @@ const bradRegistrationSchema = new mongoose.Schema({
       verification: { type: String, default: "VERIFIED" }
       , otp: { type: Number },
   
+     
+      basePrice: { type: String, default: "0" },
+      kmPrice: { type: String, default: "0" },
+      crmPrice: { type: String, default: "0" },
+      perMonthPrice: { type: String, default: "0" },
+      inCityPrice: { type: String, default: "0" },
+      outCityPrice: { type: String, default: "0" },
+      shaPrice: { type: String, default: "0" },
+      bhaPrice: { type: String, default: "0" },
+
       status: { type: String, default: "ACTIVE" },
     }, { timestamps: true });
  
