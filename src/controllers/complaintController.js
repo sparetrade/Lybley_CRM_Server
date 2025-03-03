@@ -838,9 +838,18 @@ const editComplaint = async (req, res) => {
       });
 
       // Update the complaint with new data
-      Object.assign(data, body);
-      await data.save();
+      // Object.assign(data, body);
+      // await data.save();
+      if (body.status === "FINAL VERIFICATION") {
+         data.complaintCloseTime = new Date();
 
+      }
+
+      // Apply updates to the complaint object
+      Object.assign(data, body);
+
+      // Save the updated complaint
+      await data.save();
       if (body.assignServiceCenterId) {
          const notification = new NotificationModel({
             complaintId: data._id,
