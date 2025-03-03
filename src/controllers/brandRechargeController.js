@@ -12,7 +12,29 @@ const addRecharge = async (req, res) => {
     }
 
 };
+const addRechargeByBrand = async (req, res) => {
 
+    try {
+        let body = req.body;
+        
+        // Check if file is uploaded
+        let paymentImage = req.file ? req.file?.location : null;
+    
+        let data = new BrandRechargeModel({
+          amount: body.amount,
+          brandName: body.brandName,
+          brandId: body.brandId,
+          description: body.description,
+          paymentImage, // Store image path in DB
+        });
+    
+        await data.save();
+        res.json({ status: true, msg: "Recharge Added", data });
+      } catch (err) {
+        res.status(400).send(err);
+      }
+
+};
 const getAllRecharge = async (req, res) => {
     try {
         let data = await BrandRechargeModel.find({}).sort({ _id: -1 });
@@ -73,4 +95,4 @@ const deleteRecharge = async (req, res) => {
     }
 }
 
-module.exports = { addRecharge, getAllRecharge, getRechargeById, editRecharge, deleteRecharge };
+module.exports = { addRecharge,addRechargeByBrand, getAllRecharge, getRechargeById, editRecharge, deleteRecharge };
