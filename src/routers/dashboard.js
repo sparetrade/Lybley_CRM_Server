@@ -789,14 +789,130 @@ const calculateDateRanges = () => {
 // Example usage
 // console.log(calculateDateRanges());
 
+// router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     const query = { brandId: id };
+//     const { now, oneDayAgo, fiveDaysAgo,todayStart } = calculateDateRanges();
+//     const datetoday = new Date();
+//     datetoday.setHours(23, 59, 59, 999);
+    
+//     const [
+//       allComplaintCount,
+//       complaintProdressCount,
+//       complaintAssignCount,
+//       complaintPendingCount,
+//       complaintCompleteCount,
+//       complaintCancelCount,
+//       complaintPartPendingCount,
+//       complaintFinalVerificationCount,
+//       complaints0To1Days,
+//       complaints2To5Days,
+//       complaintsMoreThan5Days,
+//       complaints0To1PartPendingDays,
+//       complaints2To5PartPendingDays,
+//       complaintsMoreThan5PartPendingDays,
+//       schedule,
+//       scheduleUpcomming,
+//     ] = await Promise.all([
+//       Complaints.countDocuments(query),
+//       Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
+//       Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+//       Complaints.countDocuments({ ...query, status: 'PENDING' }),
+//       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+//       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+//       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+//       Complaints.countDocuments({ ...query, status: 'FINAL VERIFICATION' }),
+ 
+//       Complaints.countDocuments({
+//         ...query,
+//         status: { $in: ["PENDING", "IN PROGRESS"] },
+//         createdAt: { $gte: oneDayAgo }
+//       }),
+//       Complaints.countDocuments({
+//         ...query,
+//         status: { $in: ["PENDING", "IN PROGRESS"] },
+//         createdAt: { $gte:  fiveDaysAgo , $lt: new Date(oneDayAgo.setHours(23, 59, 59, 999)) }
+//       }),
+//       Complaints.countDocuments({
+//         ...query,
+//         status: { $in: ["PENDING", "IN PROGRESS"] },
+//         createdAt: { $lt: new Date(fiveDaysAgo.setHours(23, 59, 59, 999)) }
+//       }),
+//       Complaints.countDocuments({
+//         ...query,
+//         status: "PART PENDING",
+//         createdAt: { $gte: oneDayAgo }
+//       }),
+//       Complaints.countDocuments({
+//         ...query,
+//         status: "PART PENDING",
+//         createdAt: { $gte: new Date(fiveDaysAgo), $lt: new Date(oneDayAgo) }
+//       }),
+//       Complaints.countDocuments({
+//         ...query,
+//         status: "PART PENDING",
+//         createdAt: { $lt: new Date(fiveDaysAgo) }
+//       }),
+//       Complaints.countDocuments({...query,
+//         $or: [
+          
+//           {...query, preferredServiceDate: { $gte: datetoday }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
+//         ]
+//       }),
+//       Complaints.countDocuments({
+//         ...query,
+//         preferredServiceDate: { $lt: todayStart },
+//         status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
+//       }),
+      
+      
+//     ]);
+
+//     res.json({
+//       complaints: {
+//         allComplaints: allComplaintCount,
+//         inProgress: complaintProdressCount,
+//         assign: complaintAssignCount,
+//         pending: complaintPendingCount,
+//         complete: complaintCompleteCount,
+//         cancel: complaintCancelCount,
+//         partPending: complaintPartPendingCount,
+//         finalVerification: complaintFinalVerificationCount,
+//         zeroToOneDays: complaints0To1Days,
+//         twoToFiveDays: complaints2To5Days,
+//         moreThanFiveDays: complaintsMoreThan5Days,
+//         zeroToOneDaysPartPending: complaints0To1PartPendingDays,
+//         twoToFiveDaysPartPending: complaints2To5PartPendingDays,
+//         moreThanFiveDaysPartPending: complaintsMoreThan5PartPendingDays,
+//         schedule:schedule,
+//         scheduleUpcomming:scheduleUpcomming
+//       }
+//     });
+//   } catch (err) {
+//     console.error('Error in /dashboardDetailsById/:id:', err);
+//     res.status(500).send(err);
+//   }
+// });
+
 router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const query = { brandId: id };
-    const { now, oneDayAgo, fiveDaysAgo,todayStart } = calculateDateRanges();
+
+    // Calculate date ranges
+    const { now, oneDayAgo, fiveDaysAgo, todayStart } = calculateDateRanges();
+
+    // Create new date instances to prevent modifying original objects
+    const oneDayAgoEnd = new Date(oneDayAgo);
+    oneDayAgoEnd.setHours(23, 59, 59, 999);
+
+    const fiveDaysAgoEnd = new Date(fiveDaysAgo);
+    fiveDaysAgoEnd.setHours(23, 59, 59, 999);
+
     const datetoday = new Date();
     datetoday.setHours(23, 59, 59, 999);
-    fiveDaysAgo.setHours(23, 59, 59, 999);
+
     const [
       allComplaintCount,
       complaintProdressCount,
@@ -816,61 +932,72 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       scheduleUpcomming,
     ] = await Promise.all([
       Complaints.countDocuments(query),
-      Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
-      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
-      Complaints.countDocuments({ ...query, status: 'PENDING' }),
-      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
-      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-      Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
-      Complaints.countDocuments({ ...query, status: 'FINAL VERIFICATION' }),
-      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
-      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
+      Complaints.countDocuments({ ...query, status: "IN PROGRESS" }),
+      Complaints.countDocuments({ ...query, status: "ASSIGN" }),
+      Complaints.countDocuments({ ...query, status: "PENDING" }),
+      Complaints.countDocuments({ ...query, status: "COMPLETED" }),
+      Complaints.countDocuments({ ...query, status: "CANCELED" }),
+      Complaints.countDocuments({ ...query, status: "PART PENDING" }),
+      Complaints.countDocuments({ ...query, status: "FINAL VERIFICATION" }),
+
+      // Complaints in 0-1 days
       Complaints.countDocuments({
         ...query,
         status: { $in: ["PENDING", "IN PROGRESS"] },
         createdAt: { $gte: oneDayAgo }
       }),
+
+      // Complaints in 2-5 days
       Complaints.countDocuments({
         ...query,
         status: { $in: ["PENDING", "IN PROGRESS"] },
         createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo }
       }),
+
+      // Complaints older than 5 days
       Complaints.countDocuments({
         ...query,
         status: { $in: ["PENDING", "IN PROGRESS"] },
-        createdAt: { $lt: fiveDaysAgo }
+        createdAt: { $lt: fiveDaysAgoEnd }
       }),
+
+      // Part Pending Complaints (0-1 days)
       Complaints.countDocuments({
         ...query,
         status: "PART PENDING",
         createdAt: { $gte: oneDayAgo }
       }),
+
+      // Part Pending Complaints (2-5 days)
       Complaints.countDocuments({
         ...query,
         status: "PART PENDING",
         createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo }
       }),
+
+      // Part Pending Complaints (>5 days)
       Complaints.countDocuments({
         ...query,
         status: "PART PENDING",
         createdAt: { $lt: fiveDaysAgo }
       }),
-      Complaints.countDocuments({...query,
-        $or: [
-          
-          {...query, preferredServiceDate: { $gte: datetoday }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
-        ]
+
+      // Scheduled complaints (upcoming)
+      Complaints.countDocuments({
+        ...query,
+        preferredServiceDate: { $gte: datetoday },
+        status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
       }),
+
+      // Scheduled complaints (missed)
       Complaints.countDocuments({
         ...query,
         preferredServiceDate: { $lt: todayStart },
         status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] }
       }),
-      
-      
     ]);
 
+    // Sending the response
     res.json({
       complaints: {
         allComplaints: allComplaintCount,
@@ -887,16 +1014,15 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
         zeroToOneDaysPartPending: complaints0To1PartPendingDays,
         twoToFiveDaysPartPending: complaints2To5PartPendingDays,
         moreThanFiveDaysPartPending: complaintsMoreThan5PartPendingDays,
-        schedule:schedule,
-        scheduleUpcomming:scheduleUpcomming
+        schedule: schedule,
+        scheduleUpcomming: scheduleUpcomming
       }
     });
   } catch (err) {
-    console.error('Error in /dashboardDetailsById/:id:', err);
+    console.error("Error in /dashboardDetailsByBrandId/:id:", err);
     res.status(500).send(err);
   }
 });
-
 
 
 
