@@ -830,12 +830,20 @@ const editComplaint = async (req, res) => {
       if (!data) {
          return res.status(404).json({ status: false, msg: "Complaint not found" });
       }
+      if (!data.empResponseTime && body.empResponseTime) {
+         data.empResponseTime = new Date(); // Set only if it was never set before
+      }
 
       // Push the update details into updateHistory
       data.updateHistory.push({
          updatedAt: new Date(),
          changes: changes,
       });
+      // Push the update details into updateHistory
+      // data.updateHistory.push({
+      //    updatedAt: new Date(),
+      //    changes: changes,
+      // });
 
       // Update the complaint with new data
       // Object.assign(data, body);
