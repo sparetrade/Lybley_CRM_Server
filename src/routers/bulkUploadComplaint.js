@@ -36,7 +36,9 @@ router.post('/bulkServiceRequests', upload.single('file'), async (req, res) => {
 
   try {
     const { brandId, productBrand } = req.body; // Get brandId & productBrand from request body
-
+    if(brandId==="67ab1ec2bfe41718e6ddfb6e"){
+      return res.status(404).json({ status: false, msg: 'Complaint not added' });
+   }
     if (!brandId || !productBrand) {
       return res.status(400).json({ status: false, msg: 'Brand ID and Product Brand are required.' });
     }
