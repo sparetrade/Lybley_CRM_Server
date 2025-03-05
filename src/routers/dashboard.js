@@ -457,12 +457,17 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       complaintCompleteCount,
       complaintCancelCount,
       complaintPartPendingCount,
-      schedule,
-      scheduleUpcomming ,
-      allMonthComplaintCount,
+     
       complaints0To1Days,
       complaints2To5Days,
       complaintsMoreThan5Days,
+      complaints0To1PartPendingDays,
+      complaints2To5PartPendingDays,
+      complaintsMoreThan5PartPendingDays,
+      schedule,
+      scheduleUpcomming ,
+     
+      allMonthComplaintCount,
       lastMonthNewCount,
       lastMonthAssignCount,
       lastMonthPendingCount,
@@ -495,6 +500,17 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+    
+      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
+      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
+      Complaints.countDocuments({ ...query,  status: { $in: ["PENDING", "IN PROGRESS"] }, createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query,  status: { $in: ["PENDING", "IN PROGRESS"] }, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query,  status: { $in: ["PENDING", "IN PROGRESS"] }, createdAt: { $lt: fiveDaysAgo } }),
+      
+      Complaints.countDocuments({ ...query, status: 'PART PENDING', createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING', createdAt: { $lt: fiveDaysAgo } }),
       Complaints.countDocuments({...query,
         $or: [
           
@@ -507,12 +523,6 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
           {...query, preferredServiceDate: { $lt: todayStart }, status: { $nin: ["COMPLETED", "FINAL VERIFICATION", "CANCELED"] } } // Past but not completed/canceled
         ]
       }),
-      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
-      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      // Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
-      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
-      Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $lt: fiveDaysAgo } }),
       // Last Month counts
       Complaints.countDocuments({ ...query, createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS', createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
@@ -557,12 +567,16 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
         partPending: complaintPartPendingCount,
+        finalVerification: complaintFinalVerificationCount,
+        schedule:schedule,
+        scheduleUpcomming: scheduleUpcomming,
         zeroToOneDays: complaints0To1Days,
         twoToFiveDays: complaints2To5Days,
         moreThanFiveDays: complaintsMoreThan5Days,
-        finalVerification: complaintFinalVerificationCount,
-      schedule:schedule,
-      scheduleUpcomming: scheduleUpcomming,
+        zeroToOneDaysPartPending: complaints0To1PartPendingDays,
+        twoToFiveDaysPartPending: complaints2To5PartPendingDays,
+        moreThanFiveDaysPartPending: complaintsMoreThan5PartPendingDays,
+      
         lastMonth: {
           allComplaints: allMonthComplaintCount,
           inProgress: lastMonthNewCount,
@@ -602,6 +616,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
     res.status(500).send(err);
   }
 });
+ 
 
 
 
