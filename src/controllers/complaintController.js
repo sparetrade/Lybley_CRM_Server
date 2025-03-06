@@ -851,11 +851,21 @@ const editComplaint = async (req, res) => {
       // Update the complaint with new data
       // Object.assign(data, body);
       // await data.save();
+      if (body.status === "PART PENDING") {
+         data.cspStatus = "YES";   
+     }
+     
       if (body.status === "FINAL VERIFICATION") {
          data.complaintCloseTime = new Date();
 
       }
+      if (body.status === "COMPLETED") {
+         data.complaintCloseTime = new Date();
 
+      }
+      if (!data.complaintCloseTime && body.complaintCloseTime) {
+         data.complaintCloseTime = new Date(); // Set only if it was never set before
+      }
       // Apply updates to the complaint object
       Object.assign(data, body);
 
