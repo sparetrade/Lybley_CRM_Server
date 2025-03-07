@@ -310,9 +310,9 @@ const activateWarranty = async (req, res) => {
 const productId=req.body.productId
 // console.log("");
 
-    if (!name || !contact || !address || !uniqueId) {
-      return res.status(400).json({ status: false, msg: 'Missing required fields' });
-    }
+    // if (!name || !contact || !address || !uniqueId) {
+    //   return res.status(400).json({ status: false, msg: 'Missing required fields' });
+    // }
 
     // Check if the user already exists
     let user = await UserModel.findOne({ contact });

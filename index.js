@@ -114,42 +114,24 @@ const serviceCenterPayment = require("./src/routers/servicePayment");
 
 app.use(express.json());
 
-// app.use(cors({
-//     origin: '*',
-//     methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-//     allowedHeaders: ['Content-Type', 'Authorization']
-// }));
+ 
 
-// // Handle OPTIONS requests globally
-// app.options('*', (req, res) => {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-//     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//     res.sendStatus(204); // No content, but successfully handled
-// });
-
-// app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header(
-//         "Access-Control-Allow-Methods",
-//         "GET, POST, OPTIONS, PUT, PATCH, DELETE, HEAD"
-//     );
-//     res.header(
-//         "Access-Control-Allow-Headers",
-//         "Origin, X-Requested-With, Content-Type, Accept"
-//     );
-//     next();
-// });
+// const corsOptions = {
+//     origin: '*', 
+//     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+//     allowedHeaders: ['Content-Type', 'Authorization', 'Referer', 'Origin', 'X-Requested-With', 'Accept'],
+//     preflightContinue: false,
+//     optionsSuccessStatus: 204
+// };
+// app.use(cors(corsOptions));
 
 const corsOptions = {
-    origin: '*', // Replace '*' with specific domains for security
+    origin: ["https://crm.servsy.in", "http://localhost:5000"], // List allowed origins
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Referer', 'Origin', 'X-Requested-With', 'Accept'],
-    preflightContinue: false,
-    optionsSuccessStatus: 204
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 };
 app.use(cors(corsOptions));
-
 
 
 // Handle OPTIONS preflight requests
